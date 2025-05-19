@@ -22,21 +22,28 @@ def mock_state():
         "background_investigation_results": None,
     }
 
+
 @pytest.fixture
 def mock_configurable():
     mock = MagicMock()
     mock.max_search_results = 5
     return mock
 
+
 @pytest.fixture
 def mock_config():
     # 你可以根据实际需要返回一个 MagicMock 或 dict
     return MagicMock()
 
+
 @pytest.fixture
 def patch_config_from_runnable_config(mock_configurable):
-    with patch("src.graph.nodes.Configuration.from_runnable_config", return_value=mock_configurable):
+    with patch(
+        "src.graph.nodes.Configuration.from_runnable_config",
+        return_value=mock_configurable,
+    ):
         yield
+
 
 @pytest.fixture
 def mock_tavily_search():
@@ -48,6 +55,7 @@ def mock_tavily_search():
         ]
         yield mock
 
+
 @pytest.fixture
 def mock_web_search_tool():
     with patch("src.graph.nodes.get_web_search_tool") as mock:
@@ -58,9 +66,15 @@ def mock_web_search_tool():
         ]
         yield mock
 
+
 @pytest.mark.parametrize("search_engine", [SearchEngine.TAVILY, "other"])
 def test_background_investigation_node_tavily(
-    mock_state, mock_tavily_search, mock_web_search_tool, search_engine, patch_config_from_runnable_config, mock_config
+    mock_state,
+    mock_tavily_search,
+    mock_web_search_tool,
+    search_engine,
+    patch_config_from_runnable_config,
+    mock_config,
 ):
     """Test background_investigation_node with Tavily search engine"""
     with patch("src.graph.nodes.SELECTED_SEARCH_ENGINE", search_engine):
@@ -86,8 +100,11 @@ def test_background_investigation_node_tavily(
             assert results[0]["title"] == "Test Title 1"
             assert results[0]["content"] == "Test Content 1"
         else:
-            mock_web_search_tool.return_value.invoke.assert_called_once_with("test query")
+            mock_web_search_tool.return_value.invoke.assert_called_once_with(
+                "test query"
+            )
             assert len(results) == 2
+
 
 def test_background_investigation_node_malformed_response(
     mock_state, mock_tavily_search, patch_config_from_runnable_config, mock_config
