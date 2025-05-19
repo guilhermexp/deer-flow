@@ -2,11 +2,12 @@ import json
 import pytest
 from unittest.mock import patch, MagicMock
 
-from langgraph.types import Command
-
-from src.graph.nodes import background_investigation_node
-from src.config import SearchEngine
-from langchain_core.messages import HumanMessage
+# 在这里 mock 掉 get_llm_by_type，避免 ValueError
+with patch("src.llms.llm.get_llm_by_type", return_value=MagicMock()):
+    from langgraph.types import Command
+    from src.graph.nodes import background_investigation_node
+    from src.config import SearchEngine
+    from langchain_core.messages import HumanMessage
 
 # Mock data
 MOCK_SEARCH_RESULTS = [
