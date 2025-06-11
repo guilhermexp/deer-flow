@@ -39,7 +39,7 @@ from src.server.rag_request import (
     RAGResourcesResponse,
 )
 from src.server.config_request import ConfigResponse
-from src.llms.llm import get_configured_llms
+from src.llms.llm import get_configured_llm_models
 from src.tools import VolcengineTTS
 
 logger = logging.getLogger(__name__)
@@ -413,6 +413,6 @@ async def rag_resources(request: Annotated[RAGResourceRequest, Query()]):
 async def config():
     """Get the config of the server."""
     return ConfigResponse(
-        rag_config=RAGConfigResponse(provider=SELECTED_RAG_PROVIDER),
-        configured_llms=get_configured_llms(),
+        rag=RAGConfigResponse(provider=SELECTED_RAG_PROVIDER),
+        models=get_configured_llm_models(),
     )

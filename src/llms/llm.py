@@ -93,7 +93,7 @@ def get_llm_by_type(
     return llm
 
 
-def get_configured_llms() -> dict[str, list[str]]:
+def get_configured_llm_models() -> dict[str, list[str]]:
     """
     Get all configured LLM models grouped by type.
 
@@ -104,7 +104,7 @@ def get_configured_llms() -> dict[str, list[str]]:
         conf = load_yaml_config(_get_config_file_path())
         llm_type_config_keys = _get_llm_type_config_keys()
 
-        configured_llms: dict[str, list[str]] = {}
+        configured_models: dict[str, list[str]] = {}
 
         for llm_type in get_args(LLMType):
             # Get configuration from YAML file
@@ -120,9 +120,9 @@ def get_configured_llms() -> dict[str, list[str]]:
             # Check if model is configured
             model_name = merged_conf.get("model")
             if model_name:
-                configured_llms.setdefault(llm_type, []).append(model_name)
+                configured_models.setdefault(llm_type, []).append(model_name)
 
-        return configured_llms
+        return configured_models
 
     except Exception as e:
         # Log error and return empty dict to avoid breaking the application
