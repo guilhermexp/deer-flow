@@ -24,7 +24,6 @@ from src.prompt_enhancer.graph.builder import build_graph as build_prompt_enhanc
 from src.rag.builder import build_retriever
 from src.rag.retriever import Resource
 from src.server.chat_request import (
-    ChatMessage,
     ChatRequest,
     EnhancePromptRequest,
     GeneratePodcastRequest,
@@ -81,6 +80,7 @@ async def chat_stream(request: ChatRequest):
             request.mcp_settings,
             request.enable_background_investigation,
             request.report_style,
+            request.enable_deep_thinking,
         ),
         media_type="text/event-stream",
     )
@@ -98,6 +98,7 @@ async def _astream_workflow_generator(
     mcp_settings: dict,
     enable_background_investigation: bool,
     report_style: ReportStyle,
+    enable_deep_thinking: bool,
 ):
     input_ = {
         "messages": messages,
@@ -125,6 +126,7 @@ async def _astream_workflow_generator(
             "max_search_results": max_search_results,
             "mcp_settings": mcp_settings,
             "report_style": report_style.value,
+            "enable_deep_thinking": enable_deep_thinking,
         },
         stream_mode=["messages", "updates"],
         subgraphs=True,
@@ -156,6 +158,10 @@ async def _astream_workflow_generator(
             "role": "assistant",
             "content": message_chunk.content,
         }
+        if message_chunk.additional_kwargs.get("reasoning_content"):
+            event_stream_message["reasoning_content"] = message_chunk.additional_kwargs[
+                "reasoning_content"
+            ]
         if message_chunk.response_metadata.get("finish_reason"):
             event_stream_message["finish_reason"] = message_chunk.response_metadata.get(
                 "finish_reason"

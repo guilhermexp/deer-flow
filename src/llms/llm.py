@@ -6,6 +6,7 @@ from typing import Any, Dict
 import os
 
 from langchain_openai import ChatOpenAI
+from langchain_deepseek import ChatDeepSeek
 
 from src.config import load_yaml_config
 from src.config.agents import LLMType
@@ -29,7 +30,9 @@ def _get_env_llm_conf(llm_type: str) -> Dict[str, Any]:
     return conf
 
 
-def _create_llm_use_conf(llm_type: LLMType, conf: Dict[str, Any]) -> ChatOpenAI:
+def _create_llm_use_conf(
+    llm_type: LLMType, conf: Dict[str, Any]
+) -> ChatOpenAI | ChatDeepSeek:
     llm_type_map = {
         "reasoning": conf.get("REASONING_MODEL", {}),
         "basic": conf.get("BASIC_MODEL", {}),
@@ -47,7 +50,14 @@ def _create_llm_use_conf(llm_type: LLMType, conf: Dict[str, Any]) -> ChatOpenAI:
     if not merged_conf:
         raise ValueError(f"Unknown LLM Conf: {llm_type}")
 
-    return ChatOpenAI(**merged_conf)
+    if llm_type == "reasoning":
+        merged_conf["api_base"] = merged_conf.pop("base_url")
+
+    return (
+        ChatOpenAI(**merged_conf)
+        if llm_type != "reasoning"
+        else ChatDeepSeek(**merged_conf)
+    )
 
 
 def get_llm_by_type(
