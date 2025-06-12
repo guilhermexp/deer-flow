@@ -8,7 +8,7 @@ import {
   Headphones,
   ChevronDown,
   ChevronRight,
-  Brain,
+  Lightbulb,
 } from "lucide-react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 
@@ -347,7 +347,7 @@ function ThoughtBlock({
             )}
           >
             <div className="flex w-full items-center gap-3">
-              <Brain
+              <Lightbulb
                 size={18}
                 className={cn(
                   "shrink-0 transition-colors duration-200",
