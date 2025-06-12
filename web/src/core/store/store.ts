@@ -133,6 +133,8 @@ export async function sendMessage(
           role: data.role,
           content: "",
           contentChunks: [],
+          reasoningContent: "",
+          reasoningContentChunks: [],
           isStreaming: true,
           interruptFeedback,
         };
@@ -297,6 +299,8 @@ export async function listenToPodcast(researchId: string) {
         agent: "podcast",
         content: JSON.stringify(podcastObject),
         contentChunks: [],
+        reasoningContent: "",
+        reasoningContentChunks: [],
         isStreaming: true,
       };
       appendMessage(podcastMessage);
