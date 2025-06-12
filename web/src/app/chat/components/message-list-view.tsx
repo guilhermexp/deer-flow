@@ -316,9 +316,8 @@ function ThoughtBlock({
   isStreaming?: boolean;
   hasMainContent?: boolean;
 }) {
-  const [isOpen, setIsOpen] = useState(true); // 初始状态为展开
+  const [isOpen, setIsOpen] = useState(true);
 
-  // 当开始有主要内容时，自动折叠思考块
   const [hasAutoCollapsed, setHasAutoCollapsed] = useState(false);
 
   React.useEffect(() => {
@@ -385,16 +384,27 @@ function ThoughtBlock({
               isStreaming ? "border-primary/20 bg-primary/5" : "border-border",
             )}
           >
-            <CardContent className="py-6">
-              <Markdown
-                className={cn(
-                  "prose dark:prose-invert max-w-none transition-colors duration-200",
-                  isStreaming ? "prose-primary" : "opacity-80",
-                )}
-                animated={isStreaming}
-              >
-                {content}
-              </Markdown>
+            <CardContent>
+              <div className="flex h-40 w-full overflow-y-auto">
+                <ScrollContainer
+                  className={cn(
+                    "flex h-full w-full flex-col overflow-hidden",
+                    className,
+                  )}
+                  scrollShadow={false}
+                  autoScrollToBottom
+                >
+                  <Markdown
+                    className={cn(
+                      "prose dark:prose-invert max-w-none transition-colors duration-200",
+                      isStreaming ? "prose-primary" : "opacity-80",
+                    )}
+                    animated={isStreaming}
+                  >
+                    {content}
+                  </Markdown>
+                </ScrollContainer>
+              </div>
             </CardContent>
           </Card>
         </CollapsibleContent>
