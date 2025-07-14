@@ -102,7 +102,16 @@ def planner_node(
         ]
 
     if configurable.enable_deep_thinking:
-        llm = get_llm_by_type("reasoning")
+        try:
+            llm = get_llm_by_type("reasoning")
+        except ValueError as e:
+            logger.warning(f"Reasoning model not available: {e}. Falling back to basic model.")
+            llm = get_llm_by_type("basic").with_structured_output(
+                Plan,
+                method="json_mode",
+            )
+            # Update the flag to false since we're using basic model
+            configurable.enable_deep_thinking = False
     elif AGENT_LLM_MAP["planner"] == "basic":
         llm = get_llm_by_type("basic").with_structured_output(
             Plan,
@@ -220,7 +229,7 @@ def coordinator_node(
     logger.debug(f"Current state messages: {state['messages']}")
 
     goto = "__end__"
-    locale = state.get("locale", "en-US")  # Default locale if not specified
+    locale = state.get("locale", "pt-BR")  # Default locale if not specified
     research_topic = state.get("research_topic", "")
 
     if len(response.tool_calls) > 0:

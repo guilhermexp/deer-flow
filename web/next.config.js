@@ -32,11 +32,110 @@ const config = {
       test: /\.md$/,
       use: "raw-loader",
     });
+
+    // Otimizações de performance
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          // Separar Chart.js em bundle próprio
+          charts: {
+            test: /[\\/]node_modules[\\/](chart\.js|react-chartjs-2)[\\/]/,
+            name: 'charts',
+            chunks: 'all',
+            priority: 20,
+          },
+          // Separar Framer Motion
+          animations: {
+            test: /[\\/]node_modules[\\/](framer-motion|motion)[\\/]/,
+            name: 'animations',
+            chunks: 'all',
+            priority: 20,
+          },
+          // Separar TipTap
+          editor: {
+            test: /[\\/]node_modules[\\/](@tiptap)[\\/]/,
+            name: 'editor',
+            chunks: 'all',
+            priority: 20,
+          },
+          // Radix UI components
+          ui: {
+            test: /[\\/]node_modules[\\/](@radix-ui)[\\/]/,
+            name: 'ui',
+            chunks: 'all',
+            priority: 10,
+          },
+        },
+      },
+    };
+
     return config;
   },
 
   // ... rest of the configuration.
   output: "standalone",
+
+  // Custom server configuration
+  serverRuntimeConfig: {
+    port: 4000,
+  },
+
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion", 
+      "@radix-ui/react-accordion",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-select",
+    ],
+    // Pre-compile páginas mais usadas
+    optimizeServerReact: true,
+    // Faster builds em desenvolvimento
+    turbo: {
+      memoryLimit: 512,
+    },
+  },
+
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
+
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "upgrade-insecure-requests",
+          },
+        ],
+      },
+    ];
+  },
+
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
+  // Configurações de performance para desenvolvimento
+  devIndicators: {
+    buildActivity: true,
+    buildActivityPosition: 'bottom-right',
+  },
 };
 
 export default config;

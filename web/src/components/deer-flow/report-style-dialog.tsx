@@ -21,26 +21,26 @@ import { Tooltip } from "./tooltip";
 const REPORT_STYLES = [
   {
     value: "academic" as const,
-    label: "Academic",
-    description: "Formal, objective, and analytical with precise terminology",
+    label: "Acadêmico",
+    description: "Formal, objetivo e analítico com terminologia precisa",
     icon: GraduationCap,
   },
   {
     value: "popular_science" as const,
-    label: "Popular Science",
-    description: "Engaging and accessible for general audience",
+    label: "Ciência Popular",
+    description: "Cativante e acessível para o público em geral",
     icon: FileText,
   },
   {
     value: "news" as const,
-    label: "News",
-    description: "Factual, concise, and impartial journalistic style",
+    label: "Notícias",
+    description: "Estilo jornalístico factual, conciso e imparcial",
     icon: Newspaper,
   },
   {
     value: "social_media" as const,
-    label: "Social Media",
-    description: "Concise, attention-grabbing, and shareable",
+    label: "Mídia Social",
+    description: "Conciso, chamativo e compartilhável",
     icon: Users,
   },
 ];
@@ -68,30 +68,36 @@ export function ReportStyleDialog() {
         title={
           <div>
             <h3 className="mb-2 font-bold">
-              Writing Style: {currentStyleConfig.label}
+              Estilo de Escrita: {currentStyleConfig.label}
             </h3>
             <p>
-              Choose the writing style for your research reports. Different
-              styles are optimized for different audiences and purposes.
+              Escolha o estilo de escrita para seus relatórios de pesquisa. Diferentes
+              estilos são otimizados para diferentes públicos e propósitos.
             </p>
           </div>
         }
       >
         <DialogTrigger asChild>
           <Button
-            className="!border-brand !text-brand rounded-2xl"
+            className="rounded-xl bg-white/[0.05] backdrop-blur-sm border-white/10 hover:bg-white/[0.08] text-gray-300 text-xs whitespace-nowrap flex-shrink-0"
             variant="outline"
           >
-            <CurrentIcon className="h-4 w-4" /> {currentStyleConfig.label}
+            <CurrentIcon className="h-4 w-4 mr-1" /> 
+            <span className="hidden xl:inline">{currentStyleConfig.label}</span>
+            <span className="xl:hidden">
+              {currentStyle === "academic" ? "Acadêm." : 
+               currentStyle === "popular_science" ? "Popular" :
+               currentStyle === "news" ? "Notícias" : "Social"}
+            </span>
           </Button>
         </DialogTrigger>
       </Tooltip>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Choose Writing Style</DialogTitle>
+          <DialogTitle>Escolher Estilo de Escrita</DialogTitle>
           <DialogDescription>
-            Select the writing style for your research reports. Each style is
-            optimized for different audiences and purposes.
+            Selecione o estilo de escrita para seus relatórios de pesquisa. Cada estilo é
+            otimizado para diferentes públicos e propósitos.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3 py-4">

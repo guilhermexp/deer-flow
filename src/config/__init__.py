@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Team configuration
-TEAM_MEMBER_CONFIGRATIONS = {
+TEAM_MEMBER_CONFIGURATIONS = {
     "researcher": {
         "name": "researcher",
         "desc": (
@@ -36,14 +36,15 @@ TEAM_MEMBER_CONFIGRATIONS = {
     },
 }
 
-TEAM_MEMBERS = list(TEAM_MEMBER_CONFIGRATIONS.keys())
+TEAM_MEMBERS = list(TEAM_MEMBER_CONFIGURATIONS.keys())
 
 __all__ = [
     # Other configurations
     "TEAM_MEMBERS",
-    "TEAM_MEMBER_CONFIGRATIONS",
+    "TEAM_MEMBER_CONFIGURATIONS",
     "SELECTED_SEARCH_ENGINE",
     "SearchEngine",
     "BUILT_IN_QUESTIONS",
     "BUILT_IN_QUESTIONS_ZH_CN",
+    load_yaml_config,
 ]

@@ -6,42 +6,54 @@ import logging
 import os
 
 from src.podcast.graph.state import PodcastState
-from src.tools.tts import VolcengineTTS
+from src.tools.google_gemini_tts import GoogleGeminiTTS
 
 logger = logging.getLogger(__name__)
 
 
 def tts_node(state: PodcastState):
     logger.info("Generating audio chunks for podcast...")
-    tts_client = _create_tts_client()
-    for line in state["script"].lines:
-        tts_client.voice_type = (
-            "BV002_streaming" if line.speaker == "male" else "BV001_streaming"
-        )
-        result = tts_client.text_to_speech(line.paragraph, speed_ratio=1.05)
-        if result["success"]:
-            audio_data = result["audio_data"]
-            audio_chunk = base64.b64decode(audio_data)
-            state["audio_chunks"].append(audio_chunk)
-        else:
-            logger.error(result["error"])
+    try:
+        tts_client = _create_tts_client()
+        logger.info(f"Processing {len(state['script'].lines)} lines of script")
+        
+        for i, line in enumerate(state["script"].lines):
+            # Set voice based on speaker gender
+            # Using different voices for male and female speakers
+            # Note: gemini-2.5-flash-preview-tts may have different voice names
+            voice_name = "Puck" if line.speaker == "male" else "Kore"
+            logger.info(f"Processing line {i+1}/{len(state['script'].lines)} - Speaker: {line.speaker}, Voice: {voice_name}")
+            logger.debug(f"Text: {line.paragraph[:50]}...")
+            
+            result = tts_client.text_to_speech(line.paragraph, voice_name=voice_name)
+            if result["success"]:
+                audio_data = result["audio_data"]
+                state["audio_chunks"].append(audio_data)
+                logger.info(f"Successfully generated audio for line {i+1}")
+            else:
+                logger.error(f"Failed to generate audio for line {i+1}: {result['error']}")
+                raise Exception(f"TTS failed: {result['error']}")
+                
+        logger.info(f"Successfully generated {len(state['audio_chunks'])} audio chunks")
+    except Exception as e:
+        logger.exception(f"Error in tts_node: {str(e)}")
+        raise
+        
     return {
         "audio_chunks": state["audio_chunks"],
     }
 
 
 def _create_tts_client():
-    app_id = os.getenv("VOLCENGINE_TTS_APPID", "")
-    if not app_id:
-        raise Exception("VOLCENGINE_TTS_APPID is not set")
-    access_token = os.getenv("VOLCENGINE_TTS_ACCESS_TOKEN", "")
-    if not access_token:
-        raise Exception("VOLCENGINE_TTS_ACCESS_TOKEN is not set")
-    cluster = os.getenv("VOLCENGINE_TTS_CLUSTER", "volcano_tts")
-    voice_type = "BV001_streaming"
-    return VolcengineTTS(
-        appid=app_id,
-        access_token=access_token,
-        cluster=cluster,
-        voice_type=voice_type,
+    api_key = os.getenv("GOOGLE_API_KEY", "")
+    logger.info(f"GOOGLE_API_KEY present: {bool(api_key)}")
+    if not api_key:
+        raise Exception("GOOGLE_API_KEY is not set")
+    model = os.getenv("GOOGLE_TTS_MODEL", "gemini-2.5-flash-preview-tts")
+    voice_name = os.getenv("GOOGLE_TTS_VOICE", "kore")
+    logger.info(f"Using TTS model: {model}, voice: {voice_name}")
+    return GoogleGeminiTTS(
+        api_key=api_key,
+        model=model,
+        voice_name=voice_name,
     )

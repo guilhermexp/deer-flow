@@ -1,0 +1,139 @@
+# Supabase Configuration for Deep-flow
+
+[project]
+# Project ID from your Supabase dashboard
+project_id = "your-project-id"
+
+[api]
+# API configuration
+enabled = true
+# Port for the API
+port = 54321
+# Schemas to expose via API
+schemas = ["public", "storage"]
+# Extra schemas to include
+extra_search_path = ["public", "extensions"]
+# Maximum rows returned
+max_rows = 1000
+
+[db]
+# Database configuration
+port = 54322
+# Maximum client connections
+max_connections = 100
+# Use connection pooling
+pooler_enabled = true
+# Pool mode: "transaction" or "session"
+pool_mode = "transaction"
+
+[studio]
+# Supabase Studio
+enabled = true
+port = 54323
+
+[inbucket]
+# Email testing
+enabled = true
+port = 54324
+
+[storage]
+# Storage configuration
+enabled = true
+# Image transformation service
+image_transformation_enabled = true
+# File size limit (50MB)
+file_size_limit = "50MiB"
+
+[auth]
+# Authentication settings
+enabled = true
+
+# JWT Configuration
+[auth.jwt]
+# JWT secret - use your own secret in production
+secret = "your-super-secret-jwt-token-with-at-least-32-characters-long"
+exp = 3600
+
+# Email auth
+[auth.email]
+enabled = true
+# Allow sign-ups
+enable_signup = true
+# Require email confirmation
+enable_confirmations = true
+# Allow password recovery
+enable_password_recovery = true
+# Minimum password length
+password_min_length = 8
+
+# OAuth providers
+[auth.external.google]
+enabled = true
+client_id = "your-google-client-id"
+# Note: Never commit the actual secret to version control
+secret = "your-google-client-secret"
+redirect_uri = "http://localhost:54321/auth/v1/callback"
+
+[auth.external.github]
+enabled = true
+client_id = "your-github-client-id"
+secret = "your-github-client-secret"
+redirect_uri = "http://localhost:54321/auth/v1/callback"
+
+# SMS auth (optional)
+[auth.sms]
+enabled = false
+
+# Rate limiting
+[auth.rate_limiting]
+# Enable rate limiting
+enabled = true
+# Rate limit for email/SMS
+email_per_hour = 10
+sms_per_hour = 5
+
+# Analytics (optional)
+[analytics]
+enabled = false
+
+[functions]
+# Edge Functions configuration
+enabled = true
+# Function invocation timeout
+timeout = 30
+
+# Storage buckets
+[[storage.buckets]]
+name = "avatars"
+public = true
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/jpeg", "image/png", "image/gif", "image/webp"]
+
+[[storage.buckets]]
+name = "generated-content"
+public = false
+file_size_limit = "100MiB"
+allowed_mime_types = ["audio/mpeg", "audio/wav", "application/pdf", "application/vnd.openxmlformats-officedocument.presentationml.presentation"]
+
+[[storage.buckets]]
+name = "note-attachments"
+public = false
+file_size_limit = "50MiB"
+allowed_mime_types = ["image/*", "video/*", "audio/*", "application/pdf", "text/*"]
+
+# Local development
+[local]
+# Automatically apply migrations on start
+migration_auto_apply = true
+# Start services automatically
+auto_start = true
+
+# Database settings
+[db.pooler]
+enabled = true
+# Number of pooler connections
+num_pools = 15
+# Default pool size
+default_pool_size = 25
+# Pool mode
+pool_mode = "transaction"

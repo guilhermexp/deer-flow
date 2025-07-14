@@ -1,0 +1,47 @@
+/* Jarvis-specific global styles que funcionam com temas claro e escuro */
+
+/* Glass morphism effects para ambos os temas */
+.jarvis-glass {
+  background: hsl(var(--card) / 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+}
+
+.dark .jarvis-glass {
+  background: hsl(var(--card) / 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Jarvis-specific animations */
+@keyframes jarvis-glow {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+
+.jarvis-glow {
+  animation: jarvis-glow 2s ease-in-out infinite;
+}
+
+/* Ajustes para componentes do Jarvis */
+.jarvis-accent {
+  color: hsl(var(--primary));
+}
+
+/* Efeito de gradiente para textos */
+.jarvis-gradient-text {
+  @apply text-transparent bg-clip-text;
+  background-image: linear-gradient(to bottom right, 
+    hsl(var(--foreground)), 
+    hsl(var(--foreground) / 0.8), 
+    hsl(var(--foreground) / 0.6)
+  );
+}
+
+.dark .jarvis-gradient-text {
+  background-image: linear-gradient(to bottom right, 
+    rgba(255, 255, 255, 1), 
+    rgba(255, 255, 255, 0.8), 
+    rgba(255, 255, 255, 0.6)
+  );
+}

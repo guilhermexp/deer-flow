@@ -2,20 +2,22 @@
 // SPDX-License-Identifier: MIT
 
 import "~/styles/globals.css";
+import "~/styles/jarvis-globals.css";
 
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import Script from "next/script";
 
 import { ThemeProviderWrapper } from "~/components/deer-flow/theme-provider-wrapper";
-import { env } from "~/env";
+import { AnimationProvider } from "~/contexts/animation-context";
+import { env } from "~/env.js";
 
 import { Toaster } from "../components/deer-flow/toaster";
 
 export const metadata: Metadata = {
   title: "🦌 DeerFlow",
   description:
-    "Deep Exploration and Efficient Research, an AI tool that combines language models with specialized tools for research tasks.",
+    "Exploração Profunda e Pesquisa Eficiente, uma ferramenta de IA que combina modelos de linguagem com ferramentas especializadas para tarefas de pesquisa.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -28,9 +30,9 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
+    <html lang="pt-BR" className={`${geist.variable}`} suppressHydrationWarning>
       <head>
-        {/* Define isSpace function globally to fix markdown-it issues with Next.js + Turbopack
+        {/* Define a função isSpace globalmente para corrigir problemas do markdown-it com Next.js + Turbopack
           https://github.com/markdown-it/markdown-it/issues/1082#issuecomment-2749656365 */}
         <Script id="markdown-it-fix" strategy="beforeInteractive">
           {`
@@ -43,13 +45,17 @@ export default async function RootLayout({
         </Script>
       </head>
       <body className="bg-app">
-        <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+        <ThemeProviderWrapper>
+          <AnimationProvider>
+            {children}
+          </AnimationProvider>
+        </ThemeProviderWrapper>
         <Toaster />
         {
-          // NO USER BEHAVIOR TRACKING OR PRIVATE DATA COLLECTION BY DEFAULT
+          // NENHUM RASTREAMENTO DE COMPORTAMENTO DO USUÁRIO OU COLETA DE DADOS PRIVADOS POR PADRÃO
           //
-          // When `NEXT_PUBLIC_STATIC_WEBSITE_ONLY` is `true`, the script will be injected
-          // into the page only when `AMPLITUDE_API_KEY` is provided in `.env`
+          // Quando `NEXT_PUBLIC_STATIC_WEBSITE_ONLY` for `true`, o script será injetado
+          // na página apenas quando `AMPLITUDE_API_KEY` for fornecido em `.env`
         }
         {env.NEXT_PUBLIC_STATIC_WEBSITE_ONLY && env.AMPLITUDE_API_KEY && (
           <>

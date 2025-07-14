@@ -1,0 +1,183 @@
+"use client"
+
+import { useState, useCallback, useMemo } from "react"
+import type { Task, Project, TaskStatus, TaskWeekDay } from "../lib/types"
+// import { useOptimisticUpdate, useOptimisticList } from "~/hooks/use-optimistic-update"
+import {
+  createTask,
+  filterTasksByQuery,
+  getDefaultTaskFormData,
+} from "~/lib/kanban-operations"
+
+export function useKanbanTasksOptimistic(
+  currentProject: Project | null,
+  tasksByProject: { [projectId: string]: Task[] },
+  setTasksByProject: React.Dispatch<React.SetStateAction<{ [projectId: string]: Task[] }>>
+) {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [deletingTask, setDeletingTask] = useState<Task | null>(null)
+  const [taskFormData, setTaskFormData] = useState(getDefaultTaskFormData())
+
+  const { addItem, updateItem, deleteItem } = useOptimisticList<Task>()
+
+  // Optimistic update for task operations
+  const { optimisticUpdate: optimisticTaskUpdate } = useOptimisticUpdate<Task[]>({
+    onUpdate: async () => {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500))
+      // In real app, this would be an API call
+      return Promise.resolve()
+    },
+    successMessage: 'Tarefa atualizada com sucesso!',
+    errorMessage: 'Erro ao atualizar tarefa'
+  })
+
+  // Filtered tasks for current project
+  const currentProjectTasks = useMemo(() => {
+    if (!currentProject) return []
+    const tasks = tasksByProject[currentProject.id] || []
+    return filterTasksByQuery(tasks, searchQuery)
+  }, [currentProject, tasksByProject, searchQuery])
+
+  // Update task with optimistic update
+  const handleUpdateTask = useCallback(
+    async (updatedTask: Task) => {
+      if (!currentProject) return
+
+      const currentTasks = tasksByProject[currentProject.id] || []
+      const optimisticTasks = updateItem(currentTasks, updatedTask)
+
+      await optimisticTaskUpdate(
+        currentTasks,
+        optimisticTasks,
+        (tasks) => {
+          setTasksByProject(prev => ({
+            ...prev,
+            [currentProject.id]: tasks
+          }))
+        }
+      )
+    },
+    [currentProject, tasksByProject, setTasksByProject, updateItem, optimisticTaskUpdate]
+  )
+
+  // Add new task with optimistic update
+  const handleAddTask = useCallback(
+    async (taskData: Partial<Task>) => {
+      if (!currentProject) return
+
+      const newTask = createTask({
+        ...getDefaultTaskFormData(),
+        ...taskData,
+        projectId: currentProject.id
+      })
+
+      const currentTasks = tasksByProject[currentProject.id] || []
+      const optimisticTasks = addItem(currentTasks, newTask)
+
+      await optimisticTaskUpdate(
+        currentTasks,
+        optimisticTasks,
+        (tasks) => {
+          setTasksByProject(prev => ({
+            ...prev,
+            [currentProject.id]: tasks
+          }))
+        }
+      )
+
+      setIsTaskDialogOpen(false)
+      setTaskFormData(getDefaultTaskFormData())
+    },
+    [currentProject, tasksByProject, setTasksByProject, addItem, optimisticTaskUpdate]
+  )
+
+  // Delete task with optimistic update
+  const handleDeleteTask = useCallback(
+    async () => {
+      if (!currentProject || !deletingTask) return
+
+      const currentTasks = tasksByProject[currentProject.id] || []
+      const optimisticTasks = deleteItem(currentTasks, deletingTask.id)
+
+      await optimisticTaskUpdate(
+        currentTasks,
+        optimisticTasks,
+        (tasks) => {
+          setTasksByProject(prev => ({
+            ...prev,
+            [currentProject.id]: tasks
+          }))
+        }
+      )
+
+      setIsDeleteDialogOpen(false)
+      setDeletingTask(null)
+    },
+    [currentProject, deletingTask, tasksByProject, setTasksByProject, deleteItem, optimisticTaskUpdate]
+  )
+
+  // Move task between columns with optimistic update
+  const handleMoveTask = useCallback(
+    async (taskId: string, newStatus: TaskStatus, newWeekDay?: TaskWeekDay) => {
+      if (!currentProject) return
+
+      const currentTasks = tasksByProject[currentProject.id] || []
+      const task = currentTasks.find(t => t.id === taskId)
+      if (!task) return
+
+      const updatedTask = {
+        ...task,
+        status: newStatus,
+        weekDay: newWeekDay || task.weekDay,
+        updatedAt: new Date()
+      }
+
+      await handleUpdateTask(updatedTask)
+    },
+    [currentProject, tasksByProject, handleUpdateTask]
+  )
+
+  return {
+    // State
+    searchQuery,
+    setSearchQuery,
+    isTaskDialogOpen,
+    setIsTaskDialogOpen,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    editingTask,
+    setEditingTask,
+    deletingTask,
+    setDeletingTask,
+    taskFormData,
+    setTaskFormData,
+    currentProjectTasks,
+    
+    // Actions
+    handleUpdateTask,
+    handleAddTask,
+    handleDeleteTask,
+    handleMoveTask,
+    
+    // Helpers
+    resetTaskForm: useCallback(() => {
+      setTaskFormData(getDefaultTaskFormData())
+    }, []),
+    handleAddTaskToColumn: useCallback((columnId: TaskStatus) => {
+      if (!currentProject) return
+      setEditingTask(null)
+      setTaskFormData(prev => ({ ...prev, status: columnId, weekDay: "none" }))
+      setIsTaskDialogOpen(true)
+    }, [currentProject]),
+    handleAddTaskToDay: useCallback((day: TaskWeekDay) => {
+      if (!currentProject || !day) return
+      setEditingTask(null)
+      setTaskFormData(prev => ({ ...prev, weekDay: day, status: "not-started" }))
+      setIsTaskDialogOpen(true)
+    }, [currentProject])
+  }
+}

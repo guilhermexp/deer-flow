@@ -21,7 +21,7 @@ export const MCPConfigSchema = z.object({
               message: "`env` must be an object of key-value pairs",
             })
             .optional(),
-        }),
+        }).passthrough(), // Allow additional properties
         z.object({
           url: z
             .string({
@@ -47,7 +47,7 @@ export const MCPConfigSchema = z.object({
               message: "`env` must be an object of key-value pairs",
             })
             .optional(),
-        }),
+        }).passthrough(), // Allow additional properties
       ],
       {
         message: "Invalid server type",

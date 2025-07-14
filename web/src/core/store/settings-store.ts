@@ -117,7 +117,7 @@ export const getChatStreamSettings = () => {
           [cur.name]: {
             ...server,
             enabled_tools: cur.tools.map((tool) => tool.name),
-            add_to_agents: ["researcher"],
+            add_to_agents: ["researcher", "coder"],
           },
         };
       }, {}),

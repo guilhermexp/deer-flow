@@ -137,8 +137,9 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
         Placeholder.configure({
           showOnlyCurrent: false,
           placeholder: config?.rag.provider
-            ? "What can I do for you? \nYou may refer to RAG resources by using @."
-            : "What can I do for you?",
+            ? `O que posso fazer por você? 
+Você pode se referir a recursos RAG usando @.`
+            : "O que posso fazer por você?",
           emptyEditorClass: "placeholder",
         }),
         Extension.create({
@@ -185,11 +186,11 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
           <EditorContent
             immediatelyRender={false}
             extensions={extensions}
-            className="border-muted h-full w-full overflow-auto"
+            className="h-full w-full overflow-auto"
             editorProps={{
               attributes: {
                 class:
-                  "prose prose-base dark:prose-invert inline-editor font-default focus:outline-none max-w-full",
+                  "prose prose-base dark:prose-invert inline-editor font-default focus:outline-none max-w-full text-gray-100",
               },
               transformPastedHTML: transformPastedHTML,
             }}

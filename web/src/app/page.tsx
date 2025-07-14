@@ -1,9 +1,9 @@
 // Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 // SPDX-License-Identifier: MIT
 
-import { useMemo } from "react";
+"use client";
 
-import { SiteHeader } from "./chat/components/site-header";
+import { useMemo } from "react";
 import { Jumbotron } from "./landing/components/jumbotron";
 import { Ray } from "./landing/components/ray";
 import { CaseStudySection } from "./landing/sections/case-study-section";
@@ -11,11 +11,10 @@ import { CoreFeatureSection } from "./landing/sections/core-features-section";
 import { JoinCommunitySection } from "./landing/sections/join-community-section";
 import { MultiAgentSection } from "./landing/sections/multi-agent-section";
 
-export default function HomePage() {
+export default function RootPage() {
   return (
     <div className="flex flex-col items-center">
-      <SiteHeader />
-      <main className="container flex flex-col items-center justify-center gap-56">
+      <main className="container flex flex-col items-center justify-center gap-32 md:gap-48 lg:gap-56 py-8">
         <Jumbotron />
         <CaseStudySection />
         <MultiAgentSection />

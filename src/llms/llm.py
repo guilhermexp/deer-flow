@@ -70,8 +70,8 @@ def _create_llm_use_conf(
     if not merged_conf:
         raise ValueError(f"No configuration found for LLM type: {llm_type}")
 
-    if llm_type == "reasoning":
-        merged_conf["api_base"] = merged_conf.pop("base_url", None)
+    # Check if this is OpenRouter
+    is_openrouter = "openrouter.ai" in merged_conf.get("base_url", "")
 
     # Handle SSL verification settings
     verify_ssl = merged_conf.pop("verify_ssl", True)
@@ -83,11 +83,13 @@ def _create_llm_use_conf(
         merged_conf["http_client"] = http_client
         merged_conf["http_async_client"] = http_async_client
 
-    return (
-        ChatOpenAI(**merged_conf)
-        if llm_type != "reasoning"
-        else ChatDeepSeek(**merged_conf)
-    )
+    # Use ChatOpenAI for OpenRouter (OpenAI-compatible) or non-reasoning models
+    # Use ChatDeepSeek only for reasoning models with DeepSeek API
+    if is_openrouter or llm_type != "reasoning":
+        return ChatOpenAI(**merged_conf)
+    else:
+        merged_conf["api_base"] = merged_conf.pop("base_url", None)
+        return ChatDeepSeek(**merged_conf)
 
 
 def get_llm_by_type(

@@ -1,0 +1,135 @@
+"use client"
+
+import { motion, AnimatePresence } from "framer-motion"
+import { Button } from "~/components/ui/button"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { cn } from "~/lib/utils"
+import EventCard from "./event-card" // Certifique-se que EventCard está correto
+import type { CalendarEvent } from "../lib/types"
+import { DAYS_OF_WEEK_ABBREVIATED } from "../lib/constants"
+
+interface MonthViewProps {
+  monthDisplayDate: Date
+  getDaysInMonth: (date: Date) => (Date | null)[]
+  getEventsForSpecificDate: (date: Date) => CalendarEvent[]
+  isCurrentEventActive: (event: CalendarEvent) => boolean
+  isDateToday: (date: Date | null) => boolean
+  onNavigate: (direction: "next" | "prev") => void
+  onDeleteEvent: (event: CalendarEvent) => void
+  onAddEventClick?: (date: Date) => void
+}
+
+export default function MonthView({
+  monthDisplayDate,
+  getDaysInMonth,
+  getEventsForSpecificDate,
+  isCurrentEventActive,
+  isDateToday,
+  onNavigate,
+  onDeleteEvent,
+  onAddEventClick,
+}: MonthViewProps) {
+  // Suppress unused variable warning - feature not implemented yet
+  void onAddEventClick;
+  const cellBackgroundStyle = "bg-white/[0.05] backdrop-blur-md"
+  const emptyCellBackgroundStyle = "bg-white/[0.02] backdrop-blur-md" // Usando opacidade menor para células vazias
+
+  return (
+    <section className="space-y-6 p-1 sm:p-0 mt-2" aria-label="Month view calendar">}
+            className="text-gray-400 hover:text-gray-100 hover:bg-white/[0.08]"
+            aria-label="Next month"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+      <div className="rounded-lg border border-white/10 p-px sm:p-0.5">
+        {" "}
+        {/* Ajustado padding responsivo */}
+        <div className="grid grid-cols-7 gap-px bg-white/10 rounded-t-md overflow-hidden mb-px">
+          {DAYS_OF_WEEK_ABBREVIATED.map((day) => (
+            <div key={day} className={cn(cellBackgroundStyle, "p-2 sm:p-3 text-center")}>
+              {" "}
+              {/* Ajustado padding */}
+              <span className="text-xs sm:text-sm font-medium text-gray-400">{day}</span>{" "}
+              {/* Ajustado tamanho da fonte */}
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-px bg-white/10 rounded-b-md overflow-hidden">
+          {getDaysInMonth(monthDisplayDate).map((date, index) => {
+            const dayEvents = date ? getEventsForSpecificDate(date) : []
+            const isCurrentDay = date ? isDateToday(date) : false
+            return (
+              <div
+                key={index}
+                className={cn(
+                  "min-h-[80px] sm:min-h-[100px] md:min-h-[120px] p-1 sm:p-1.5 md:p-2 transition-colors", // Ajustado padding e min-height
+                  date ? cellBackgroundStyle : emptyCellBackgroundStyle,
+                  date && "hover:bg-white/[0.08]",
+                  isCurrentDay && "border border-blue-500/50 relative",
+                )}
+              >
+                {isCurrentDay && (
+                  <div className="absolute top-0.5 left-0.5 sm:top-1 sm:left-1 w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full" />
+                )}{" "}
+                {/* Ajustado posicionamento e tamanho */}
+                {date && (
+                  <>
+                    <div className="flex items-center justify-between mb-1 sm:mb-1.5">
+                      {" "}
+                      {/* Ajustado margin */}
+                      <time
+                        className={cn(
+                          "text-[10px] sm:text-xs md:text-sm font-medium", // Ajustado tamanho da fonte
+                          isCurrentDay ? "text-blue-400" : "text-gray-100",
+                        )}
+                        dateTime={date.toISOString().split("T")[0]}
+                      >
+                        {date.getDate()}
+                      </time>
+                    </div>
+                    <div className="space-y-0.5 sm:space-y-1">
+                      {" "}
+                      {/* Ajustado espaçamento */}
+                      <AnimatePresence>
+                        {dayEvents.slice(0, 2).map(
+                          (
+                            event,
+                            eventIdx, // Limita a 2 eventos visíveis inicialmente
+                          ) => (
+                            <motion.div
+                              key={event.id}
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2, delay: eventIdx * 0.05 }}
+                              className="overflow-hidden"
+                            >
+                              <EventCard
+                                event={event}
+                                isCurrent={isCurrentEventActive(event)}
+                                view="month"
+                                onDelete={() => onDeleteEvent(event)} // Passa o evento para onDeleteEvent
+                              />
+                            </motion.div>
+                          ),
+                        )}
+                      </AnimatePresence>
+                      {dayEvents.length > 2 && (
+                        <div className="text-[9px] sm:text-[10px] text-gray-500 text-center py-0.5">
+                          {" "}
+                          {/* Ajustado tamanho da fonte */}+ {dayEvents.length - 2} more
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}

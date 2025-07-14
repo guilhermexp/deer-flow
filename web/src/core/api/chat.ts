@@ -44,7 +44,7 @@ export async function* chatStream(
   ) 
     return yield* chatReplayStream(userMessage, params, options);
   
-  try{
+  try {
     const stream = fetchStream(resolveServiceURL("chat/stream"), {
       body: JSON.stringify({
         messages: [{ role: "user", content: userMessage }],
@@ -59,8 +59,9 @@ export async function* chatStream(
         data: JSON.parse(event.data),
       } as ChatEvent;
     }
-  }catch(e){
-    console.error(e);
+  } catch(e) {
+    console.error("Chat stream error:", e);
+    throw e; // Re-throw to let the store handle it
   }
 }
 

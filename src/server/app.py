@@ -1,6 +1,7 @@
 # Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
+import asyncio
 import base64
 import json
 import logging
@@ -8,7 +9,11 @@ import os
 from typing import Annotated, List, cast
 from uuid import uuid4
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
+
+# Load environment variables
+load_dotenv()
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, StreamingResponse
 from langchain_core.messages import AIMessageChunk, ToolMessage, BaseMessage
@@ -85,6 +90,11 @@ async def chat_stream(request: ChatRequest):
             request.enable_deep_thinking,
         ),
         media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",  # Disable Nginx buffering
+        }
     )
 
 
@@ -102,99 +112,112 @@ async def _astream_workflow_generator(
     report_style: ReportStyle,
     enable_deep_thinking: bool,
 ):
-    input_ = {
-        "messages": messages,
-        "plan_iterations": 0,
-        "final_report": "",
-        "current_plan": None,
-        "observations": [],
-        "auto_accepted_plan": auto_accepted_plan,
-        "enable_background_investigation": enable_background_investigation,
-        "research_topic": messages[-1]["content"] if messages else "",
-    }
-    if not auto_accepted_plan and interrupt_feedback:
-        resume_msg = f"[{interrupt_feedback}]"
-        # add the last message to the resume message
-        if messages:
-            resume_msg += f" {messages[-1]['content']}"
-        input_ = Command(resume=resume_msg)
-    async for agent, _, event_data in graph.astream(
-        input_,
-        config={
-            "thread_id": thread_id,
-            "resources": resources,
-            "max_plan_iterations": max_plan_iterations,
-            "max_step_num": max_step_num,
-            "max_search_results": max_search_results,
-            "mcp_settings": mcp_settings,
-            "report_style": report_style.value,
-            "enable_deep_thinking": enable_deep_thinking,
-        },
-        stream_mode=["messages", "updates"],
-        subgraphs=True,
-    ):
-        if isinstance(event_data, dict):
-            if "__interrupt__" in event_data:
-                yield _make_event(
-                    "interrupt",
-                    {
-                        "thread_id": thread_id,
-                        "id": event_data["__interrupt__"][0].ns[0],
-                        "role": "assistant",
-                        "content": event_data["__interrupt__"][0].value,
-                        "finish_reason": "interrupt",
-                        "options": [
-                            {"text": "Edit plan", "value": "edit_plan"},
-                            {"text": "Start research", "value": "accepted"},
-                        ],
-                    },
-                )
-            continue
-        message_chunk, message_metadata = cast(
-            tuple[BaseMessage, dict[str, any]], event_data
-        )
-        event_stream_message: dict[str, any] = {
-            "thread_id": thread_id,
-            "agent": agent[0].split(":")[0],
-            "id": message_chunk.id,
-            "role": "assistant",
-            "content": message_chunk.content,
+    try:
+        input_ = {
+            "messages": messages,
+            "plan_iterations": 0,
+            "final_report": "",
+            "current_plan": None,
+            "observations": [],
+            "auto_accepted_plan": auto_accepted_plan,
+            "enable_background_investigation": enable_background_investigation,
+            "research_topic": messages[-1]["content"] if messages else "",
         }
-        if message_chunk.additional_kwargs.get("reasoning_content"):
-            event_stream_message["reasoning_content"] = message_chunk.additional_kwargs[
-                "reasoning_content"
-            ]
-        if message_chunk.response_metadata.get("finish_reason"):
-            event_stream_message["finish_reason"] = message_chunk.response_metadata.get(
-                "finish_reason"
+        if not auto_accepted_plan and interrupt_feedback:
+            resume_msg = f"[{interrupt_feedback}]"
+            # add the last message to the resume message
+            if messages:
+                resume_msg += f" {messages[-1]['content']}"
+            input_ = Command(resume=resume_msg)
+        
+        # Keep track of last event time for keep-alive
+        last_event_time = asyncio.get_event_loop().time()
+        
+        async for agent, _, event_data in graph.astream(
+            input_,
+            config={
+                "thread_id": thread_id,
+                "resources": resources,
+                "max_plan_iterations": max_plan_iterations,
+                "max_step_num": max_step_num,
+                "max_search_results": max_search_results,
+                "mcp_settings": mcp_settings,
+                "report_style": report_style.value,
+                "enable_deep_thinking": enable_deep_thinking,
+            },
+            stream_mode=["messages", "updates"],
+            subgraphs=True,
+        ):
+            if isinstance(event_data, dict):
+                if "__interrupt__" in event_data:
+                    yield _make_event(
+                        "interrupt",
+                        {
+                            "thread_id": thread_id,
+                            "id": event_data["__interrupt__"][0].ns[0],
+                            "role": "assistant",
+                            "content": event_data["__interrupt__"][0].value,
+                            "finish_reason": "interrupt",
+                            "options": [
+                                {"text": "Edit plan", "value": "edit_plan"},
+                                {"text": "Start research", "value": "accepted"},
+                            ],
+                        },
+                    )
+                continue
+            message_chunk, message_metadata = cast(
+                tuple[BaseMessage, dict[str, any]], event_data
             )
-        if isinstance(message_chunk, ToolMessage):
-            # Tool Message - Return the result of the tool call
-            event_stream_message["tool_call_id"] = message_chunk.tool_call_id
-            yield _make_event("tool_call_result", event_stream_message)
-        elif isinstance(message_chunk, AIMessageChunk):
-            # AI Message - Raw message tokens
-            if message_chunk.tool_calls:
-                # AI Message - Tool Call
-                event_stream_message["tool_calls"] = message_chunk.tool_calls
-                event_stream_message["tool_call_chunks"] = (
-                    message_chunk.tool_call_chunks
+            event_stream_message: dict[str, any] = {
+                "thread_id": thread_id,
+                "agent": agent[0].split(":")[0],
+                "id": message_chunk.id,
+                "role": "assistant",
+                "content": message_chunk.content,
+            }
+            if message_chunk.additional_kwargs.get("reasoning_content"):
+                event_stream_message["reasoning_content"] = message_chunk.additional_kwargs[
+                    "reasoning_content"
+                ]
+            if message_chunk.response_metadata.get("finish_reason"):
+                event_stream_message["finish_reason"] = message_chunk.response_metadata.get(
+                    "finish_reason"
                 )
-                yield _make_event("tool_calls", event_stream_message)
-            elif message_chunk.tool_call_chunks:
-                # AI Message - Tool Call Chunks
-                event_stream_message["tool_call_chunks"] = (
-                    message_chunk.tool_call_chunks
-                )
-                yield _make_event("tool_call_chunks", event_stream_message)
-            else:
+            if isinstance(message_chunk, ToolMessage):
+                # Tool Message - Return the result of the tool call
+                event_stream_message["tool_call_id"] = message_chunk.tool_call_id
+                yield _make_event("tool_call_result", event_stream_message)
+            elif isinstance(message_chunk, AIMessageChunk):
                 # AI Message - Raw message tokens
-                yield _make_event("message_chunk", event_stream_message)
+                if message_chunk.tool_calls:
+                    # AI Message - Tool Call
+                    event_stream_message["tool_calls"] = message_chunk.tool_calls
+                    event_stream_message["tool_call_chunks"] = (
+                        message_chunk.tool_call_chunks
+                    )
+                    yield _make_event("tool_calls", event_stream_message)
+                elif message_chunk.tool_call_chunks:
+                    # AI Message - Tool Call Chunks
+                    event_stream_message["tool_call_chunks"] = (
+                        message_chunk.tool_call_chunks
+                    )
+                    yield _make_event("tool_call_chunks", event_stream_message)
+                else:
+                    # AI Message - Raw message tokens
+                    yield _make_event("message_chunk", event_stream_message)
+            
+            # Update last event time
+            last_event_time = asyncio.get_event_loop().time()
+            
+    except Exception as e:
+        logger.error(f"Error in SSE stream: {str(e)}")
+        yield _make_event("error", {"error": str(e), "thread_id": thread_id})
 
 
 def _make_event(event_type: str, data: dict[str, any]):
     if data.get("content") == "":
         data.pop("content")
+    # Ensure proper SSE format with double newline at the end
     return f"event: {event_type}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
 
@@ -258,14 +281,29 @@ async def text_to_speech(request: TTSRequest):
 async def generate_podcast(request: GeneratePodcastRequest):
     try:
         report_content = request.content
-        print(report_content)
+        logger.info(f"Received podcast generation request, content length: {len(report_content)}")
+        logger.info(f"First 100 chars: {report_content[:100]}...")
+        
+        # Check environment variables
+        logger.info(f"GOOGLE_API_KEY present: {bool(os.getenv('GOOGLE_API_KEY'))}")
+        logger.info(f"GOOGLE_TTS_MODEL: {os.getenv('GOOGLE_TTS_MODEL')}")
+        
         workflow = build_podcast_graph()
+        logger.info("Podcast workflow built successfully")
+        
         final_state = workflow.invoke({"input": report_content})
-        audio_bytes = final_state["output"]
+        logger.info("Podcast workflow invoked successfully")
+        
+        audio_bytes = final_state.get("output")
+        if not audio_bytes:
+            logger.error("No audio output from workflow")
+            raise ValueError("No audio output generated")
+            
+        logger.info(f"Generated audio bytes: {len(audio_bytes)} bytes")
         return Response(content=audio_bytes, media_type="audio/mp3")
     except Exception as e:
         logger.exception(f"Error occurred during podcast generation: {str(e)}")
-        raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR_DETAIL)
+        raise HTTPException(status_code=500, detail=str(e))  # Return actual error for debugging
 
 
 @app.post("/api/ppt/generate")

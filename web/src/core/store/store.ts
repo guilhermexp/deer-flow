@@ -146,11 +146,13 @@ export async function sendMessage(
         updateMessage(message);
       }
     }
-  } catch {
-    toast("An error occurred while generating the response. Please try again.");
+  } catch (error) {
+    console.error("Error in chat stream:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    toast(`An error occurred: ${errorMessage}. Please try again.`);
     // Update message status.
-    // TODO: const isAborted = (error as Error).name === "AbortError";
-    if (messageId != null) {
+    const isAborted = error instanceof Error && error.name === "AbortError";
+    if (messageId != null && !isAborted) {
       const message = getMessage(messageId);
       if (message?.isStreaming) {
         message.isStreaming = false;
@@ -323,7 +325,12 @@ export async function listenToPodcast(researchId: string) {
             },
           ),
         }));
-        toast("An error occurred while generating podcast. Please try again.");
+        const errorMsg = e instanceof Error ? e.message : "Unknown error";
+        if (errorMsg.includes("500")) {
+          toast("Podcast generation service is not available. Please check if TTS API keys are configured.");
+        } else {
+          toast(`Failed to generate podcast: ${errorMsg}`);
+        }
         return;
       }
       useStore.setState((state) => ({

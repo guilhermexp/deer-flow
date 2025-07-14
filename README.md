@@ -262,11 +262,24 @@ The system employs a streamlined workflow with the following components:
 
 ## Text-to-Speech Integration
 
-DeerFlow now includes a Text-to-Speech (TTS) feature that allows you to convert research reports to speech. This feature uses the volcengine TTS API to generate high-quality audio from text. Features like speed, volume, and pitch are also customizable.
+DeerFlow includes a Text-to-Speech (TTS) feature that allows you to convert research reports to speech. For podcast generation, DeerFlow uses Google Gemini TTS API to generate high-quality audio with natural-sounding voices. For standalone TTS functionality, volcengine TTS API is available through the `/api/tts` endpoint.
 
-### Using the TTS API
+### Podcast Generation with Google Gemini TTS
 
-You can access the TTS functionality through the `/api/tts` endpoint:
+The podcast generation feature uses Google Gemini TTS with natural-sounding voices:
+- **orus**: Male voice
+- **kore**: Female voice
+
+To enable podcast generation, configure the following environment variables:
+```bash
+# Google Gemini TTS for podcast generation
+GOOGLE_API_KEY=your-google-api-key
+# Optional: Customize the model and default voice
+GOOGLE_TTS_MODEL=gemini-2.5-flash-preview-tts  # Default value
+GOOGLE_TTS_VOICE=kore  # Default value (female voice)
+```
+
+### Using the Standalone TTS API
 
 ```bash
 # Example API call using curl
