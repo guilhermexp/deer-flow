@@ -117,6 +117,24 @@ BASIC_MODEL:
   api_key: $AZURE_OPENAI_API_KEY
 ```
 
+## Security Settings
+
+### CORS Configuration
+
+DeerFlow allows you to configure Cross-Origin Resource Sharing (CORS) to control which domains can access the API. This improves security by restricting API access to trusted origins only.
+
+You can configure CORS allowed origins through the `CORS_ALLOWED_ORIGINS` environment variable:
+
+```bash
+# In your .env file
+CORS_ALLOWED_ORIGINS="http://localhost:3000,http://localhost:4000,https://yourdomain.com"
+```
+
+- Multiple origins should be comma-separated
+- For development, defaults to `http://localhost:3000,http://localhost:4000`
+- In production, always specify your actual domain(s)
+- Only the specified origins will be allowed to make requests to the API
+
 ## About Search Engine
 
 ### How to control search domains for Tavily?
