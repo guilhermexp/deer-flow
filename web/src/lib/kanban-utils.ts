@@ -89,7 +89,7 @@ export const saveToLocalStorage = (key: string, value: string): void => {
 
 export const getFromLocalStorage = (key: string, defaultValue: string): string => {
   try {
-    return localStorage.getItem(key) || defaultValue
+    return localStorage.getItem(key) ?? defaultValue
   } catch (error) {
     console.error(`Failed to get from localStorage: ${key}`, error)
     return defaultValue

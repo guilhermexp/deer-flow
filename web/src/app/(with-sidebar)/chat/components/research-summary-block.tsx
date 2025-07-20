@@ -17,7 +17,7 @@ interface ResearchSummaryBlockProps {
 
 export function ResearchSummaryBlock({
   className,
-  researchId,
+  researchId: _researchId,
   reportId,
 }: ResearchSummaryBlockProps) {
   const report = useStore((state) => state.messages.get(reportId));
@@ -30,8 +30,7 @@ export function ResearchSummaryBlock({
     const sections: { title: string; content: string[] }[] = [];
     let currentSection: { title: string; content: string[] } | null = null;
     
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
+    for (const line of lines) {
       if (!line) continue;
       
       // Main headers (##)
@@ -83,7 +82,7 @@ export function ResearchSummaryBlock({
       if (section.content.length > 0) {
         summaryText += `**${section.title}**\n`;
         // Get first meaningful paragraph
-        const firstPara = section.content.find(p => p.length > 50) || section.content[0];
+        const firstPara = section.content.find(p => p.length > 50) ?? section.content[0];
         summaryText += `${firstPara}\n\n`;
       }
     });
@@ -108,7 +107,7 @@ export function ResearchSummaryBlock({
   }, []);
 
   useEffect(() => {
-    if (report && report.content && !summary && !isGenerating) {
+    if (report?.content && !summary && !isGenerating) {
       setIsGenerating(true);
       // Simulate async generation
       setTimeout(() => {

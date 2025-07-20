@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { CheckSquare } from "lucide-react"
 import { motion } from "framer-motion"
-import { useTasks } from "~/hooks/jarvis/useTasks"
+import { useTasksApi } from "~/hooks/jarvis/useTasksApi"
 import { formatTotalTime } from "~/lib/jarvis/task-formatting-utils"
 // import TaskItem from "~/components/jarvis/task-item"
 import { Play, Star } from "lucide-react"
@@ -10,7 +10,7 @@ import { Button } from "~/components/ui/button"
 import LiquidGlassCard from "~/components/ui/liquid-glass-card"
 
 export default function TodayTasksCard() {
-  const { tasksByDay, setTasksByDay, currentDay } = useTasks()
+  const { tasksByDay, setTasksByDay, currentDay, isLoading } = useTasksApi()
   const [activeTimers, setActiveTimers] = useState<Record<string, number>>({})
 
   const todayTasks = useMemo(

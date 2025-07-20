@@ -4,6 +4,7 @@
 "use client";
 
 import { useMemo } from "react";
+
 import { Jumbotron } from "./landing/components/jumbotron";
 import { Ray } from "./landing/components/ray";
 import { CaseStudySection } from "./landing/sections/case-study-section";

@@ -33,15 +33,15 @@ export function createTask(
     .padStart(2, "0")}`
 
   return {
-    id: existingTask?.id || `task-${Date.now().toString()}`,
+    id: existingTask?.id ?? `task-${Date.now().toString()}`,
     projectId,
     title: title.trim(),
     description: description.trim(),
     date: formattedDate,
-    progress: existingTask?.progress || 0,
-    comments: existingTask?.comments || 0,
-    attachments: existingTask?.attachments || 0,
-    assignees: existingTask?.assignees || [],
+    progress: existingTask?.progress ?? 0,
+    comments: existingTask?.comments ?? 0,
+    attachments: existingTask?.attachments ?? 0,
+    assignees: existingTask?.assignees ?? [],
     status,
     weekDay: weekDay === "none" ? undefined : weekDay,
   }

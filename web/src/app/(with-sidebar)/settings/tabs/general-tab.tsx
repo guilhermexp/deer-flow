@@ -38,6 +38,7 @@ const generalFormSchema = z.object({
   enableBackgroundInvestigation: z.boolean(),
   enableDeepThinking: z.boolean(),
   reportStyle: z.enum(["academic", "popular_science", "news", "social_media"]),
+  selectedModel: z.enum(["google/gemini-2.5-pro", "moonshotai/kimi-k2", "grok-4-latest", "deepseek/deepseek-chat-v3-0324:free"]),
 });
 
 export const GeneralTab: Tab = ({

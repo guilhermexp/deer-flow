@@ -2,7 +2,7 @@
  * Efficient deep equality check for objects and arrays
  * Much faster than JSON.stringify comparison
  */
-export function deepEqual(a: any, b: any): boolean {
+export function deepEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   
   if (a == null || b == null) return false;
@@ -30,7 +30,7 @@ export function deepEqual(a: any, b: any): boolean {
   
   for (const key of keysA) {
     if (!keysB.includes(key)) return false;
-    if (!deepEqual(a[key], b[key])) return false;
+    if (!deepEqual((a as any)[key], (b as any)[key])) return false;
   }
   
   return true;
@@ -40,7 +40,7 @@ export function deepEqual(a: any, b: any): boolean {
  * Shallow equality check for objects
  * Use this when you know the object is only one level deep
  */
-export function shallowEqual(a: any, b: any): boolean {
+export function shallowEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
   
   if (a == null || b == null) return false;
@@ -53,7 +53,7 @@ export function shallowEqual(a: any, b: any): boolean {
   if (keysA.length !== keysB.length) return false;
   
   for (const key of keysA) {
-    if (a[key] !== b[key]) return false;
+    if ((a as any)[key] !== (b as any)[key]) return false;
   }
   
   return true;

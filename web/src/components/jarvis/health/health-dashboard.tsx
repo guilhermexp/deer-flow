@@ -11,7 +11,7 @@ import { BloodPressureCard } from "./blood-pressure-card";
 import { NextWorkoutCard } from "./next-workout-card";
 import { HealthSidebar } from "./health-sidebar";
 import { HealthTabs } from "./health-tabs";
-import { useHealthData } from "./hooks/use-health-data";
+import { useHealthDataJWT } from "./hooks/use-health-data-jwt";
 import DashboardSettingsModal from "../dashboard-settings-modal";
 import type { CardConfig } from "../dashboard-settings-modal";
 
@@ -58,6 +58,7 @@ export function HealthDashboard() {
   const {
     healthData,
     isLoading,
+    error,
     handleAddWater,
     handleUpdateSleep,
     handleUpdateBloodPressure,
@@ -65,7 +66,7 @@ export function HealthDashboard() {
     handleAddMedication,
     handleRemoveMedication,
     handleCompleteWorkout,
-  } = useHealthData();
+  } = useHealthDataJWT();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -99,6 +100,28 @@ export function HealthDashboard() {
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
           <p className="text-muted-foreground mt-2">Carregando dados de saúde...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <p className="text-destructive mb-2">Erro ao carregar dados de saúde</p>
+          <p className="text-muted-foreground text-sm">{error}</p>
+          <p className="text-muted-foreground text-sm mt-4">Certifique-se de estar autenticado e que as tabelas do banco de dados foram criadas.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!healthData) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <p className="text-muted-foreground">Nenhum dado de saúde disponível</p>
         </div>
       </div>
     );

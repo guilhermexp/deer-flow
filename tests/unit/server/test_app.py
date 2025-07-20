@@ -172,7 +172,7 @@ class TestPodcastEndpoint:
         response = client.post("/api/podcast/generate", json=request_data)
 
         assert response.status_code == 500
-        assert response.json()["detail"] == "Internal Server Error"
+        assert response.json()["detail"] == "Podcast generation failed"
 
 
 class TestPPTEndpoint:

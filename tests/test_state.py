@@ -71,7 +71,7 @@ State = load_state_class()
 def test_state_initialization():
     """Test that State class has correct default attribute definitions."""
     # Test that the class has the expected attribute definitions
-    assert State.locale == "en-US"
+    assert State.locale == "pt-BR"
     assert State.observations == []
     assert State.plan_iterations == 0
     assert State.current_plan is None

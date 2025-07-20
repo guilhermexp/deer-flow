@@ -1110,7 +1110,7 @@ def patch_multiserver_mcp_client():
         async def __aexit__(self, exc_type, exc, tb):
             pass
 
-        def get_tools(self):
+        async def get_tools(self):
             return [
                 FakeTool("toolA", "descA"),
                 FakeTool("toolB", "descB"),
@@ -1133,7 +1133,9 @@ async def test_setup_and_execute_agent_step_with_mcp(
     patch_multiserver_mcp_client,
 ):
     # Should use MCP client, load tools, and call create_agent with correct tools
-    default_tools = [MagicMock(name="default_tool")]
+    default_tool = MagicMock()
+    default_tool.name = "default_tool"
+    default_tools = [default_tool]
     agent_type = "researcher"
 
     result = await _setup_and_execute_agent_step(
@@ -1162,7 +1164,9 @@ async def test_setup_and_execute_agent_step_without_mcp(
     patch_execute_agent_step,
 ):
     # Should use default tools and not use MCP client
-    default_tools = [MagicMock(name="default_tool")]
+    default_tool = MagicMock()
+    default_tool.name = "default_tool"
+    default_tools = [default_tool]
     agent_type = "coder"
 
     result = await _setup_and_execute_agent_step(
@@ -1205,7 +1209,9 @@ async def test_setup_and_execute_agent_step_with_mcp_no_enabled_tools(
         "src.graph.nodes.Configuration.from_runnable_config",
         return_value=configurable,
     ):
-        default_tools = [MagicMock(name="default_tool")]
+        default_tool = MagicMock()
+        default_tool.name = "default_tool"
+        default_tools = [default_tool]
         agent_type = "researcher"
         result = await _setup_and_execute_agent_step(
             mock_state_with_steps,
@@ -1228,7 +1234,9 @@ async def test_setup_and_execute_agent_step_with_mcp_tools_description_update(
     patch_execute_agent_step,
 ):
     # Should update tool.description with Powered by info
-    default_tools = [MagicMock(name="default_tool")]
+    default_tool = MagicMock()
+    default_tool.name = "default_tool"
+    default_tools = [default_tool]
     agent_type = "researcher"
 
     # Patch MultiServerMCPClient to check description update
@@ -1244,7 +1252,7 @@ async def test_setup_and_execute_agent_step_with_mcp_tools_description_update(
         async def __aexit__(self, exc_type, exc, tb):
             pass
 
-        def get_tools(self):
+        async def get_tools(self):
             return [FakeTool("toolA", "descA")]
 
     with patch("src.graph.nodes.MultiServerMCPClient", return_value=FakeClient()):

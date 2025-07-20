@@ -6,6 +6,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeerFlow (Deep Exploration and Efficient Research Flow) is a hybrid application combining a Python-based multi-agent research framework with a Next.js frontend. The system uses LangGraph for workflow orchestration and supports multiple LLMs via litellm.
 
+## 🚨 CONFIGURAÇÃO DE PORTAS - NÃO ALTERAR
+
+**IMPORTANTE**: As portas abaixo foram definidas e NÃO devem ser alteradas:
+
+- **Frontend (Next.js)**: Porta 4000
+- **Backend (Python/FastAPI)**: Porta 8005
+- **Frontend API URL**: http://localhost:8005/api
+
+Essas portas estão configuradas em:
+- `web/package.json` (frontend)
+- `server.py` (backend)
+- `web/.env` (API URL)
+- `Makefile` (comando serve)
+
 ## Key Commands
 
 ### Backend Development (Python)
@@ -16,10 +30,10 @@ uv sync
 # Run the main console UI
 uv run main.py
 
-# Run the API server
+# Run the API server (PORT 8005 - NÃO ALTERAR)
 uv run server.py
 
-# Run with auto-reload
+# Run with auto-reload (PORT 8005 - NÃO ALTERAR)
 make serve
 
 # Run tests
@@ -44,7 +58,7 @@ cd web
 # Install dependencies
 pnpm install
 
-# Development server (port 4000)
+# Development server (PORT 4000 - NÃO ALTERAR)
 pnpm dev
 
 # Build for production
@@ -62,8 +76,9 @@ pnpm check      # Both lint and typecheck
 ### Full Stack Development
 ```bash
 # Run both backend and frontend in development mode
-./bootstrap.sh -d     # macOS/Linux
-bootstrap.bat -d      # Windows
+./bootstrap.sh        # Install deps + start both services
+./start-dev.sh        # Start both services in dev mode
+./restart_backend.sh  # Restart both services
 
 # Docker Compose
 docker compose build

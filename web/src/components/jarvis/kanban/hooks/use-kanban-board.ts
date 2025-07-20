@@ -1,73 +1,42 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import type { Task, Project, ActiveTabValue } from "../lib/types"
-import { useKanbanStorageOptimized } from "./use-kanban-storage-optimized"
+import { useState } from "react"
+import type { Task, Project, ActiveTabValue, TaskStatus } from "../lib/types"
+import { useKanbanApi } from "./use-kanban-api"
 import { useKanbanTasks } from "./use-kanban-tasks"
 import { useKanbanColumns } from "./use-kanban-columns"
 import { useKanbanDragDrop } from "./use-kanban-drag-drop"
 
 export function useKanbanBoard() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [currentProject, setCurrentProject] = useState<Project | null>(null)
-  const [tasksByProject, setTasksByProject] = useState<{ [projectId: string]: Task[] }>({})
-  const [activeTab, setActiveTab] = useState<ActiveTabValue>("projectList")
-
-  // Storage operations
+  // Use the new API hook instead of localStorage
   const {
+    projects,
+    tasksByProject,
+    currentProject,
+    activeTab,
+    loading,
+    error,
+    setProjects,
+    setTasksByProject,
+    setCurrentProject,
+    setActiveTab,
     loadProjects,
-    loadTasks,
-    loadLastActiveProject,
-    loadLastActiveTab,
-    saveProjects,
-    saveTasks,
-    saveLastActiveProject,
-    saveLastActiveTab,
-  } = useKanbanStorageOptimized()
+    createProject: apiCreateProject,
+    updateProject: apiUpdateProject,
+    deleteProject: apiDeleteProject,
+    createTask: apiCreateTask,
+    moveTask: apiMoveTask,
+    isAuthenticated
+  } = useKanbanApi()
 
-  // Load initial data from localStorage
-  useEffect(() => {
-    const loadedProjects = loadProjects()
-    setProjects(loadedProjects)
+  // Task management - use original signature
+  const taskHooks = useKanbanTasks(
+    currentProject, 
+    tasksByProject, 
+    setTasksByProject
+  )
 
-    const loadedTasks = loadTasks(loadedProjects)
-    setTasksByProject(loadedTasks)
-
-    const lastActiveProject = loadLastActiveProject(loadedProjects)
-    const lastActiveTab = loadLastActiveTab()
-
-    if (lastActiveProject) {
-      setCurrentProject(lastActiveProject)
-      setActiveTab(lastActiveTab || "kanbanBoard")
-    } else if (loadedProjects.length > 0) {
-      setCurrentProject(loadedProjects[0] ?? null)
-      setActiveTab("kanbanBoard")
-    } else {
-      setActiveTab("projectList")
-    }
-  }, [loadProjects, loadTasks, loadLastActiveProject, loadLastActiveTab])
-
-  // Save data to localStorage
-  useEffect(() => {
-    saveProjects(projects)
-  }, [projects, saveProjects])
-
-  useEffect(() => {
-    saveTasks(tasksByProject)
-  }, [tasksByProject, saveTasks])
-
-  useEffect(() => {
-    saveLastActiveProject(currentProject)
-  }, [currentProject, saveLastActiveProject])
-
-  useEffect(() => {
-    saveLastActiveTab(activeTab)
-  }, [activeTab, saveLastActiveTab])
-
-  // Task management
-  const taskHooks = useKanbanTasks(currentProject, tasksByProject, setTasksByProject)
-
-  // Column/Project management
+  // Column/Project management - use original signature
   const columnHooks = useKanbanColumns(
     projects,
     setProjects,
@@ -79,6 +48,64 @@ export function useKanbanBoard() {
   // Drag and drop
   const dragDropHooks = useKanbanDragDrop(taskHooks.handleUpdateTask)
 
+  // Override methods that need API integration
+  const handleSaveNewProject = async () => {
+    if (!columnHooks.newProjectFormData.name.trim()) return
+    
+    try {
+      const newProject = await apiCreateProject({
+        name: columnHooks.newProjectFormData.name,
+        description: columnHooks.newProjectFormData.description
+      })
+      
+      if (newProject) {
+        setCurrentProject(newProject)
+        setActiveTab("kanbanBoard")
+        columnHooks.setIsCreateProjectDialogOpen(false)
+        columnHooks.setNewProjectFormData({ name: "", description: "" })
+      }
+    } catch (error) {
+      console.error("Error creating project:", error)
+    }
+  }
+
+  const handleAddTaskToColumn = async (columnId: string, title: string) => {
+    if (!currentProject || !title.trim()) return
+    
+    try {
+      await apiCreateTask(currentProject.id, { title }, columnId)
+    } catch (error) {
+      console.error("Error creating task:", error)
+    }
+  }
+
+  const handleUpdateTask = async (updatedTask: Task) => {
+    if (!currentProject) return
+    
+    // Handle status changes that require API calls
+    const originalTasks = tasksByProject[currentProject.id] || []
+    const originalTask = originalTasks.find(t => t.id === updatedTask.id)
+    
+    if (originalTask && originalTask.status !== updatedTask.status) {
+      const columnMap: { [key in TaskStatus]: string } = {
+        'not-started': 'backlog',
+        'in-progress': 'in_progress',
+        'done': 'done',
+        'paused': 'todo'
+      }
+      
+      try {
+        const columnId = columnMap[updatedTask.status]
+        await apiMoveTask(currentProject.id, updatedTask.id, columnId, 0)
+      } catch (error) {
+        console.error("Error moving task:", error)
+      }
+    }
+    
+    // Also update local state
+    taskHooks.handleUpdateTask(updatedTask)
+  }
+
   return {
     // State
     projects,
@@ -86,14 +113,26 @@ export function useKanbanBoard() {
     tasksByProject,
     activeTab,
     setActiveTab,
+    loading,
+    error,
+    isAuthenticated,
     
-    // Task hooks
+    // Task hooks (with API overrides)
     ...taskHooks,
+    handleUpdateTask,
+    handleAddTaskToColumn,
     
-    // Column hooks
+    // Column hooks (with API overrides)
     ...columnHooks,
+    handleSaveNewProject,
     
     // Drag and drop hooks
     ...dragDropHooks,
+    
+    // API methods
+    loadProjects,
+    createProject: apiCreateProject,
+    updateProject: apiUpdateProject,
+    deleteProject: apiDeleteProject,
   }
 }

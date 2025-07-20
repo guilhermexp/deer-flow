@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 import { Kanban } from "lucide-react"
 
 import { useKanbanBoard } from "../hooks/use-kanban-board"
+import type { TaskStatus } from "../lib/types"
 import KanbanBoardHeader from "./kanban-board-header"
 import ProjectListView from "./project-list-view"
 import KanbanView from "./kanban-view"
@@ -62,6 +63,13 @@ export default function KanbanDeskBoard() {
   } = useKanbanBoard()
 
   const [visibleDaysCount, setVisibleDaysCount] = useState(5)
+
+  // Wrapper function to match KanbanView interface
+  const handleAddTaskWrapper = (columnId: TaskStatus) => {
+    // This just opens the task dialog with the column pre-selected
+    // The actual task creation happens when the user fills the form
+    handleAddTaskToColumn(columnId, '')
+  }
 
   return (
     <div className="bg-[#0a0a0a] text-gray-100 h-full flex flex-col">
@@ -124,7 +132,7 @@ export default function KanbanDeskBoard() {
             <KanbanView
               tasks={currentProjectTasks}
               searchQuery={searchQuery}
-              onAddTask={handleAddTaskToColumn}
+              onAddTask={handleAddTaskWrapper}
               onEditTask={handleEditTask}
               onDeleteTask={handleDeleteTask}
               onDragStartTask={handleDragStart}

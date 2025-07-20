@@ -3,17 +3,24 @@
 
 import { MagicWandIcon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUp, Lightbulb, X } from "lucide-react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { ArrowUp, Lightbulb, X, Paperclip } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
 
 import { Detective } from "~/components/deer-flow/icons/detective";
 import MessageInput, {
   type MessageInputRef,
 } from "~/components/deer-flow/message-input";
+import { ModelSelector } from "~/components/deer-flow/model-selector";
 import { ReportStyleDialog } from "~/components/deer-flow/report-style-dialog";
 import { Tooltip } from "~/components/deer-flow/tooltip";
+import { FileUpload } from "~/components/deer-flow/file-upload";
 import { BorderBeam } from "~/components/magicui/border-beam";
 import { Button } from "~/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import { enhancePrompt } from "~/core/api";
 import { useConfig } from "~/core/api/hooks";
 import type { Option, Resource } from "~/core/messages";
@@ -21,6 +28,7 @@ import {
   setEnableDeepThinking,
   setEnableBackgroundInvestigation,
   useSettingsStore,
+  setSelectedModel,
 } from "~/core/store";
 import { cn } from "~/lib/utils";
 
@@ -52,6 +60,9 @@ export function InputBox({
   const backgroundInvestigation = useSettingsStore(
     (state) => state.general.enableBackgroundInvestigation,
   );
+  const selectedModel = useSettingsStore(
+    (state) => state.general.selectedModel,
+  );
   const { config, loading } = useConfig();
   const reportStyle = useSettingsStore((state) => state.general.reportStyle);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -62,6 +73,11 @@ export function InputBox({
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isEnhanceAnimating, setIsEnhanceAnimating] = useState(false);
   const [currentPrompt, setCurrentPrompt] = useState("");
+  
+  // File upload state
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [fileResources, setFileResources] = useState<Resource[]>([]);
+  const [isFilePopoverOpen, setIsFilePopoverOpen] = useState(false);
 
   const handleSendMessage = useCallback(
     (message: string, resources: Array<Resource>) => {
@@ -72,17 +88,21 @@ export function InputBox({
           return;
         }
         if (onSend) {
+          // Combine resources from mentions and file uploads
+          const allResources = [...resources, ...fileResources];
           onSend(message, {
             interruptFeedback: feedback?.option.value,
-            resources,
+            resources: allResources,
           });
           onRemoveFeedback?.();
-          // Clear enhancement animation after sending
+          // Clear enhancement animation and files after sending
           setIsEnhanceAnimating(false);
+          setSelectedFiles([]);
+          setFileResources([]);
         }
       }
     },
-    [responding, onCancel, onSend, feedback, onRemoveFeedback],
+    [responding, onCancel, onSend, feedback, onRemoveFeedback, fileResources],
   );
 
   const handleEnhancePrompt = useCallback(async () => {
@@ -120,6 +140,12 @@ export function InputBox({
       setIsEnhancing(false);
     }
   }, [currentPrompt, isEnhancing, reportStyle]);
+
+  const handleFilesSelect = useCallback((files: File[], resources: Resource[]) => {
+    setSelectedFiles(files);
+    setFileResources(resources);
+    setIsFilePopoverOpen(false);
+  }, []);
 
   return (
     <div
@@ -212,7 +238,7 @@ export function InputBox({
       </div>
       <div className="flex flex-col lg:flex-row items-start lg:items-center px-4 py-2 gap-2">
         <div className="flex gap-2 min-w-0 flex-wrap lg:flex-nowrap">
-          {config?.models.reasoning?.[0] && (
+          {config?.models?.reasoning?.[0] && (
             <Tooltip
               className="max-w-60"
               title={
@@ -222,7 +248,7 @@ export function InputBox({
                   </h3>
                   <p>
                     Quando ativado, o DeerFlow usará o modelo de raciocínio (
-                    {config.models.reasoning?.[0]}) para gerar planos mais elaborados.
+                    {config?.models?.reasoning?.[0]}) para gerar planos mais elaborados.
                   </p>
                 </div>
               }
@@ -233,13 +259,12 @@ export function InputBox({
                   enableDeepThinking && "!border-blue-500/50 !text-blue-400 !bg-blue-500/10",
                 )}
                 variant="outline"
+                size="icon"
                 onClick={() => {
                   setEnableDeepThinking(!enableDeepThinking);
                 }}
               >
-                <Lightbulb className="h-4 w-4 mr-1" /> 
-                <span className="hidden xl:inline">Pensamento Profundo</span>
-                <span className="xl:hidden">Profundo</span>
+                <Lightbulb className="h-4 w-4" />
               </Button>
             </Tooltip>
           )}
@@ -265,18 +290,56 @@ export function InputBox({
                 backgroundInvestigation && "!border-blue-500/50 !text-blue-400 !bg-blue-500/10",
               )}
               variant="outline"
+              size="icon"
               onClick={() =>
                 setEnableBackgroundInvestigation(!backgroundInvestigation)
               }
             >
-              <Detective className="h-4 w-4 mr-1" /> 
-              <span className="hidden sm:inline md:hidden lg:inline">Investigação</span>
-              <span className="sm:hidden lg:hidden">Investig.</span>
+              <Detective className="h-4 w-4" />
             </Button>
           </Tooltip>
           <ReportStyleDialog />
+          <ModelSelector
+            value={selectedModel}
+            onChange={setSelectedModel}
+            size="sm"
+            className="flex-shrink-0"
+          />
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
+          <Popover open={isFilePopoverOpen} onOpenChange={setIsFilePopoverOpen}>
+            <Tooltip title="Upload de arquivos">
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-8 w-8 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] flex-shrink-0 relative",
+                    selectedFiles.length > 0 && "!border-blue-500/50 !text-blue-400 !bg-blue-500/10"
+                  )}
+                >
+                  <Paperclip className="h-4 w-4" />
+                  {selectedFiles.length > 0 && (
+                    <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-blue-500 text-[10px] text-white flex items-center justify-center">
+                      {selectedFiles.length}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+            </Tooltip>
+            <PopoverContent className="w-80 p-4" align="end">
+              <div className="space-y-2">
+                <h3 className="font-medium text-sm">Upload de Arquivos</h3>
+                <p className="text-xs text-muted-foreground">
+                  Faça upload de arquivos para usar com RAG
+                </p>
+                <FileUpload
+                  onFilesSelect={handleFilesSelect}
+                  disabled={responding}
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
           <Tooltip title="Melhorar prompt com IA">
             <Button
               variant="ghost"

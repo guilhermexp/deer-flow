@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+
 import type { Note } from '~/app/(with-sidebar)/notes/page';
 
 const NOTES_STORAGE_KEY = 'jarvis-notes';

@@ -34,6 +34,7 @@ export async function* chatStream(
         }
       >;
     };
+    model?: string;
   },
   options: { abortSignal?: AbortSignal } = {},
 ) {

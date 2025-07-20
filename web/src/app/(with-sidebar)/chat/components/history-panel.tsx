@@ -7,9 +7,10 @@ import { History, Search, Trash2, Clock, Plus, MessageSquare } from "lucide-reac
 import { useState } from "react";
 
 import { Tooltip } from "~/components/deer-flow/tooltip";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { Input } from "~/components/ui/input";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
@@ -18,15 +19,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "~/components/ui/sheet";
-import { Badge } from "~/components/ui/badge";
 import { useHistoryStore } from "~/core/store/history-store";
+import type { HistoryItem } from "~/core/store/history-store";
 import { cn } from "~/lib/utils";
+
 
 interface HistoryPanelProps {
   onSelectQuery?: (query: string, fileName?: string) => void;
+  onLoadConversation?: (conversation: HistoryItem) => void;
 }
 
-export function HistoryPanel({ onSelectQuery }: HistoryPanelProps) {
+export function HistoryPanel({ onSelectQuery, onLoadConversation }: HistoryPanelProps) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const { conversations, removeConversation, clearHistory } = useHistoryStore();
@@ -53,8 +56,14 @@ export function HistoryPanel({ onSelectQuery }: HistoryPanelProps) {
     }
   };
 
-  const handleSelectConversation = (query: string, fileName?: string) => {
-    onSelectQuery?.(query, fileName);
+  const handleSelectConversation = (conversation: HistoryItem) => {
+    if (conversation.messages && conversation.messages.length > 0) {
+      // Load saved conversation
+      onLoadConversation?.(conversation);
+    } else {
+      // Fallback to old behavior for conversations without saved messages
+      onSelectQuery?.(conversation.query, conversation.fileName);
+    }
     setOpen(false);
   };
 
@@ -150,12 +159,12 @@ export function HistoryPanel({ onSelectQuery }: HistoryPanelProps) {
                       "hover:bg-white/[0.08] hover:border-white/20",
                       "focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                     )}
-                    onClick={() => handleSelectConversation(conversation.query, conversation.fileName)}
+                    onClick={() => handleSelectConversation(conversation)}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
-                        handleSelectConversation(conversation.query, conversation.fileName);
+                        handleSelectConversation(conversation);
                       }
                     }}
                   >

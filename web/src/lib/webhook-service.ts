@@ -42,7 +42,7 @@ export interface WebhookRequest {
 
 // URL padrão do webhook; pode ser sobrescrita via variável de ambiente
 const WEBHOOK_URL =
-  process.env.NEXT_PUBLIC_WEBHOOK_URL ||
+  process.env.NEXT_PUBLIC_WEBHOOK_URL ??
   "https://auto-n8n.brnfyg.easypanel.host/webhook/6ee109b8-8f6c-4530-a360-a62b18887422"
 
 export async function sendToWebhook(data: WebhookData): Promise<WebhookResponse> {
@@ -104,13 +104,13 @@ export async function sendToWebhook(data: WebhookData): Promise<WebhookResponse>
     
     const webhookResponse = {
       success: true,
-      summary: responseData.summary || responseData.resumo || responseData.Resumo || responseData.Summary || responseData.output || responseData.texto || responseData.content,
-      transcript: responseData.transcript || responseData.transcricao || responseData.Transcricao || responseData.Transcript || responseData.transcription,
-      title: responseData.title || responseData.titulo || responseData.Titulo || responseData.Title || responseData.name || responseData.nome,
-      thumbnail: responseData.thumbnail || responseData.thumb || responseData.image || responseData.imagem,
-      resumo: responseData.resumo || responseData.summary || responseData.output,
-      transcricao: responseData.transcricao || responseData.transcript,
-      titulo: responseData.titulo || responseData.title
+      summary: responseData.summary ?? responseData.resumo ?? responseData.Resumo ?? responseData.Summary ?? responseData.output ?? responseData.texto ?? responseData.content,
+      transcript: responseData.transcript ?? responseData.transcricao ?? responseData.Transcricao ?? responseData.Transcript ?? responseData.transcription,
+      title: responseData.title ?? responseData.titulo ?? responseData.Titulo ?? responseData.Title ?? responseData.name ?? responseData.nome,
+      thumbnail: responseData.thumbnail ?? responseData.thumb ?? responseData.image ?? responseData.imagem,
+      resumo: responseData.resumo ?? responseData.summary ?? responseData.output,
+      transcricao: responseData.transcricao ?? responseData.transcript,
+      titulo: responseData.titulo ?? responseData.title
     }
     
     console.log('✅ Response final:', webhookResponse)

@@ -7,12 +7,20 @@ import "~/styles/jarvis-globals.css";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import Script from "next/script";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 
 import { ThemeProviderWrapper } from "~/components/deer-flow/theme-provider-wrapper";
 import { AnimationProvider } from "~/contexts/animation-context";
+import { AuthProvider } from "~/core/contexts/auth-context";
 import { env } from "~/env.js";
 
 import { Toaster } from "../components/deer-flow/toaster";
+
+// Import debug utilities in development
+if (process.env.NODE_ENV === 'development') {
+  import('~/lib/debug-auth');
+}
 
 export const metadata: Metadata = {
   title: "🦌 DeerFlow",
@@ -29,8 +37,11 @@ const geist = Geist({
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="pt-BR" className={`${geist.variable}`} suppressHydrationWarning>
+    <html lang={locale} className={`${geist.variable}`} suppressHydrationWarning>
       <head>
         {/* Define a função isSpace globalmente para corrigir problemas do markdown-it com Next.js + Turbopack
           https://github.com/markdown-it/markdown-it/issues/1082#issuecomment-2749656365 */}
@@ -45,11 +56,15 @@ export default async function RootLayout({
         </Script>
       </head>
       <body className="bg-app">
-        <ThemeProviderWrapper>
-          <AnimationProvider>
-            {children}
-          </AnimationProvider>
-        </ThemeProviderWrapper>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProviderWrapper>
+            <AuthProvider>
+              <AnimationProvider>
+                {children}
+              </AnimationProvider>
+            </AuthProvider>
+          </ThemeProviderWrapper>
+        </NextIntlClientProvider>
         <Toaster />
         {
           // NENHUM RASTREAMENTO DE COMPORTAMENTO DO USUÁRIO OU COLETA DE DADOS PRIVADOS POR PADRÃO

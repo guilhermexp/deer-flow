@@ -1,4 +1,4 @@
-import React from 'react'
+import type React from 'react'
 
 export interface Task {
   id: string
@@ -91,7 +91,7 @@ export const taskStorage = {
 }
 
 export const parseTaskInput = (input: string): Partial<Task> => {
-  const assigneeMatch = input.match(/@(\w+)/)
+  const assigneeMatch = /@(\w+)/.exec(input)
   const tagMatches = input.matchAll(/#(\w+)/g)
   
   let title = input

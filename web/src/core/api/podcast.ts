@@ -19,7 +19,7 @@ export async function generatePodcast(content: string) {
       try {
         const errorData = await response.json();
         if (errorData.error || errorData.message) {
-          errorMessage = errorData.error || errorData.message;
+          errorMessage = errorData.error ?? errorData.message;
         }
       } catch {
         // If can't parse JSON, use default error message

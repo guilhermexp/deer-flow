@@ -1,14 +1,14 @@
 "use client"
 
 import { useCallback } from "react"
-import { useCalendarEvents } from "./useCalendarEvents"
+import { useCalendarEventsApi } from "./useCalendarEventsApi"
 import { useCalendarDateNavigation } from "./useCalendarDateNavigation"
 import { useCalendarDisplayLogic } from "./useCalendarDisplayLogic"
 import { useCalendarDialogs } from "./useCalendarDialogs"
 import type { NewEventFormData } from "../lib/types" // Importar NewEventFormData
 
 export const useCalendar = () => {
-  const { events, addEvent, deleteEvent } = useCalendarEvents()
+  const { events, addEvent, deleteEvent, isLoading } = useCalendarEventsApi()
   const dateNavigation = useCalendarDateNavigation()
   const displayLogic = useCalendarDisplayLogic(
     events,
@@ -41,6 +41,7 @@ export const useCalendar = () => {
   return {
     // Do useCalendarEvents
     allEvents: events,
+    isLoading,
     // Do useCalendarDateNavigation
     currentDate: dateNavigation.currentDate,
     setCurrentDate: dateNavigation.setCurrentDate,

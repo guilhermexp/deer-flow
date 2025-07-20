@@ -5,8 +5,6 @@
 Text-to-Speech module using Minimax TTS API.
 """
 
-import json
-import uuid
 import logging
 import requests
 from typing import Optional, Dict, Any
@@ -45,7 +43,7 @@ class MinimaxTTS:
         self.api_url = f"https://{host}/v1/t2a_v2?GroupId={group_id}"
         self.headers = {
             "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
     def text_to_speech(
@@ -87,14 +85,14 @@ class MinimaxTTS:
                 "voice_id": self.voice_id,
                 "speed": speed,
                 "vol": volume,
-                "pitch": pitch
+                "pitch": pitch,
             },
             "audio_setting": {
                 "sample_rate": sample_rate,
                 "bitrate": bitrate,
                 "format": format,
-                "channel": 1
-            }
+                "channel": 1,
+            },
         }
 
         if language_boost:
@@ -103,11 +101,9 @@ class MinimaxTTS:
         try:
             sanitized_text = text.replace("\r\n", "").replace("\n", "")
             logger.debug(f"Sending TTS request for text: {sanitized_text[:50]}...")
-            
+
             response = requests.post(
-                self.api_url, 
-                json=request_data, 
-                headers=self.headers
+                self.api_url, json=request_data, headers=self.headers
             )
             response_json = response.json()
 
@@ -141,9 +137,13 @@ class MinimaxTTS:
                 "success": True,
                 "response": response_json,
                 "audio_data": audio_bytes,
-                "extra_info": response_json.get("extra_info", {})
+                "extra_info": response_json.get("extra_info", {}),
             }
 
         except Exception as e:
             logger.exception(f"Error in TTS API call: {str(e)}")
-            return {"success": False, "error": f"TTS API call error: {str(e)}", "audio_data": None}
+            return {
+                "success": False,
+                "error": f"TTS API call error: {str(e)}",
+                "audio_data": None,
+            }

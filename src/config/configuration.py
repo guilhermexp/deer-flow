@@ -24,6 +24,7 @@ class Configuration:
     mcp_settings: dict = None  # MCP settings, including dynamic loaded tools
     report_style: str = ReportStyle.ACADEMIC.value  # Report style
     enable_deep_thinking: bool = False  # Whether to enable deep thinking
+    selected_model: str = None  # Selected model override (e.g., 'moonshotai/kimi-k2')
 
     @classmethod
     def from_runnable_config(

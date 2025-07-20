@@ -1,7 +1,7 @@
 // Conversations Service for Deep-flow
 
 import { getSupabaseClient } from '~/lib/supabase/client'
-import type { Conversation, ConversationSummary, TablesInsert } from '~/types/supabase'
+import type { ConversationSummary, TablesInsert } from '~/types/supabase'
 
 export const conversationsService = {
   // List user's conversations
@@ -27,7 +27,7 @@ export const conversationsService = {
     }
 
     if (options?.offset) {
-      query = query.range(options.offset, options.offset + (options.limit || 10) - 1)
+      query = query.range(options.offset, options.offset + (options.limit ?? 10) - 1)
     }
 
     const { data, error } = await query
@@ -86,7 +86,7 @@ export const conversationsService = {
   async update(conversationId: string, updates: {
     title?: string
     is_archived?: boolean
-    metadata?: any
+    metadata?: unknown
   }) {
     const supabase = getSupabaseClient()
     
@@ -135,7 +135,7 @@ export const conversationsService = {
   },
 
   // Subscribe to conversation changes
-  subscribeToChanges(userId: string, callback: (payload: any) => void) {
+  subscribeToChanges(userId: string, callback: (payload: unknown) => void) {
     const supabase = getSupabaseClient()
     
     return supabase
@@ -157,7 +157,7 @@ export const conversationsService = {
   async getStats(userId: string) {
     const supabase = getSupabaseClient()
     
-    const { data, error, count } = await supabase
+    const { error, count } = await supabase
       .from('conversations')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', userId)
@@ -171,9 +171,9 @@ export const conversationsService = {
       .eq('is_archived', true)
 
     return {
-      total: count || 0,
-      active: (count || 0) - (archivedCount || 0),
-      archived: archivedCount || 0,
+      total: count ?? 0,
+      active: (count ?? 0) - (archivedCount ?? 0),
+      archived: archivedCount ?? 0,
     }
   },
 }

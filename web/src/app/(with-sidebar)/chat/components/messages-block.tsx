@@ -18,7 +18,6 @@ import { useReplayMetadata } from "~/core/api/hooks";
 import type { Option, Resource } from "~/core/messages";
 import { useReplay } from "~/core/replay";
 import { sendMessage, useMessageIds, useStore } from "~/core/store";
-import { addToHistory } from "~/core/store/history-store";
 import { env } from "~/env";
 import { cn } from "~/lib/utils";
 
@@ -27,7 +26,7 @@ import { InputBox } from "./input-box";
 import { MessageListView } from "./message-list-view";
 import { Welcome } from "./welcome";
 
-export const MessagesBlock = forwardRef<
+const MessagesBlockComponent = forwardRef<
   { sendQuery: (query: string) => void },
   { className?: string }
 >(({ className }, ref) => {
@@ -52,7 +51,7 @@ export const MessagesBlock = forwardRef<
       
       // Adicionar ao histórico apenas se não for feedback ou mensagem de sistema
       if (message.trim() && !options?.interruptFeedback && !message.includes("Let's get started") && !message.includes("Cool!") && !message.includes("Sounds great") && !message.includes("Looks good") && !message.includes("Great!") && !message.includes("Awesome!")) {
-        addToHistory(message);
+        // addToHistory is now handled in sendMessage function in store.ts
       }
       
       try {
@@ -97,7 +96,7 @@ export const MessagesBlock = forwardRef<
   useImperativeHandle(ref, () => ({
     sendQuery: (query: string) => {
       if (!responding) {
-        handleSend(query);
+        void handleSend(query);
       }
     },
   }), [handleSend, responding]);
@@ -227,3 +226,7 @@ export const MessagesBlock = forwardRef<
     </div>
   );
 });
+
+MessagesBlockComponent.displayName = 'MessagesBlock';
+
+export const MessagesBlock = MessagesBlockComponent;

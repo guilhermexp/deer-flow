@@ -97,10 +97,6 @@ const config = {
     ],
     // Pre-compile páginas mais usadas
     optimizeServerReact: true,
-    // Faster builds em desenvolvimento
-    turbo: {
-      memoryLimit: 512,
-    },
   },
 
   images: {
@@ -136,8 +132,7 @@ const config = {
 
   // Configurações de performance para desenvolvimento
   devIndicators: {
-    buildActivity: true,
-    buildActivityPosition: 'bottom-right',
+    position: 'bottom-right',
   },
 };
 

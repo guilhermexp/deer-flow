@@ -1,4 +1,3 @@
-import React from "react"
 import {
   YoutubeIcon,
   InstagramIcon,
@@ -13,10 +12,12 @@ import {
   LockIcon as LoomIcon,
   VideoIcon,
 } from "lucide-react"
+import type React from "react"
+
 import type { WebhookData } from "~/lib/webhook-service"
 
 // Icon mapping for different content types
-export const iconMapping: { [key: string]: React.ElementType } = {
+export const iconMapping: Record<string, React.ElementType> = {
   youtube: YoutubeIcon,
   tiktok: VideoIcon,
   instagram: InstagramIcon,
@@ -33,7 +34,7 @@ export const iconMapping: { [key: string]: React.ElementType } = {
 
 // Icon color mapping
 export const getIconColorClass = (type: string): string => {
-  const colorMap: { [key: string]: string } = {
+  const colorMap: Record<string, string> = {
     youtube: "text-red-500",
     tiktok: "text-pink-500",
     instagram: "text-pink-500",
@@ -47,11 +48,11 @@ export const getIconColorClass = (type: string): string => {
     audio: "text-purple-500",
     loom: "text-blue-500",
   }
-  return colorMap[type] || ""
+  return colorMap[type] ?? ""
 }
 
 // URL placeholders for different types
-export const urlPlaceholders: { [key: string]: string } = {
+export const urlPlaceholders: Record<string, string> = {
   youtube: "URL do vídeo do YouTube (ex: https://youtube.com/watch?v=...)",
   tiktok: "URL do vídeo do TikTok (ex: https://tiktok.com/@user/video/...)",
   instagram: "URL do Reel do Instagram (ex: https://instagram.com/reel/...)",
@@ -62,13 +63,13 @@ export const urlPlaceholders: { [key: string]: string } = {
 
 // File accept attributes for different file types
 export const getFileAcceptAttribute = (type: string): string => {
-  const acceptMap: { [key: string]: string } = {
+  const acceptMap: Record<string, string> = {
     pdf: ".pdf",
     txt: ".txt",
     markdown: ".md,.markdown",
     audio: "audio/*",
   }
-  return acceptMap[type] || "*/*"
+  return acceptMap[type] ?? "*/*"
 }
 
 // Max file size for different types

@@ -116,6 +116,74 @@ class RAGFlowProvider(Retriever):
 
         return resources
 
+    def create_dataset(self, name: str, description: str = "") -> dict:
+        """Create a new dataset in RAGFlow"""
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+        payload = {
+            "name": name,
+            "description": description,
+            "language": "pt",  # Portuguese
+            "embedding_model": "BAAI/bge-base-zh-v1.5",  # Default embedding model
+            "permission": "me",  # Private dataset
+        }
+
+        response = requests.post(
+            f"{self.api_url}/api/v1/datasets", headers=headers, json=payload
+        )
+
+        if response.status_code not in [200, 201]:
+            raise Exception(f"Failed to create dataset: {response.text}")
+
+        return response.json()
+
+    def upload_document(
+        self, dataset_id: str, file_data: bytes, filename: str, file_type: str = "pdf"
+    ) -> dict:
+        """Upload a document to a dataset"""
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+        }
+
+        files = {"file": (filename, file_data, f"application/{file_type}")}
+
+        data = {
+            "dataset_id": dataset_id,
+            "parser_id": "naive",  # Default parser
+        }
+
+        response = requests.post(
+            f"{self.api_url}/api/v1/datasets/{dataset_id}/documents",
+            headers=headers,
+            files=files,
+            data=data,
+        )
+
+        if response.status_code not in [200, 201]:
+            raise Exception(f"Failed to upload document: {response.text}")
+
+        return response.json()
+
+    def process_document(self, dataset_id: str, document_id: str) -> dict:
+        """Process/parse an uploaded document"""
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+
+        response = requests.post(
+            f"{self.api_url}/api/v1/datasets/{dataset_id}/documents/{document_id}/process",
+            headers=headers,
+        )
+
+        if response.status_code not in [200, 201]:
+            raise Exception(f"Failed to process document: {response.text}")
+
+        return response.json()
+
 
 def parse_uri(uri: str) -> tuple[str, str]:
     parsed = urlparse(uri)

@@ -47,8 +47,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--port",
         type=int,
-        default=9090,
-        help="Port to bind the server to (default: 9090)",
+        default=8005,
+        help="Port to bind the server to (default: 8005)",
     )
     parser.add_argument(
         "--log-level",

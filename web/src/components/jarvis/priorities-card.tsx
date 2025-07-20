@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Badge } from "~/components/ui/badge"
 import { Star, Clock, AlertTriangle, CheckCircle2, Circle, Play, Pause } from "lucide-react"
-import { defaultTasks } from "~/data/tasks"
+// Remove mock data import
 import LiquidGlassCard from "~/components/ui/liquid-glass-card"
 
 interface PriorityProject {
@@ -41,18 +41,8 @@ export default function PrioritiesCard() {
     const loadPriorityItems = () => {
       const items: PriorityItem[] = []
 
-      // Carregar tarefas de alta prioridade das tarefas principais
-      const highPriorityTasks = defaultTasks.filter(task => task.priority === "high")
-      highPriorityTasks.forEach(task => {
-        items.push({
-          id: task.id,
-          title: task.title,
-          type: "task",
-          priority: task.priority,
-          description: task.description,
-          day: task.day,
-        })
-      })
+      // Por enquanto, não carregamos tarefas mockadas
+      // TODO: Integrar com useTasksApi para carregar tarefas reais
 
       // Carregar projetos marcados como prioridade
       const storedProjects = localStorage.getItem("kanban-projects-v2")

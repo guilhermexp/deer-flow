@@ -2,6 +2,7 @@
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+
 import type { Database } from '~/types/supabase'
 
 // Create a Supabase client for server-side operations
@@ -19,14 +20,14 @@ export async function createServerSupabaseClient() {
         set(name: string, value: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value, ...options })
-          } catch (error) {
+          } catch {
             // Handle error in Server Component
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: '', ...options })
-          } catch (error) {
+          } catch {
             // Handle error in Server Component
           }
         },
@@ -49,8 +50,12 @@ export function createAdminSupabaseClient() {
         get() {
           return undefined
         },
-        set() {},
-        remove() {},
+        set() {
+          // No-op for admin client
+        },
+        remove() {
+          // No-op for admin client
+        },
       },
       auth: {
         autoRefreshToken: false,

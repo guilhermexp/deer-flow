@@ -16,6 +16,7 @@ const DEFAULT_SETTINGS: SettingsState = {
     maxStepNum: 3,
     maxSearchResults: 3,
     reportStyle: "academic",
+    selectedModel: "google/gemini-2.5-pro",
   },
   mcp: {
     servers: [],
@@ -31,6 +32,7 @@ export type SettingsState = {
     maxStepNum: number;
     maxSearchResults: number;
     reportStyle: "academic" | "popular_science" | "news" | "social_media";
+    selectedModel: "google/gemini-2.5-pro" | "moonshotai/kimi-k2" | "grok-4-latest" | "deepseek/deepseek-chat-v3-0324:free";
   };
   mcp: {
     servers: MCPServerMetadata[];
@@ -75,6 +77,17 @@ export const saveSettings = () => {
   const latestSettings = useSettingsStore.getState();
   const json = JSON.stringify(latestSettings);
   localStorage.setItem(SETTINGS_KEY, json);
+};
+
+export const setSelectedModel = (model: SettingsState["general"]["selectedModel"]) => {
+  useSettingsStore.setState((state) => ({
+    ...state,
+    general: {
+      ...state.general,
+      selectedModel: model,
+    },
+  }));
+  saveSettings();
 };
 
 export const getChatStreamSettings = () => {
@@ -126,6 +139,7 @@ export const getChatStreamSettings = () => {
   return {
     ...general,
     mcpSettings,
+    selectedModel: general.selectedModel,
   };
 };
 

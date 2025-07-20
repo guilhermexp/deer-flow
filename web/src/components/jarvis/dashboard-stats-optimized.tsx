@@ -9,7 +9,6 @@ const DashboardSettingsModal = lazy(() => import("~/components/jarvis/dashboard-
 const RemindersCard = lazy(() => import("~/components/jarvis/reminders-card"));
 const TodayTasksCard = lazy(() => import("~/components/jarvis/today-tasks-card"));
 const TimelineCard = lazy(() => import("~/components/jarvis/timeline-card"));
-const TaskQuickActionsCardMobile = lazy(() => import("~/components/jarvis/task-quick-actions-card-mobile"));
 const PrioritiesCard = lazy(() => import("~/components/jarvis/priorities-card"));
 const SleepDashboard = lazy(() => import("~/components/jarvis/sleep/sleep-dashboard"));
 
@@ -38,7 +37,6 @@ export interface CardConfig {
 const availableCardsForDashboardStats: CardConfig[] = [
   { id: "reminders", name: "Reminders" },
   { id: "timeline", name: "Timeline" },
-  { id: "taskQuickActions", name: "Task Quick Actions" },
   { id: "sleep", name: "Sleep Dashboard" },
   { id: "priorities", name: "Priorities" },
   { id: "todayTasks", name: "Today's Tasks" },
@@ -105,7 +103,6 @@ const DashboardStatsOptimized = memo(function DashboardStatsOptimized() {
 
         {/* Center Column */}
         <div className="md:col-span-1 lg:col-span-4 space-y-4 md:space-y-6 lg:space-y-8">
-          {renderCard("taskQuickActions", TaskQuickActionsCardMobile)}
           {renderCard("sleep", SleepDashboard)}
         </div>
 

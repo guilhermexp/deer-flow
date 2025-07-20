@@ -4,6 +4,7 @@
 "use client";
 
 import React, { createContext, useContext } from "react";
+
 import { useAnimationControl } from "~/hooks/use-first-load";
 
 interface AnimationContextValue {
@@ -41,7 +42,7 @@ export function withAnimation<P extends object>(
   animatedProps: Partial<P>,
   staticProps?: Partial<P>
 ) {
-  return React.forwardRef<any, P>((props, ref) => {
+  const AnimatedComponent = React.forwardRef<any, P>((props, ref) => {
     const { shouldAnimate } = useAnimation();
     const finalProps = shouldAnimate 
       ? { ...props, ...animatedProps }
@@ -49,4 +50,8 @@ export function withAnimation<P extends object>(
     
     return <Component {...finalProps as P} ref={ref} />;
   });
+  
+  AnimatedComponent.displayName = `withAnimation(${Component.displayName ?? Component.name ?? 'Component'})`;
+  
+  return AnimatedComponent;
 }

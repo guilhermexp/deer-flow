@@ -1,18 +1,35 @@
 #!/bin/bash
 
-# Start both of DeerFlow's backend and web UI server.
-# If the user presses Ctrl+C, kill them both.
+echo "🚀 DeerFlow Bootstrap Script"
+echo "============================="
 
-if [ "$1" = "--dev" -o "$1" = "-d" -o "$1" = "dev" -o "$1" = "development" ]; then
-  echo -e "Starting DeerFlow in [DEVELOPMENT] mode...\n"
-  uv run server.py --reload & SERVER_PID=$$!
-  cd web && pnpm dev & WEB_PID=$$!
-  trap "kill $$SERVER_PID $$WEB_PID" SIGINT SIGTERM
-  wait
-else
-  echo -e "Starting DeerFlow in [PRODUCTION] mode...\n"
-  uv run server.py & SERVER_PID=$$!
-  cd web && pnpm start & WEB_PID=$$!
-  trap "kill $$SERVER_PID $$WEB_PID" SIGINT SIGTERM
-  wait
-fi
+# Instalar dependências do backend Python
+echo "📦 Installing backend dependencies..."
+uv sync
+
+# Navegar para o diretório web e instalar dependências
+echo "📦 Installing frontend dependencies..."
+cd web
+pnpm install
+
+# Voltar ao diretório raiz
+cd ..
+
+# Executar o projeto em modo de desenvolvimento
+echo ""
+echo "🚀 Starting DeerFlow services..."
+echo "   Backend: http://localhost:8005"
+echo "   Frontend: http://localhost:4000"
+echo ""
+
+# Iniciar backend em background
+echo "🚀 Starting backend..."
+uv run server.py &
+
+# Aguardar backend iniciar
+sleep 5
+
+# Iniciar frontend
+echo "🚀 Starting frontend..."
+cd web
+pnpm dev 

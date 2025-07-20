@@ -1,39 +1,29 @@
 "use client"
 import { Bell, Clock } from "lucide-react"
 import { motion } from "framer-motion"
+import { useEffect, useState } from "react"
 import LiquidGlassCard from "~/components/ui/liquid-glass-card"
-
-interface Reminder {
-  id: string
-  title: string
-  time?: string
-  priority: "low" | "medium" | "high"
-  category: string
-}
+import { reminderService } from "~/services/supabase/reminders"
+import type { Reminder } from "~/services/supabase/reminders"
 
 export default function RemindersCard() {
-  const reminders: Reminder[] = [
-    {
-      id: "1",
-      title: "Revisar relatório mensal",
-      time: "14:00",
-      priority: "high",
-      category: "Trabalho",
-    },
-    {
-      id: "2",
-      title: "Ligar para o dentista",
-      time: "16:30",
-      priority: "medium",
-      category: "Pessoal",
-    },
-    {
-      id: "3",
-      title: "Comprar presentes de aniversário",
-      priority: "low",
-      category: "Pessoal",
-    },
-  ]
+  const [reminders, setReminders] = useState<Reminder[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadReminders = async () => {
+      try {
+        const data = await reminderService.getTodayReminders()
+        setReminders(data)
+      } catch (error) {
+        console.error('Failed to load reminders:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    
+    loadReminders()
+  }, [])
 
   return (
     <motion.div
@@ -52,7 +42,19 @@ export default function RemindersCard() {
           </h3>
         </div>
         <div>
-          {reminders.length > 0 ? (
+          {isLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-start gap-3 p-3">
+                  <div className="h-4 w-12 bg-white/10 rounded-xl animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-white/10 rounded-xl animate-pulse" />
+                    <div className="h-3 w-20 bg-white/10 rounded-xl animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : reminders.length > 0 ? (
             <div className="space-y-2.5">
               {reminders.map((reminder) => (
                 <div
@@ -68,7 +70,7 @@ export default function RemindersCard() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-100 truncate">{reminder.title}</p>
                     <div className="flex items-center gap-2 mt-1.5">
-                      <span className="text-xs text-gray-500">{reminder.category}</span>
+                      <span className="text-xs text-gray-500">{reminder.category || 'Geral'}</span>
                     </div>
                   </div>
                 </div>

@@ -1,7 +1,8 @@
 "use client";
 
-import { Suspense } from "react";
 import dynamic from "next/dynamic";
+import { Suspense } from "react";
+
 import AnimatedPageWrapperOptimized from "~/components/jarvis/animated-page-wrapper-optimized";
 
 // Lazy load with better loading state

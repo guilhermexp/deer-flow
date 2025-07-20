@@ -1,10 +1,9 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import * as React from "react"
 import { useState, useCallback, useEffect } from "react"
-import dynamic from "next/dynamic"
-import { type WebhookResponse } from "~/lib/webhook-service"
-import { type ChatSession } from "~/lib/session-utils"
+
 import {
   loadNotesFromStorage,
   saveNotesToStorage,
@@ -12,6 +11,8 @@ import {
   getSourceIcon,
   createNoteFromWebhook,
 } from "~/lib/notes-utils"
+import { type ChatSession } from "~/lib/session-utils"
+import { type WebhookResponse } from "~/lib/webhook-service"
 
 // Dynamic imports for better code splitting
 const NotesListView = dynamic(

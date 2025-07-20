@@ -4,8 +4,7 @@
 import { getSupabaseClient } from '~/lib/supabase/client'
 import type { 
   TablesInsert, 
-  KanbanColumn,
-  HealthMetricValue 
+  HealthMetrics 
 } from '~/types/supabase'
 
 // Migration status tracking
@@ -63,10 +62,10 @@ async function migrateConversations(userId: string): Promise<boolean> {
     // Prepare conversation data
     const conversations: TablesInsert<'conversations'>[] = history.map(item => ({
       user_id: userId,
-      thread_id: item.threadId || `legacy-${Date.now()}-${Math.random()}`,
-      title: item.title || 'Untitled Conversation',
-      query: item.query || '',
-      created_at: item.timestamp || new Date().toISOString(),
+      thread_id: item.threadId ?? `legacy-${Date.now()}-${Math.random()}`,
+      title: item.title ?? 'Untitled Conversation',
+      query: item.query ?? '',
+      created_at: item.timestamp ?? new Date().toISOString(),
       is_archived: false,
       metadata: {
         migrated: true,
@@ -105,19 +104,19 @@ async function migrateNotes(userId: string): Promise<boolean> {
     // Prepare notes data
     const notesInsert: TablesInsert<'notes'>[] = notes.map(note => ({
       user_id: userId,
-      title: note.title || 'Untitled Note',
+      title: note.title ?? 'Untitled Note',
       media_type: note.mediaType,
       media_source: note.mediaSource,
       media_url: note.mediaUrl,
       content: note.content,
       transcript: note.transcript,
       summary: note.summary,
-      ai_processed: note.aiProcessed || false,
-      created_at: note.createdAt || new Date().toISOString(),
+      ai_processed: note.aiProcessed ?? false,
+      created_at: note.createdAt ?? new Date().toISOString(),
       metadata: {
         migrated: true,
         originalId: note.id,
-        sessions: note.sessions || [],
+        sessions: note.sessions ?? [],
       },
     }))
 
@@ -144,9 +143,9 @@ async function migrateNotes(userId: string): Promise<boolean> {
             const { data: noteSession, error: sessionError } = await supabase
               .from('note_sessions')
               .insert({
-                note_id: note.id,
-                session_name: session.sessionName || 'Default Session',
-                created_at: session.createdAt || new Date().toISOString(),
+                note_id: note?.id || '',
+                session_name: session.sessionName ?? 'Default Session',
+                created_at: session.createdAt ?? new Date().toISOString(),
               })
               .select()
               .single()
@@ -158,11 +157,11 @@ async function migrateNotes(userId: string): Promise<boolean> {
 
             // Insert session messages
             if (session.messages && Array.isArray(session.messages)) {
-              const messages: TablesInsert<'note_messages'>[] = session.messages.map((msg: any) => ({
+              const messages: TablesInsert<'note_messages'>[] = session.messages.map((msg: Record<string, unknown>) => ({
                 session_id: noteSession.id,
-                role: msg.role || 'user',
-                content: msg.content || '',
-                created_at: msg.timestamp || new Date().toISOString(),
+                role: msg.role ?? 'user',
+                content: msg.content ?? '',
+                created_at: msg.timestamp ?? new Date().toISOString(),
               }))
 
               const { error: messagesError } = await supabase
@@ -197,15 +196,17 @@ async function migrateCalendarEvents(userId: string): Promise<boolean> {
     const supabase = getSupabaseClient()
     
     // Prepare events data
-    const eventsInsert: TablesInsert<'calendar_events'>[] = events.map(event => ({
+    const eventsInsert = events.map((event: any) => ({
       user_id: userId,
-      title: event.title || 'Untitled Event',
-      description: event.description,
-      start_time: event.start || event.date || new Date().toISOString(),
-      end_time: event.end || event.date || new Date().toISOString(),
-      all_day: event.allDay || false,
-      color: event.color,
-      created_at: event.createdAt || new Date().toISOString(),
+      title: String(event.title ?? 'Untitled Event'),
+      description: event.description ? String(event.description) : null,
+      date: String(event.date ?? event.start ?? new Date().toISOString()),
+      end_date: event.end ? String(event.end) : null,
+      is_all_day: event.allDay ?? false,
+      color: event.color ? String(event.color) : null,
+      category: event.category ? String(event.category) : null,
+      location: event.location ? String(event.location) : null,
+      created_at: event.createdAt ?? new Date().toISOString(),
     }))
 
     // Batch insert events
@@ -245,13 +246,12 @@ async function migrateProjects(userId: string): Promise<boolean> {
       // Insert project
       const { data: insertedProject, error: projectError } = await supabase
         .from('projects')
-        .insert({
+        .insert([{
           user_id: userId,
-          name: project.name || 'Untitled Project',
-          description: project.description,
-          columns: project.columns || [],
-          created_at: project.createdAt || new Date().toISOString(),
-        })
+          name: project.name ?? 'Untitled Project',
+          description: project.description || null,
+          created_at: project.createdAt ?? new Date().toISOString(),
+        }])
         .select()
         .single()
 
@@ -261,18 +261,17 @@ async function migrateProjects(userId: string): Promise<boolean> {
       }
 
       // Migrate tasks for this project
-      const projectTasks = tasksByProject[project.id] || []
+      const projectTasks = tasksByProject[project.id] ?? []
       if (projectTasks.length > 0) {
-        const tasksInsert: TablesInsert<'tasks'>[] = projectTasks.map((task: any, index: number) => ({
-          project_id: insertedProject.id,
-          title: task.title || 'Untitled Task',
-          description: task.description,
-          column_id: task.columnId || project.columns[0]?.id || 'default',
-          position: task.position ?? index,
-          priority: task.priority || 'medium',
-          due_date: task.dueDate,
-          completed: task.completed || false,
-          created_at: task.createdAt || new Date().toISOString(),
+        const tasksInsert = projectTasks.map((task: any) => ({
+          user_id: userId,
+          title: String(task.title ?? 'Untitled Task'),
+          description: task.description ? String(task.description) : null,
+          status: task.status ?? 'not-started',
+          priority: task.priority ?? 'medium',
+          due_date: task.dueDate ? String(task.dueDate) : null,
+          category: task.category ?? 'general',
+          created_at: task.createdAt ?? new Date().toISOString(),
         }))
 
         const { error: tasksError } = await supabase
@@ -304,7 +303,7 @@ async function migrateHealthData(userId: string): Promise<boolean> {
     const supabase = getSupabaseClient()
     
     // Prepare health metrics
-    const metrics: TablesInsert<'health_metrics'>[] = []
+    const metrics: any[] = []
 
     // Convert each metric type
     const metricTypes = ['sleep', 'water', 'steps', 'bloodPressure', 'weight', 'heartRate']
@@ -317,8 +316,8 @@ async function migrateHealthData(userId: string): Promise<boolean> {
             metrics.push({
               user_id: userId,
               metric_type: metricType,
-              value: record as HealthMetricValue,
-              recorded_at: record.date || new Date().toISOString(),
+              value: record as any,
+              recorded_at: record.date ?? new Date().toISOString(),
               created_at: new Date().toISOString(),
             })
           }
@@ -327,7 +326,7 @@ async function migrateHealthData(userId: string): Promise<boolean> {
           metrics.push({
             user_id: userId,
             metric_type: metricType,
-            value: data[metricType] as HealthMetricValue,
+            value: data[metricType] as any,
             recorded_at: new Date().toISOString(),
             created_at: new Date().toISOString(),
           })
@@ -363,22 +362,22 @@ async function migrateSettings(userId: string): Promise<boolean> {
     const supabase = getSupabaseClient()
     
     // Prepare settings data
-    const settingsInsert: TablesInsert<'user_settings'> = {
+    const settingsInsert = {
       user_id: userId,
-      general_settings: settings.generalSettings || {},
-      mcp_servers: settings.mcpServers || [],
-      report_style: settings.reportStyle || 'ACADEMIC',
-      enable_deep_thinking: settings.enableDeepThinking || false,
-      enable_background_investigation: settings.enableBackgroundInvestigation || false,
-      max_search_results: settings.maxSearchResults || 5,
-      max_plan_iterations: settings.maxPlanIterations || 3,
-      max_step_num: settings.maxStepNum || 20,
+      general_settings: settings.generalSettings ?? {},
+      mcp_servers: settings.mcpServers ?? [],
+      report_style: settings.reportStyle ?? 'ACADEMIC',
+      enable_deep_thinking: settings.enableDeepThinking ?? false,
+      enable_background_investigation: settings.enableBackgroundInvestigation ?? false,
+      max_search_results: settings.maxSearchResults ?? 5,
+      max_plan_iterations: settings.maxPlanIterations ?? 3,
+      max_step_num: settings.maxStepNum ?? 20,
     }
 
     // Upsert settings
     const { error } = await supabase
       .from('user_settings')
-      .upsert(settingsInsert, { onConflict: 'user_id' })
+      .upsert([settingsInsert], { onConflict: 'user_id' })
 
     if (error) {
       console.error('Failed to migrate settings:', error)

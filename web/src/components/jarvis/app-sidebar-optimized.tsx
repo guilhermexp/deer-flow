@@ -13,11 +13,13 @@ import {
   StickyNote,
   MessageSquare,
   House,
+  LogOut,
 } from "lucide-react"
 import { cn } from "~/lib/utils"
 import { Button } from "~/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRoutePrefetch } from "~/hooks/use-route-prefetch"
+import { useAuth } from "~/core/contexts/auth-context"
 
 
 const navItems = [
@@ -95,7 +97,10 @@ const SidebarContent = memo(({
   onHoverItem: (href: string) => void
   isMobileOpen?: boolean
   router: any
-}) => (
+}) => {
+  const { logout, user } = useAuth()
+  
+  return (
   <div className="flex flex-col h-full">
     <div className="flex items-center justify-center h-10 border-b border-border/60">
       <Brain className="w-4 h-4 text-slate-100 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] transition-all hover:brightness-125" />
@@ -118,7 +123,7 @@ const SidebarContent = memo(({
       ))}
     </nav>
 
-    <div className="flex justify-center px-1.5 py-2">
+    <div className="flex flex-col gap-1.5 px-1.5 py-2">
       <div className="relative group">
         <Button
           variant="ghost"
@@ -141,9 +146,32 @@ const SidebarContent = memo(({
           </span>
         </Button>
       </div>
+      <div className="relative group">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={logout}
+          className={cn(
+            "relative w-9 h-9 rounded-xl transition-all duration-200",
+            "flex items-center justify-center",
+            "hover:bg-red-500/20 hover:text-red-400"
+          )}
+        >
+          <LogOut className="w-4 h-4" />
+          <span className={cn(
+            "absolute left-full ml-3 px-2 py-1 text-xs font-medium",
+            "bg-black/80 text-white rounded-md whitespace-nowrap",
+            "opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200",
+            "pointer-events-none z-50"
+          )}>
+            Sair
+          </span>
+        </Button>
+      </div>
     </div>
   </div>
-))
+  )
+})
 
 SidebarContent.displayName = "SidebarContent"
 

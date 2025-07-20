@@ -6,11 +6,11 @@ import base64
 import json
 import logging
 import os
-from typing import Annotated, List, cast
+from typing import Annotated, List, Optional, cast
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form
 
 # Load environment variables
 load_dotenv()
@@ -44,8 +44,21 @@ from src.server.rag_request import (
     RAGConfigResponse,
     RAGResourceRequest,
     RAGResourcesResponse,
+    RAGUploadResponse,
 )
 from src.tools import VolcengineTTS
+
+# Import new routers
+from src.server.auth_routes import router as auth_router
+from src.server.dashboard_routes import router as dashboard_router
+from src.server.calendar_routes import router as calendar_router
+from src.server.projects_routes import router as projects_router
+from src.server.health_routes import router as health_router
+from src.server.notes_routes import router as notes_router
+from src.server.conversations_routes import router as conversations_router
+
+# Import database initialization
+from src.database.base import create_tables
 
 logger = logging.getLogger(__name__)
 
@@ -58,19 +71,38 @@ app = FastAPI(
 )
 
 # Add CORS middleware
-# Get allowed origins from environment variable, default to localhost ports for development
-cors_allowed_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:4000")
-allowed_origins = [origin.strip() for origin in cors_allowed_origins.split(",") if origin.strip()]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,  # Only allow specific origins
+    allow_origins=["*"],  # Allows all origins
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Specify allowed methods
+    allow_methods=["*"],  # Allows all methods
     allow_headers=["*"],  # Allows all headers
 )
 
+
+# Database initialization on startup
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database tables on startup"""
+    try:
+        logger.info("Creating database tables...")
+        create_tables()
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.error(f"Failed to create database tables: {e}")
+        raise
+
+
 graph = build_graph_with_memory()
+
+# Include routers
+app.include_router(auth_router)
+app.include_router(dashboard_router)
+app.include_router(calendar_router)
+app.include_router(projects_router)
+app.include_router(health_router)
+app.include_router(notes_router)
+app.include_router(conversations_router)
 
 
 @app.post("/api/chat/stream")
@@ -92,13 +124,14 @@ async def chat_stream(request: ChatRequest):
             request.enable_background_investigation,
             request.report_style,
             request.enable_deep_thinking,
+            request.model,
         ),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
             "X-Accel-Buffering": "no",  # Disable Nginx buffering
-        }
+        },
     )
 
 
@@ -115,6 +148,7 @@ async def _astream_workflow_generator(
     enable_background_investigation: bool,
     report_style: ReportStyle,
     enable_deep_thinking: bool,
+    selected_model: Optional[str],
 ):
     try:
         input_ = {
@@ -133,10 +167,10 @@ async def _astream_workflow_generator(
             if messages:
                 resume_msg += f" {messages[-1]['content']}"
             input_ = Command(resume=resume_msg)
-        
+
         # Keep track of last event time for keep-alive
         last_event_time = asyncio.get_event_loop().time()
-        
+
         async for agent, _, event_data in graph.astream(
             input_,
             config={
@@ -148,6 +182,7 @@ async def _astream_workflow_generator(
                 "mcp_settings": mcp_settings,
                 "report_style": report_style.value,
                 "enable_deep_thinking": enable_deep_thinking,
+                "selected_model": selected_model,
             },
             stream_mode=["messages", "updates"],
             subgraphs=True,
@@ -180,12 +215,12 @@ async def _astream_workflow_generator(
                 "content": message_chunk.content,
             }
             if message_chunk.additional_kwargs.get("reasoning_content"):
-                event_stream_message["reasoning_content"] = message_chunk.additional_kwargs[
-                    "reasoning_content"
-                ]
+                event_stream_message["reasoning_content"] = (
+                    message_chunk.additional_kwargs["reasoning_content"]
+                )
             if message_chunk.response_metadata.get("finish_reason"):
-                event_stream_message["finish_reason"] = message_chunk.response_metadata.get(
-                    "finish_reason"
+                event_stream_message["finish_reason"] = (
+                    message_chunk.response_metadata.get("finish_reason")
                 )
             if isinstance(message_chunk, ToolMessage):
                 # Tool Message - Return the result of the tool call
@@ -209,10 +244,10 @@ async def _astream_workflow_generator(
                 else:
                     # AI Message - Raw message tokens
                     yield _make_event("message_chunk", event_stream_message)
-            
+
             # Update last event time
             last_event_time = asyncio.get_event_loop().time()
-            
+
     except Exception as e:
         logger.error(f"Error in SSE stream: {str(e)}")
         yield _make_event("error", {"error": str(e), "thread_id": thread_id})
@@ -285,29 +320,133 @@ async def text_to_speech(request: TTSRequest):
 async def generate_podcast(request: GeneratePodcastRequest):
     try:
         report_content = request.content
-        logger.info(f"Received podcast generation request, content length: {len(report_content)}")
+        logger.info(
+            f"Received podcast generation request, content length: {len(report_content)}"
+        )
         logger.info(f"First 100 chars: {report_content[:100]}...")
-        
+
         # Check environment variables
         logger.info(f"GOOGLE_API_KEY present: {bool(os.getenv('GOOGLE_API_KEY'))}")
         logger.info(f"GOOGLE_TTS_MODEL: {os.getenv('GOOGLE_TTS_MODEL')}")
-        
+
         workflow = build_podcast_graph()
         logger.info("Podcast workflow built successfully")
-        
+
         final_state = workflow.invoke({"input": report_content})
         logger.info("Podcast workflow invoked successfully")
-        
+
         audio_bytes = final_state.get("output")
         if not audio_bytes:
             logger.error("No audio output from workflow")
             raise ValueError("No audio output generated")
-            
+
         logger.info(f"Generated audio bytes: {len(audio_bytes)} bytes")
         return Response(content=audio_bytes, media_type="audio/mp3")
     except Exception as e:
         logger.exception(f"Error occurred during podcast generation: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))  # Return actual error for debugging
+        raise HTTPException(
+            status_code=500, detail=str(e)
+        )  # Return actual error for debugging
+
+
+@app.post("/api/podcast/generate-stream")
+async def generate_podcast_stream(request: GeneratePodcastRequest):
+    """Generate podcast with streaming progress updates"""
+
+    async def podcast_stream_generator():
+        try:
+            report_content = request.content
+            workflow = build_podcast_graph()
+
+            # Track progress
+            progress_data = {
+                "total_steps": 0,
+                "current_step": 0,
+                "status": "initializing",
+            }
+
+            # Stream progress updates
+            yield _make_event(
+                "progress",
+                {
+                    "stage": "Initializing",
+                    "progress": 0,
+                    "message": "Starting podcast generation...",
+                },
+            )
+
+            # Run workflow and collect state
+            state = {"input": report_content}
+            nodes_executed = []
+
+            async for chunk in workflow.astream(state, stream_mode="updates"):
+                node_name = list(chunk.keys())[0]
+                nodes_executed.append(node_name)
+
+                # Map node names to user-friendly messages
+                if node_name == "script_writer_node":
+                    yield _make_event(
+                        "progress",
+                        {
+                            "stage": "Script Generation",
+                            "progress": 20,
+                            "message": "Creating podcast script...",
+                        },
+                    )
+                elif node_name == "tts_node":
+                    yield _make_event(
+                        "progress",
+                        {
+                            "stage": "Audio Generation",
+                            "progress": 50,
+                            "message": "Generating audio from script...",
+                        },
+                    )
+                elif node_name == "audio_mixer_node":
+                    yield _make_event(
+                        "progress",
+                        {
+                            "stage": "Audio Mixing",
+                            "progress": 90,
+                            "message": "Mixing audio tracks...",
+                        },
+                    )
+
+            # Get final audio
+            final_state = workflow.invoke(state)
+            audio_bytes = final_state.get("output")
+
+            if not audio_bytes:
+                yield _make_event("error", {"error": "No audio output generated"})
+                return
+
+            # Convert audio to base64 for streaming
+            import base64
+
+            audio_base64 = base64.b64encode(audio_bytes).decode("utf-8")
+
+            yield _make_event(
+                "complete",
+                {
+                    "audio_data": audio_base64,
+                    "mime_type": "audio/mp3",
+                    "size": len(audio_bytes),
+                },
+            )
+
+        except Exception as e:
+            logger.exception(f"Error in podcast stream: {str(e)}")
+            yield _make_event("error", {"error": str(e)})
+
+    return StreamingResponse(
+        podcast_stream_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @app.post("/api/ppt/generate")
@@ -443,6 +582,109 @@ async def rag_resources(request: Annotated[RAGResourceRequest, Query()]):
     if retriever:
         return RAGResourcesResponse(resources=retriever.list_resources(request.query))
     return RAGResourcesResponse(resources=[])
+
+
+@app.post("/api/rag/upload", response_model=RAGUploadResponse)
+async def rag_upload(
+    file: UploadFile = File(...),
+    dataset_name: str = Form(default="My Documents"),
+    dataset_description: str = Form(default="Uploaded documents"),
+):
+    """Upload a document to RAG."""
+    try:
+        # Check if RAG is configured
+        if SELECTED_RAG_PROVIDER != "ragflow":
+            return RAGUploadResponse(
+                success=False,
+                dataset_id="",
+                error="RAG provider is not configured or not RAGFlow",
+            )
+
+        # Build retriever (RAGFlow provider)
+        retriever = build_retriever()
+        if not retriever:
+            return RAGUploadResponse(
+                success=False, dataset_id="", error="Failed to initialize RAG provider"
+            )
+
+        # Read file content
+        file_content = await file.read()
+        filename = file.filename or "document"
+
+        # Determine file type from filename
+        file_extension = filename.split(".")[-1].lower() if "." in filename else "txt"
+
+        # Check if we need to create a dataset first
+        # For simplicity, we'll use existing datasets or create a new one
+        resources = retriever.list_resources(dataset_name)
+
+        if resources:
+            # Use the first matching dataset
+            dataset_id = resources[0].uri.split("/")[-1]
+        else:
+            # Create a new dataset
+            try:
+                dataset_result = retriever.create_dataset(
+                    dataset_name, dataset_description
+                )
+                dataset_id = dataset_result.get("data", {}).get("id")
+                if not dataset_id:
+                    raise Exception("Failed to get dataset ID from creation response")
+            except Exception as e:
+                return RAGUploadResponse(
+                    success=False,
+                    dataset_id="",
+                    error=f"Failed to create dataset: {str(e)}",
+                )
+
+        # Upload the document
+        try:
+            upload_result = retriever.upload_document(
+                dataset_id=dataset_id,
+                file_data=file_content,
+                filename=filename,
+                file_type=file_extension,
+            )
+
+            document_id = upload_result.get("data", {}).get("id")
+
+            # Create resource reference
+            resource = Resource(
+                uri=(
+                    f"rag://dataset/{dataset_id}#{document_id}"
+                    if document_id
+                    else f"rag://dataset/{dataset_id}"
+                ),
+                title=filename,
+                description=f"Uploaded document: {filename}",
+            )
+
+            # Optionally trigger document processing
+            if document_id:
+                try:
+                    retriever.process_document(dataset_id, document_id)
+                except Exception as e:
+                    logger.warning(f"Document processing failed: {e}")
+
+            return RAGUploadResponse(
+                success=True,
+                dataset_id=dataset_id,
+                document_id=document_id,
+                resource=resource,
+            )
+
+        except Exception as e:
+            return RAGUploadResponse(
+                success=False,
+                dataset_id=dataset_id,
+                error=f"Failed to upload document: {str(e)}",
+            )
+
+    except Exception as e:
+        logger.exception(f"Error in RAG upload: {str(e)}")
+        return RAGUploadResponse(
+            success=False, dataset_id="", error=f"Internal error: {str(e)}"
+        )
 
 
 @app.get("/api/config", response_model=ConfigResponse)

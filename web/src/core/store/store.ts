@@ -11,6 +11,7 @@ import type { Message, Resource } from "../messages";
 import { mergeMessage } from "../messages";
 import { parseJSON } from "../utils";
 
+import { addToHistory, useHistoryStore } from "./history-store";
 import { getChatStreamSettings } from "./settings-store";
 
 const THREAD_ID = nanoid();
@@ -26,6 +27,7 @@ export const useStore = create<{
   researchActivityIds: Map<string, string[]>;
   ongoingResearchId: string | null;
   openResearchId: string | null;
+  isLoadingHistory: boolean;
 
   appendMessage: (message: Message) => void;
   updateMessage: (message: Message) => void;
@@ -33,6 +35,8 @@ export const useStore = create<{
   openResearch: (researchId: string | null) => void;
   closeResearch: () => void;
   setOngoingResearch: (researchId: string | null) => void;
+  loadConversation: (messages: Message[], threadId: string) => void;
+  clearConversation: () => void;
 }>((set) => ({
   responding: false,
   threadId: THREAD_ID,
@@ -44,6 +48,7 @@ export const useStore = create<{
   researchActivityIds: new Map<string, string[]>(),
   ongoingResearchId: null,
   openResearchId: null,
+  isLoadingHistory: false,
 
   appendMessage(message: Message) {
     set((state) => ({
@@ -72,6 +77,79 @@ export const useStore = create<{
   setOngoingResearch(researchId: string | null) {
     set({ ongoingResearchId: researchId });
   },
+  loadConversation(messages: Message[], threadId: string) {
+    // Set loading state
+    set({ isLoadingHistory: true });
+    
+    // Process messages in chunks to avoid blocking UI
+    setTimeout(() => {
+      const messageMap = new Map<string, Message>();
+      const messageIds: string[] = [];
+      const researchIds: string[] = [];
+      const researchPlanIds = new Map<string, string>();
+      const researchReportIds = new Map<string, string>();
+      const researchActivityIds = new Map<string, string[]>();
+      
+      // Process messages in batches to improve performance
+      const BATCH_SIZE = 50;
+      for (let i = 0; i < messages.length; i += BATCH_SIZE) {
+        const batch = messages.slice(i, i + BATCH_SIZE);
+        
+        batch.forEach((msg) => {
+          messageMap.set(msg.id, msg);
+          messageIds.push(msg.id);
+          
+          // Reconstruct research-related maps only for relevant messages
+          if (msg.agent === "planner" && msg.role === "assistant") {
+            const researchId = msg.id;
+            researchIds.push(researchId);
+            researchPlanIds.set(researchId, msg.id);
+          } else if (msg.agent === "reporter" && msg.role === "assistant" && researchIds.length > 0) {
+            const researchId = researchIds[researchIds.length - 1];
+            if (researchId) {
+              researchReportIds.set(researchId, msg.id);
+            }
+          } else if ((msg.agent === "researcher" || msg.agent === "coder") && researchIds.length > 0) {
+            const researchId = researchIds[researchIds.length - 1];
+            if (researchId) {
+              const activities = researchActivityIds.get(researchId) || [];
+              activities.push(msg.id);
+              researchActivityIds.set(researchId, activities);
+            }
+          }
+        });
+      }
+      
+      set({
+        threadId,
+        messageIds,
+        messages: messageMap,
+        researchIds,
+        researchPlanIds,
+        researchReportIds,
+        researchActivityIds,
+        responding: false,
+        ongoingResearchId: null,
+        openResearchId: researchIds.length > 0 ? researchIds[researchIds.length - 1] : null,
+        isLoadingHistory: false,
+      });
+    }, 0);
+  },
+  clearConversation() {
+    set({
+      threadId: nanoid(),
+      messageIds: [],
+      messages: new Map(),
+      researchIds: [],
+      researchPlanIds: new Map(),
+      researchReportIds: new Map(),
+      researchActivityIds: new Map(),
+      responding: false,
+      ongoingResearchId: null,
+      openResearchId: null,
+      isLoadingHistory: false,
+    });
+  },
 }));
 
 export async function sendMessage(
@@ -85,22 +163,30 @@ export async function sendMessage(
   } = {},
   options: { abortSignal?: AbortSignal } = {},
 ) {
+  const currentThreadId = useStore.getState().threadId || THREAD_ID;
+  
   if (content != null) {
     appendMessage({
       id: nanoid(),
-      threadId: THREAD_ID,
+      threadId: currentThreadId,
       role: "user",
       content: content,
       contentChunks: [content],
       resources,
     });
+    
+    // Add to history only for new conversations
+    const existingConversation = useHistoryStore.getState().getConversationByThreadId(currentThreadId);
+    if (!existingConversation) {
+      addToHistory(content, currentThreadId);
+    }
   }
 
   const settings = getChatStreamSettings();
   const stream = chatStream(
     content ?? "[REPLAY]",
     {
-      thread_id: THREAD_ID,
+      thread_id: currentThreadId,
       interrupt_feedback: interruptFeedback,
       resources,
       auto_accepted_plan: settings.autoAcceptedPlan,
@@ -112,6 +198,7 @@ export async function sendMessage(
       max_search_results: settings.maxSearchResults,
       report_style: settings.reportStyle,
       mcp_settings: settings.mcpSettings,
+      model: settings.selectedModel,
     },
     options,
   );
@@ -162,6 +249,10 @@ export async function sendMessage(
     useStore.getState().setOngoingResearch(null);
   } finally {
     setResponding(false);
+    
+    // Update conversation messages in history
+    const messages = Array.from(useStore.getState().messages.values());
+    useHistoryStore.getState().updateConversationMessages(currentThreadId, messages);
   }
 }
 

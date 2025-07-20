@@ -8,7 +8,7 @@ import type { ComponentType } from 'react';
  * Hook to lazy load components with better performance
  * Loads component after initial render to prevent blocking
  */
-export function useLazyComponent<T extends ComponentType<any>>(
+export function useLazyComponent<T extends ComponentType<unknown>>(
   importFn: () => Promise<{ default: T }>,
   delay = 0
 ) {
@@ -24,14 +24,14 @@ export function useLazyComponent<T extends ComponentType<any>>(
     // Load component after delay
     if (delay > 0) {
       timeoutRef.current = setTimeout(() => {
-        importFn().then(module => {
+        void importFn().then(module => {
           setComponent(() => module.default);
         });
       }, delay);
     } else {
       // Load immediately if no delay
       requestIdleCallback(() => {
-        importFn().then(module => {
+        void importFn().then(module => {
           setComponent(() => module.default);
         });
       }, { timeout: 100 });
@@ -42,7 +42,7 @@ export function useLazyComponent<T extends ComponentType<any>>(
         clearTimeout(timeoutRef.current);
       }
     };
-  }, []);
+  }, [delay, importFn]);
 
   return Component;
 }
@@ -50,15 +50,15 @@ export function useLazyComponent<T extends ComponentType<any>>(
 /**
  * Preload a dynamic component without rendering it
  */
-export function preloadComponent(importFn: () => Promise<any>) {
+export function preloadComponent(importFn: () => Promise<unknown>) {
   if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
     requestIdleCallback(() => {
-      importFn();
+      void importFn();
     }, { timeout: 2000 });
   } else {
     // Fallback for browsers without requestIdleCallback
     setTimeout(() => {
-      importFn();
+      void importFn();
     }, 100);
   }
 }

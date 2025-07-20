@@ -1,5 +1,3 @@
-import { type Note } from "~/app/(with-sidebar)/notes/page"
-import { type WebhookResponse } from "~/lib/webhook-service"
 import { 
   Youtube,
   Instagram,
@@ -7,6 +5,9 @@ import {
   ImageIcon,
   FileText,
 } from "lucide-react"
+
+import { type Note } from "~/app/(with-sidebar)/notes/page"
+import { type WebhookResponse } from "~/lib/webhook-service"
 
 // Storage constants
 export const NOTES_STORAGE_KEY = 'jarvis-notes'
@@ -87,7 +88,7 @@ export const getSourceFromType = (type: string): Note['source'] => {
     loom: "Arquivos",
     twitter: "Arquivos"
   }
-  return typeToSource[type] || "Arquivos"
+  return typeToSource[type] ?? "Arquivos"
 }
 
 // Map content type to media type
@@ -107,7 +108,7 @@ export const extractRealThumbnail = (contextType: string, originalUrl: string, y
     
     case 'tiktok':
       // Para TikTok, vamos extrair o ID do vídeo e usar a API de thumbnail
-      const tiktokMatch = originalUrl.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/)
+      const tiktokMatch = /tiktok\.com\/@[^/]+\/video\/(\d+)/.exec(originalUrl)
       if (tiktokMatch) {
         // TikTok não tem API pública, mas podemos tentar alguns padrões
         return `https://p16-sign-va.tiktokcdn.com/obj/tos-maliva-p-0068/oEIfAWGgAEqrJdIyDHHFBCDCqhcDEBKdGgMCJB?x-expires=1640995200&x-signature=example`
@@ -116,7 +117,7 @@ export const extractRealThumbnail = (contextType: string, originalUrl: string, y
     
     case 'instagram':
       // Instagram Reel - extrair ID e usar oEmbed
-      const instaMatch = originalUrl.match(/instagram\.com\/(reel|p)\/([A-Za-z0-9_-]+)/)
+      const instaMatch = /instagram\.com\/(reel|p)\/([A-Za-z0-9_-]+)/.exec(originalUrl)
       if (instaMatch) {
         // Usar serviço de proxy para extrair thumbnail
         return `https://api.instagram.com/oembed/?url=${encodeURIComponent(originalUrl)}`
@@ -132,7 +133,7 @@ export const extractRealThumbnail = (contextType: string, originalUrl: string, y
     
     case 'loom':
       // Loom - extrair ID do vídeo
-      const loomMatch = originalUrl.match(/loom\.com\/share\/([a-zA-Z0-9]+)/)
+      const loomMatch = /loom\.com\/share\/([a-zA-Z0-9]+)/.exec(originalUrl)
       if (loomMatch) {
         return `https://cdn.loom.com/sessions/thumbnails/${loomMatch[1]}-00001.jpg`
       }
@@ -204,7 +205,7 @@ export const formatWebhookText = (text: string): React.ReactNode => {
       return (
         <div key={index} className="ml-4 mb-2">
           <span className="text-primary font-medium mr-2">
-            {trimmedLine.match(/^\d+\./)?.[0]}
+            {/^\d+\./.exec(trimmedLine)?.[0]}
           </span>
           <span className="text-muted-foreground">
             {trimmedLine.replace(/^\d+\.\s*/, '')}
@@ -267,7 +268,7 @@ export const createNoteFromWebhook = (
   // Extract YouTube ID if it's a YouTube video
   let youtubeId: string | undefined
   if (contextType === 'youtube' && originalUrl) {
-    const match = originalUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)
+    const match = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/.exec(originalUrl)
     youtubeId = match ? match[1] : undefined
   }
 
@@ -281,7 +282,7 @@ export const createNoteFromWebhook = (
 
   return {
     id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    title: webhookResponse.title || `Nova Nota - ${contextType}`,
+    title: webhookResponse.title ?? `Nova Nota - ${contextType}`,
     description: "Nota processada automaticamente via IA",
     source: getSourceFromType(contextType),
     date: new Date().toLocaleDateString('pt-BR'),
@@ -289,12 +290,12 @@ export const createNoteFromWebhook = (
     mediaType: getMediaTypeFromSource(contextType),
     mediaUrl: thumbnailUrl,
     youtubeId,
-    aiSummary: webhookResponse.summary || webhookResponse.resumo || "",
-    transcript: webhookResponse.transcript || webhookResponse.transcricao || "",
+    aiSummary: webhookResponse.summary ?? webhookResponse.resumo ?? "",
+    transcript: webhookResponse.transcript ?? webhookResponse.transcricao ?? "",
     podcastContent: "",
     webhookData: {
       type: contextType,
-      originalUrl: originalUrl || undefined,
+      originalUrl: originalUrl ?? undefined,
       processedAt: new Date().toISOString()
     }
   }

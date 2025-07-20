@@ -34,6 +34,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
+import { Progress } from "~/components/ui/progress";
 import type { Message, Option } from "~/core/messages";
 import {
   closeResearch,
@@ -93,9 +94,9 @@ export function MessageListView({
       ref={scrollContainerRef}
     >
       <ul className="flex flex-col">
-        {messageIds.map((messageId) => (
+        {messageIds.map((messageId, index) => (
           <MessageListItem
-            key={messageId}
+            key={`message-${messageId}-${index}`}
             messageId={messageId}
             waitForFeedback={waitingForFeedbackMessageId === messageId}
             interruptMessage={interruptMessage}
@@ -207,7 +208,6 @@ function MessageListItem({
         return (
           <motion.li
             className="mt-10"
-            key={messageId}
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             style={{ transition: "all 0.2s ease-out" }}
@@ -221,8 +221,9 @@ function MessageListItem({
         );
       }
     }
-    return null;
   }
+  // Always return a li element to avoid React key warnings
+  return <li className="hidden" aria-hidden="true" style={{ display: 'none' }} />;
 }
 
 function MessageBubble({
@@ -573,6 +574,8 @@ function PodcastCard({
   }, [message.content]);
   const title = useMemo<string | undefined>(() => data?.title, [data]);
   const audioUrl = useMemo<string | undefined>(() => data?.audioUrl, [data]);
+  const progress = useMemo(() => data?.progress, [data]);
+  const progressMessage = useMemo(() => data?.progressMessage, [data]);
   const isGenerating = useMemo(() => {
     return message.isStreaming;
   }, [message.isStreaming]);
@@ -589,7 +592,7 @@ function PodcastCard({
             {!hasError ? (
               <RainbowText animated={isGenerating}>
                 {isGenerating
-                  ? "Generating podcast..."
+                  ? progressMessage || "Generating podcast..."
                   : isPlaying
                     ? "Now playing podcast..."
                     : "Podcast"}
@@ -622,7 +625,14 @@ function PodcastCard({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {audioUrl ? (
+        {isGenerating && progress !== undefined ? (
+          <div className="space-y-2">
+            <Progress value={progress} className="w-full" />
+            <p className="text-sm text-muted-foreground text-center">
+              {progressMessage || "Processing..."}
+            </p>
+          </div>
+        ) : audioUrl ? (
           <audio
             className="w-full"
             src={audioUrl}

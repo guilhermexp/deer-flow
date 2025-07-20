@@ -136,7 +136,7 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
         }),
         Placeholder.configure({
           showOnlyCurrent: false,
-          placeholder: config?.rag.provider
+          placeholder: config?.rag?.provider
             ? `O que posso fazer por você? 
 Você pode se referir a recursos RAG usando @.`
             : "O que posso fazer por você?",
@@ -159,7 +159,7 @@ Você pode se referir a recursos RAG usando @.`
           },
         }),
       ];
-      if (config?.rag.provider) {
+      if (config?.rag?.provider) {
         extensions.push(
           Mention.configure({
             HTMLAttributes: {

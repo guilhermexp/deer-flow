@@ -64,10 +64,10 @@ class GoogleGeminiTTS:
         try:
             # Use provided voice_name or fall back to default
             voice_to_use = voice_name or self.voice_name
-            
+
             logger.debug(f"Sending TTS request for text: {text[:50]}...")
             logger.debug(f"Using voice: {voice_to_use}")
-            
+
             response = self.client.models.generate_content(
                 model=self.model,
                 contents=text,
@@ -80,7 +80,7 @@ class GoogleGeminiTTS:
                             )
                         )
                     ),
-                )
+                ),
             )
 
             # Extract audio data from response
@@ -126,14 +126,14 @@ class GoogleGeminiTTS:
             WAV file as bytes
         """
         import io
-        
+
         wav_buffer = io.BytesIO()
         with wave.open(wav_buffer, "wb") as wf:
             wf.setnchannels(channels)
             wf.setsampwidth(sample_width)
             wf.setframerate(rate)
             wf.writeframes(pcm_data)
-        
+
         wav_buffer.seek(0)
         return wav_buffer.read()
 

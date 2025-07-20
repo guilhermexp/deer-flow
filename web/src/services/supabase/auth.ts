@@ -60,6 +60,13 @@ export const authService = {
   async getCurrentUser() {
     const supabase = getSupabaseClient()
     
+    // First check if we have a session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError || !session) {
+      throw new Error('No active session')
+    }
+    
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error) throw error
     
@@ -121,7 +128,7 @@ export const authService = {
   },
 
   // Subscribe to auth state changes
-  onAuthStateChange(callback: (event: string, session: any) => void) {
+  onAuthStateChange(callback: (event: string, session: unknown) => void) {
     const supabase = getSupabaseClient()
     
     return supabase.auth.onAuthStateChange(callback)

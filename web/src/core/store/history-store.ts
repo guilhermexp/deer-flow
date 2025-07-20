@@ -4,6 +4,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import type { Message } from "../messages";
+
 export interface HistoryItem {
   id: string;
   title: string;
@@ -11,14 +13,18 @@ export interface HistoryItem {
   timestamp: number;
   fileName?: string;
   summary?: string;
+  messages?: Message[];
+  threadId?: string;
 }
 
 interface HistoryState {
   conversations: HistoryItem[];
   addConversation: (item: Omit<HistoryItem, "id" | "timestamp">) => void;
+  updateConversationMessages: (threadId: string, messages: Message[]) => void;
   removeConversation: (id: string) => void;
   clearHistory: () => void;
   getRecentConversations: (limit?: number) => HistoryItem[];
+  getConversationByThreadId: (threadId: string) => HistoryItem | undefined;
 }
 
 const HISTORY_KEY = "deerflow.history";
@@ -40,6 +46,22 @@ export const useHistoryStore = create<HistoryState>()(
         }));
       },
       
+      updateConversationMessages: (threadId, messages) => {
+        // Limitar o número de mensagens salvas para evitar problemas de performance
+        const MAX_MESSAGES_TO_SAVE = 200;
+        const messagesToSave = messages.length > MAX_MESSAGES_TO_SAVE 
+          ? messages.slice(-MAX_MESSAGES_TO_SAVE) // Pegar as últimas 200 mensagens
+          : messages;
+          
+        set((state) => ({
+          conversations: state.conversations.map((conv) =>
+            conv.threadId === threadId
+              ? { ...conv, messages: messagesToSave }
+              : conv
+          ),
+        }));
+      },
+      
       removeConversation: (id) => {
         set((state) => ({
           conversations: state.conversations.filter((conv) => conv.id !== id),
@@ -55,6 +77,10 @@ export const useHistoryStore = create<HistoryState>()(
           .sort((a, b) => b.timestamp - a.timestamp)
           .slice(0, limit);
       },
+      
+      getConversationByThreadId: (threadId) => {
+        return get().conversations.find((conv) => conv.threadId === threadId);
+      },
     }),
     {
       name: HISTORY_KEY,
@@ -63,7 +89,7 @@ export const useHistoryStore = create<HistoryState>()(
 );
 
 // Helper function para adicionar ao histórico de forma simples
-export const addToHistory = (query: string, fileName?: string) => {
+export const addToHistory = (query: string, threadId: string, fileName?: string) => {
   const store = useHistoryStore.getState();
   
   // Gerar um título a partir da query (primeiras 50 caracteres)
@@ -72,6 +98,7 @@ export const addToHistory = (query: string, fileName?: string) => {
   store.addConversation({
     title,
     query,
+    threadId,
     fileName,
     summary: `Conversa iniciada em ${new Date().toLocaleString('pt-BR')}`,
   });

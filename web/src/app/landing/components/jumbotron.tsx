@@ -44,7 +44,7 @@ export function Jumbotron() {
           oferece insights instantâneos, relatórios abrangentes e até mesmo podcasts cativantes.
         </p>
         <div className="flex gap-6">
-          <Button className="hidden text-lg md:flex md:w-42" size="lg" asChild>
+          <Button className="text-lg w-42" size="lg" asChild>
             <Link
               target={
                 env.NEXT_PUBLIC_STATIC_WEBSITE_ONLY ? "_blank" : undefined

@@ -13,6 +13,7 @@ import {
 } from "~/components/ui/alert-dialog"
 import { Button } from "~/components/ui/button"
 import { Calendar } from "~/components/ui/calendar"
+import { CalendarIcon } from "lucide-react"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form"
 import { Input } from "~/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover"
@@ -53,6 +54,7 @@ interface AddEventDialogProps {
 
 export function AddEventDialog({ open, setOpen, onAddEvent, initialDate }: AddEventDialogProps) {
   const [isLoading, setIsLoading] = useState(false) // Adicionado estado isLoading
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false) // Estado para controlar o popover
   const form = useForm<FormValues>({
     resolver: zodResolver(newEventFormSchema),
     defaultValues: {
@@ -82,6 +84,7 @@ export function AddEventDialog({ open, setOpen, onAddEvent, initialDate }: AddEv
           "rotina",
       })
       setIsLoading(false) // Resetar isLoading ao abrir
+      setIsCalendarOpen(false) // Resetar estado do calendário
     }
   }, [open, initialDate, form])
 
@@ -160,7 +163,7 @@ export function AddEventDialog({ open, setOpen, onAddEvent, initialDate }: AddEv
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Data do Evento</FormLabel>
-                    <Popover>
+                    <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -170,6 +173,7 @@ export function AddEventDialog({ open, setOpen, onAddEvent, initialDate }: AddEv
                               !field.value && "text-muted-foreground",
                             )}
                           >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
                             {field.value ? (
                               formatDateFn(field.value, "PPP", { locale: ptBR }) // Usar o locale importado
                             ) : (
@@ -179,7 +183,21 @@ export function AddEventDialog({ open, setOpen, onAddEvent, initialDate }: AddEv
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0 bg-card border-border" align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                        <Calendar 
+                          mode="single" 
+                          selected={field.value} 
+                          onSelect={(date) => {
+                            console.log("Data selecionada:", date);
+                            if (date) {
+                              field.onChange(date);
+                              setIsCalendarOpen(false); // Fechar o popover após selecionar
+                            }
+                          }}
+                          disabled={(date) => false} // Permitir todas as datas
+                          initialFocus
+                          locale={ptBR}
+                          className="bg-card"
+                        />
                       </PopoverContent>
                     </Popover>
                     <FormMessage />

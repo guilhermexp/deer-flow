@@ -65,6 +65,10 @@ class ChatRequest(BaseModel):
     enable_deep_thinking: Optional[bool] = Field(
         False, description="Whether to enable deep thinking"
     )
+    model: Optional[str] = Field(
+        None,
+        description="The model to use for the chat (e.g., 'google/gemini-2.5-pro', 'moonshotai/kimi-k2')",
+    )
 
 
 class TTSRequest(BaseModel):

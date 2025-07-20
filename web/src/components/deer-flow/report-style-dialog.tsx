@@ -81,14 +81,9 @@ export function ReportStyleDialog() {
           <Button
             className="rounded-xl bg-white/[0.05] backdrop-blur-sm border-white/10 hover:bg-white/[0.08] text-gray-300 text-xs whitespace-nowrap flex-shrink-0"
             variant="outline"
+            size="icon"
           >
-            <CurrentIcon className="h-4 w-4 mr-1" /> 
-            <span className="hidden xl:inline">{currentStyleConfig.label}</span>
-            <span className="xl:hidden">
-              {currentStyle === "academic" ? "Acadêm." : 
-               currentStyle === "popular_science" ? "Popular" :
-               currentStyle === "news" ? "Notícias" : "Social"}
-            </span>
+            <CurrentIcon className="h-4 w-4" />
           </Button>
         </DialogTrigger>
       </Tooltip>

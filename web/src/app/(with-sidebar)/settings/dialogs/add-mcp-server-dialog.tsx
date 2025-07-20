@@ -89,14 +89,14 @@ export function AddMCPServerDialog({
           name: key,
           command: server.command as string,
           args: server.args as string[],
-          env: server.env as Record<string, string> | undefined,
+          env: server.env,
         };
         addingServers.push(metadata);
       } else if ("url" in server) {
         const metadata: SimpleSSEMCPServerMetadata = {
           transport: "sse",
           name: key,
-          url: server.url as string,
+          url: server.url,
         };
         addingServers.push(metadata);
       }
