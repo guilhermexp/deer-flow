@@ -5,9 +5,12 @@ from pathlib import Path
 from typing import Any, Dict
 import os
 import httpx
+import logging
 
 from langchain_core.language_models import BaseChatModel
 from langchain_openai import ChatOpenAI, AzureChatOpenAI
+
+logger = logging.getLogger(__name__)
 from langchain_deepseek import ChatDeepSeek
 from typing import get_args
 
@@ -195,7 +198,7 @@ def get_configured_llm_models() -> dict[str, list[str]]:
 
     except Exception as e:
         # Log error and return empty dict to avoid breaking the application
-        print(f"Warning: Failed to load LLM configuration: {e}")
+        logger.warning(f"Failed to load LLM configuration: {e}")
         return {}
 
 

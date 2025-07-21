@@ -71,14 +71,26 @@ app = FastAPI(
 )
 
 # Add CORS middleware
+# Configure allowed origins from environment or use default secure settings
+allowed_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:4000,http://localhost:3000").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=allowed_origins,  # Specific allowed origins only
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Specific allowed methods
+    allow_headers=["Authorization", "Content-Type", "X-Requested-With"],  # Specific allowed headers
+    expose_headers=["Content-Length", "X-Total-Count"],  # Headers exposed to the browser
+    max_age=3600,  # Cache preflight requests for 1 hour
 )
 
+# Add rate limiting middleware
+from src.server.rate_limiter import rate_limit_middleware
+app.middleware("http")(rate_limit_middleware)
+
+# Setup error handlers
+from src.server.error_handler import setup_error_handlers
+setup_error_handlers(app)
 
 # Database initialization on startup
 @app.on_event("startup")
@@ -592,6 +604,12 @@ async def rag_upload(
 ):
     """Upload a document to RAG."""
     try:
+        # Import file validator
+        from src.server.file_validator import FileValidator
+        
+        # Validate the uploaded file
+        file_content, sanitized_filename, mime_type = await FileValidator.validate_upload(file)
+        
         # Check if RAG is configured
         if SELECTED_RAG_PROVIDER != "ragflow":
             return RAGUploadResponse(
@@ -607,9 +625,8 @@ async def rag_upload(
                 success=False, dataset_id="", error="Failed to initialize RAG provider"
             )
 
-        # Read file content
-        file_content = await file.read()
-        filename = file.filename or "document"
+        # Use sanitized filename
+        filename = sanitized_filename
 
         # Determine file type from filename
         file_extension = filename.split(".")[-1].lower() if "." in filename else "txt"

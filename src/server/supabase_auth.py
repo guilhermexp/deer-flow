@@ -6,7 +6,6 @@ import logging
 from typing import Optional
 from datetime import datetime
 
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from supabase import create_client, Client
 import jwt

@@ -23,6 +23,7 @@ import type { Resource } from "~/core/messages";
 import { useConfig } from "~/core/api/hooks";
 import { LoadingOutlined } from "@ant-design/icons";
 import type { DeerFlowConfig } from "~/core/config";
+import { sanitizer } from "~/lib/sanitizer";
 
 export interface MessageInputRef {
   focus: () => void;
@@ -209,14 +210,11 @@ Você pode se referir a recursos RAG usando @.`
 
 function transformPastedHTML(html: string) {
   try {
-    // Strip HTML from user-pasted content
-    const tempEl = document.createElement("div");
-    tempEl.innerHTML = html;
-
-    return tempEl.textContent || tempEl.innerText || "";
+    // Use DOMPurify to sanitize and extract text safely
+    const sanitizedText = sanitizer.sanitizeToText(html);
+    return sanitizedText.trim();
   } catch (error) {
     console.error("Error transforming pasted HTML", error);
-
     return "";
   }
 }
