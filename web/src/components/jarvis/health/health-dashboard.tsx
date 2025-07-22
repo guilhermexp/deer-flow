@@ -11,7 +11,7 @@ import { BloodPressureCard } from "./blood-pressure-card";
 import { NextWorkoutCard } from "./next-workout-card";
 import { HealthSidebar } from "./health-sidebar";
 import { HealthTabs } from "./health-tabs";
-import { useHealthDataJWT } from "./hooks/use-health-data";
+import { useHealthSupabase } from "~/hooks/use-health-supabase";
 import DashboardSettingsModal from "../dashboard-settings-modal";
 import type { CardConfig } from "../dashboard-settings-modal";
 
@@ -57,7 +57,7 @@ export function HealthDashboard() {
 
   const {
     healthData,
-    isLoading,
+    loading: isLoading,
     error,
     handleAddWater,
     handleUpdateSleep,
@@ -66,7 +66,8 @@ export function HealthDashboard() {
     handleAddMedication,
     handleRemoveMedication,
     handleCompleteWorkout,
-  } = useHealthDataJWT();
+    isAuthenticated
+  } = useHealthSupabase();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -105,13 +106,30 @@ export function HealthDashboard() {
     );
   }
 
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <p className="text-destructive mb-2">Usuário não autenticado</p>
+          <p className="text-muted-foreground text-sm">Faça login para acessar seus dados de saúde.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-center">
           <p className="text-destructive mb-2">Erro ao carregar dados de saúde</p>
           <p className="text-muted-foreground text-sm">{error}</p>
-          <p className="text-muted-foreground text-sm mt-4">Certifique-se de estar autenticado e que as tabelas do banco de dados foram criadas.</p>
+          <p className="text-muted-foreground text-sm mt-4">Certifique-se de que as tabelas do banco de dados foram criadas.</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Tentar novamente
+          </button>
         </div>
       </div>
     );

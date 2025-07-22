@@ -16,11 +16,8 @@ import { AuthProvider } from "~/core/contexts/auth-context";
 import { env } from "~/env.js";
 
 import { Toaster } from "../components/deer-flow/toaster";
+import { SupabaseStatus } from "~/components/supabase-status";
 
-// Import debug utilities in development
-if (process.env.NODE_ENV === 'development') {
-  import('~/lib/debug-auth');
-}
 
 export const metadata: Metadata = {
   title: "🦌 DeerFlow",
@@ -60,6 +57,7 @@ export default async function RootLayout({
           <ThemeProviderWrapper>
             <AuthProvider>
               <AnimationProvider>
+                <SupabaseStatus />
                 {children}
               </AnimationProvider>
             </AuthProvider>

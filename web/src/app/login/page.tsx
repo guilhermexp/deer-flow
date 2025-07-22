@@ -3,9 +3,9 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '~/core/contexts/auth-context';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
@@ -19,8 +19,17 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectedFrom = searchParams.get('redirectedFrom') || '/dashboard';
+
+  // Redirecionar se já estiver autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push(redirectedFrom);
+    }
+  }, [isAuthenticated, router, redirectedFrom]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +39,7 @@ export default function LoginPage() {
     try {
       // Use email as username since backend accepts email in username field
       await login(email, password);
-      router.push('/chat');
+      router.push(redirectedFrom);
     } catch (err: any) {
       setError(err.message || 'Login failed. Please try again.');
     } finally {

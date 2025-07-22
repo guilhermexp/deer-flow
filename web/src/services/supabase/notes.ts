@@ -1,4 +1,4 @@
-import { createClient } from "~/lib/supabase/client"
+import { getSupabaseClient } from "~/lib/supabase/client"
 import type { Database } from "~/types/supabase"
 import type { Note } from "~/app/(with-sidebar)/notes/page"
 
@@ -62,7 +62,7 @@ type SupabaseNoteMessageInsert = Database['public']['Tables']['note_messages']['
 export const notesService = {
   // Buscar todas as notas do usuário
   async fetchNotes(userId: string): Promise<Note[]> {
-    const supabase = createClient()
+    const supabase = getSupabaseClient()
     
     const { data, error } = await supabase
       .from('notes')
@@ -80,7 +80,7 @@ export const notesService = {
   
   // Buscar uma nota específica
   async fetchNoteById(noteId: string, userId: string): Promise<Note | null> {
-    const supabase = createClient()
+    const supabase = getSupabaseClient()
     
     const { data, error } = await supabase
       .from('notes')
@@ -100,7 +100,7 @@ export const notesService = {
   
   // Criar nova nota
   async createNote(note: Note, userId: string): Promise<Note> {
-    const supabase = createClient()
+    const supabase = getSupabaseClient()
     
     const supabaseNote = convertNoteToSupabase(note, userId)
     
@@ -120,7 +120,7 @@ export const notesService = {
   
   // Atualizar nota
   async updateNote(noteId: string, updates: Partial<Note>, userId: string): Promise<Note> {
-    const supabase = createClient()
+    const supabase = getSupabaseClient()
     
     const supabaseUpdate: SupabaseNoteUpdate = {}
     
@@ -176,7 +176,7 @@ export const notesService = {
   
   // Deletar nota
   async deleteNote(noteId: string, userId: string): Promise<void> {
-    const supabase = createClient()
+    const supabase = getSupabaseClient()
     
     const { error } = await supabase
       .from('notes')
@@ -217,7 +217,7 @@ export const notesService = {
       }
       
       // Migrar em lote
-      const supabase = createClient()
+      const supabase = getSupabaseClient()
       const supabaseNotes = notesToMigrate.map(note => convertNoteToSupabase(note, userId))
       
       const { error } = await supabase
@@ -243,7 +243,7 @@ export const notesService = {
   
   // Buscar sessões de uma nota
   async fetchNoteSessions(noteId: string): Promise<SupabaseNoteSession[]> {
-    const supabase = createClient()
+    const supabase = getSupabaseClient()
     
     const { data, error } = await supabase
       .from('note_sessions')
@@ -261,7 +261,7 @@ export const notesService = {
   
   // Criar nova sessão
   async createNoteSession(noteId: string, sessionName: string): Promise<SupabaseNoteSession> {
-    const supabase = createClient()
+    const supabase = getSupabaseClient()
     
     const { data, error } = await supabase
       .from('note_sessions')
@@ -282,7 +282,7 @@ export const notesService = {
   
   // Buscar mensagens de uma sessão
   async fetchSessionMessages(sessionId: string): Promise<SupabaseNoteMessage[]> {
-    const supabase = createClient()
+    const supabase = getSupabaseClient()
     
     const { data, error } = await supabase
       .from('note_messages')
@@ -300,7 +300,7 @@ export const notesService = {
   
   // Adicionar mensagem à sessão
   async addMessageToSession(sessionId: string, content: string, role: 'user' | 'assistant'): Promise<SupabaseNoteMessage> {
-    const supabase = createClient()
+    const supabase = getSupabaseClient()
     
     const { data, error } = await supabase
       .from('note_messages')

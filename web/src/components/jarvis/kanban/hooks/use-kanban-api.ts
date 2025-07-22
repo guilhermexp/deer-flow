@@ -1,53 +1,9 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { projectsApi, type Project as ApiProject, type KanbanBoard } from "~/core/api/projects"
+import { projectsService } from "~/services/supabase/projects"
 import { useAuth } from "~/core/contexts/auth-context"
-import type { Task, Project, ActiveTabValue, TaskStatus } from "../lib/types"
-
-// Map API types to Kanban types
-function mapApiProjectToKanbanProject(apiProject: ApiProject): Project {
-  return {
-    id: String(apiProject.id),
-    name: apiProject.name,
-    description: apiProject.description,
-    createdAt: apiProject.created_at,
-    isPriority: false, // This can be extended based on API
-  }
-}
-
-function mapKanbanProjectToApiProject(kanbanProject: Partial<Project>) {
-  return {
-    name: kanbanProject.name || "",
-    description: kanbanProject.description,
-    color: "#3B82F6",
-    icon: "folder",
-    status: "active",
-  }
-}
-
-function mapApiTaskToKanbanTask(apiTask: any): Task {
-  // Map backend task to frontend task format
-  const statusMap: { [key: string]: TaskStatus } = {
-    'TODO': 'not-started',
-    'IN_PROGRESS': 'in-progress', 
-    'DONE': 'done',
-  }
-
-  return {
-    id: String(apiTask.id),
-    projectId: String(apiTask.project_id || ''),
-    title: apiTask.title,
-    date: new Date(apiTask.created_at).toLocaleDateString('pt-BR'),
-    progress: apiTask.status === 'DONE' ? 100 : (apiTask.status === 'IN_PROGRESS' ? 50 : 0),
-    comments: 0, // This can be extended
-    attachments: 0, // This can be extended
-    assignees: [], // This can be extended
-    status: statusMap[apiTask.status] || 'not-started',
-    weekDay: 'none',
-    description: apiTask.description,
-  }
-}
+import type { Task, Project, ActiveTabValue } from "../lib/types"
 
 export function useKanbanApi() {
   const [projects, setProjects] = useState<Project[]>([])
@@ -59,7 +15,7 @@ export function useKanbanApi() {
   
   const { user, isAuthenticated } = useAuth()
 
-  // Load projects from API
+  // Carregar projetos do Supabase
   const loadProjects = useCallback(async (): Promise<Project[]> => {
     if (!isAuthenticated) {
       return []
@@ -68,12 +24,13 @@ export function useKanbanApi() {
     try {
       setLoading(true)
       setError(null)
-      const apiProjects = await projectsApi.getProjects()
-      const kanbanProjects = apiProjects.map(mapApiProjectToKanbanProject)
-      setProjects(kanbanProjects)
-      return kanbanProjects
+      console.log("🔄 Carregando projetos do Supabase...")
+      const supabaseProjects = await projectsService.getProjects()
+      console.log("✅ Projetos carregados:", supabaseProjects)
+      setProjects(supabaseProjects)
+      return supabaseProjects
     } catch (err) {
-      console.error("Error loading projects:", err)
+      console.error("❌ Erro ao carregar projetos:", err)
       setError("Erro ao carregar projetos")
       return []
     } finally {
@@ -81,22 +38,16 @@ export function useKanbanApi() {
     }
   }, [isAuthenticated])
 
-  // Load tasks for a specific project
+  // Carregar tarefas de um projeto específico
   const loadProjectTasks = useCallback(async (projectId: string): Promise<Task[]> => {
     if (!isAuthenticated || !projectId) {
       return []
     }
 
     try {
-      const kanbanBoard = await projectsApi.getKanbanBoard(Number(projectId))
-      const tasks: Task[] = []
-      
-      // Extract tasks from all columns
-      kanbanBoard.columns.forEach(column => {
-        column.tasks.forEach(apiTask => {
-          tasks.push(mapApiTaskToKanbanTask(apiTask))
-        })
-      })
+      console.log("🔄 Carregando tarefas do projeto:", projectId)
+      const tasks = await projectsService.getProjectTasks(projectId)
+      console.log("✅ Tarefas carregadas:", tasks)
 
       setTasksByProject(prev => ({
         ...prev,
@@ -105,13 +56,13 @@ export function useKanbanApi() {
 
       return tasks
     } catch (err) {
-      console.error("Error loading project tasks:", err)
+      console.error("❌ Erro ao carregar tarefas do projeto:", err)
       setError("Erro ao carregar tarefas do projeto")
       return []
     }
   }, [isAuthenticated])
 
-  // Create new project
+  // Criar novo projeto
   const createProject = useCallback(async (projectData: Partial<Project>): Promise<Project | null> => {
     if (!isAuthenticated) {
       throw new Error("Usuário não autenticado")
@@ -119,14 +70,14 @@ export function useKanbanApi() {
 
     try {
       setLoading(true)
-      const apiProjectData = mapKanbanProjectToApiProject(projectData)
-      const newApiProject = await projectsApi.createProject(apiProjectData)
-      const newKanbanProject = mapApiProjectToKanbanProject(newApiProject)
+      console.log("🔄 Criando projeto:", projectData)
+      const newProject = await projectsService.createProject(projectData)
+      console.log("✅ Projeto criado:", newProject)
       
-      setProjects(prev => [...prev, newKanbanProject])
-      return newKanbanProject
+      setProjects(prev => [...prev, newProject])
+      return newProject
     } catch (err) {
-      console.error("Error creating project:", err)
+      console.error("❌ Erro ao criar projeto:", err)
       setError("Erro ao criar projeto")
       throw err
     } finally {
@@ -134,41 +85,44 @@ export function useKanbanApi() {
     }
   }, [isAuthenticated])
 
-  // Update project
+  // Atualizar projeto
   const updateProject = useCallback(async (projectId: string, updates: Partial<Project>): Promise<Project | null> => {
     if (!isAuthenticated) {
       throw new Error("Usuário não autenticado")
     }
 
     try {
-      const updateData = mapKanbanProjectToApiProject(updates)
-      const updatedApiProject = await projectsApi.updateProject(Number(projectId), updateData)
-      const updatedKanbanProject = mapApiProjectToKanbanProject(updatedApiProject)
+      console.log("🔄 Atualizando projeto:", projectId, updates)
+      const updatedProject = await projectsService.updateProject(projectId, updates)
+      console.log("✅ Projeto atualizado:", updatedProject)
       
       setProjects(prev => 
-        prev.map(p => p.id === projectId ? updatedKanbanProject : p)
+        prev.map(p => p.id === projectId ? updatedProject : p)
       )
       
       if (currentProject?.id === projectId) {
-        setCurrentProject(updatedKanbanProject)
+        setCurrentProject(updatedProject)
       }
       
-      return updatedKanbanProject
+      return updatedProject
     } catch (err) {
-      console.error("Error updating project:", err)
+      console.error("❌ Erro ao atualizar projeto:", err)
       setError("Erro ao atualizar projeto")
       throw err
     }
   }, [isAuthenticated, currentProject])
 
-  // Delete project
+  // Deletar projeto
   const deleteProject = useCallback(async (projectId: string): Promise<void> => {
     if (!isAuthenticated) {
       throw new Error("Usuário não autenticado")
     }
 
     try {
-      await projectsApi.deleteProject(Number(projectId))
+      console.log("🔄 Deletando projeto:", projectId)
+      await projectsService.deleteProject(projectId)
+      console.log("✅ Projeto deletado")
+      
       setProjects(prev => prev.filter(p => p.id !== projectId))
       setTasksByProject(prev => {
         const newTasks = { ...prev }
@@ -181,75 +135,53 @@ export function useKanbanApi() {
         setActiveTab("projectList")
       }
     } catch (err) {
-      console.error("Error deleting project:", err)
+      console.error("❌ Erro ao deletar projeto:", err)
       setError("Erro ao deletar projeto")
       throw err
     }
   }, [isAuthenticated, currentProject])
 
-  // Create task in project
+  // Criar tarefa em um projeto
   const createTask = useCallback(async (projectId: string, taskData: Partial<Task>, columnId: string = 'backlog'): Promise<Task | null> => {
     if (!isAuthenticated) {
       throw new Error("Usuário não autenticado")
     }
 
     try {
-      const apiTaskData = {
-        title: taskData.title || "",
-        description: taskData.description,
-        priority: 'medium' as const,
-      }
-      
-      const newApiTask = await projectsApi.createKanbanTask(Number(projectId), apiTaskData, columnId)
-      const newKanbanTask = mapApiTaskToKanbanTask({
-        ...newApiTask,
-        project_id: Number(projectId)
-      })
+      console.log("🔄 Criando tarefa:", projectId, taskData, columnId)
+      const newTask = await projectsService.createTask(projectId, taskData, columnId)
+      console.log("✅ Tarefa criada:", newTask)
       
       setTasksByProject(prev => ({
         ...prev,
-        [projectId]: [...(prev[projectId] || []), newKanbanTask]
+        [projectId]: [...(prev[projectId] || []), newTask]
       }))
       
-      return newKanbanTask
+      return newTask
     } catch (err) {
-      console.error("Error creating task:", err)
+      console.error("❌ Erro ao criar tarefa:", err)
       setError("Erro ao criar tarefa")
       throw err
     }
   }, [isAuthenticated])
 
-  // Move task between columns
+  // Mover tarefa entre colunas
   const moveTask = useCallback(async (projectId: string, taskId: string, columnId: string, order: number): Promise<void> => {
     if (!isAuthenticated) {
       throw new Error("Usuário não autenticado")
     }
 
     try {
-      await projectsApi.moveKanbanTask(Number(projectId), Number(taskId), {
-        column_id: columnId,
-        order: order
-      })
+      console.log("🔄 Movendo tarefa:", taskId, "para", columnId)
+      const updatedTask = await projectsService.moveTask(projectId, taskId, columnId, order)
+      console.log("✅ Tarefa movida:", updatedTask)
       
-      // Update local state
+      // Atualizar estado local
       setTasksByProject(prev => {
         const projectTasks = prev[projectId] || []
-        const updatedTasks = projectTasks.map(task => {
-          if (task.id === taskId) {
-            const statusMap: { [key: string]: TaskStatus } = {
-              'backlog': 'not-started',
-              'todo': 'not-started',
-              'in_progress': 'in-progress',
-              'done': 'done',
-            }
-            return {
-              ...task,
-              status: statusMap[columnId] || 'not-started',
-              progress: columnId === 'done' ? 100 : (columnId === 'in_progress' ? 50 : 0)
-            }
-          }
-          return task
-        })
+        const updatedTasks = projectTasks.map(task => 
+          task.id === taskId ? updatedTask : task
+        )
         
         return {
           ...prev,
@@ -257,13 +189,13 @@ export function useKanbanApi() {
         }
       })
     } catch (err) {
-      console.error("Error moving task:", err)
+      console.error("❌ Erro ao mover tarefa:", err)
       setError("Erro ao mover tarefa")
       throw err
     }
   }, [isAuthenticated])
 
-  // Initialize data on mount
+  // Inicializar dados ao montar
   useEffect(() => {
     if (isAuthenticated && user) {
       loadProjects().then(loadedProjects => {
@@ -279,7 +211,7 @@ export function useKanbanApi() {
     }
   }, [isAuthenticated, user, loadProjects, loadProjectTasks, currentProject])
 
-  // Load tasks when current project changes
+  // Carregar tarefas quando o projeto atual mudar
   useEffect(() => {
     if (currentProject && isAuthenticated) {
       loadProjectTasks(currentProject.id)

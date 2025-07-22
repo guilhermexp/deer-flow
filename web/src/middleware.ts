@@ -1,52 +1,71 @@
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { updateSession, isProtectedRoute, isPublicRoute } from '~/lib/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
 
-  // Update Supabase session
-  const response = await updateSession(request)
-  
-  // Check if route requires authentication
-  if (isProtectedRoute(pathname)) {
-    // Try to get the session from the response cookies
-    const supabaseAuth = request.cookies.get('sb-vlwujoxrehymafeeiihh-auth-token')
-    
-    if (!supabaseAuth) {
-      // No auth cookie, redirect to login
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      url.searchParams.set('redirect', pathname)
-      return NextResponse.redirect(url)
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
     }
+  )
+
+  // Verificar autenticação
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // URLs públicas que não precisam de autenticação
+  const publicUrls = ['/login', '/register', '/']
+  const isPublicUrl = publicUrls.includes(request.nextUrl.pathname)
+
+  // Se não está autenticado e está tentando acessar rota protegida
+  if (!user && !isPublicUrl && request.nextUrl.pathname !== '/') {
+    // Redirecionar para login
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = '/login'
+    redirectUrl.searchParams.set('redirectedFrom', request.nextUrl.pathname)
+    return NextResponse.redirect(redirectUrl)
   }
-  
-  // For public routes that authenticated users shouldn't access
-  if (pathname === '/login' || pathname === '/register') {
-    const supabaseAuth = request.cookies.get('sb-vlwujoxrehymafeeiihh-auth-token')
-    
-    if (supabaseAuth) {
-      // User is already authenticated, redirect to chat
-      const url = request.nextUrl.clone()
-      url.pathname = '/chat'
-      return NextResponse.redirect(url)
-    }
+
+  // Se está autenticado e tentando acessar login/register, redirecionar para dashboard
+  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = '/dashboard'
+    return NextResponse.redirect(redirectUrl)
   }
-  
-  return response
+
+  return supabaseResponse
 }
 
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
-     * - api routes
+     * - api routes (they handle their own auth)
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

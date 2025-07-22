@@ -44,3 +44,18 @@ yarn-error.log*
 
 # idea files
 .idea
+
+# Debug and test files
+**/debug-*.ts
+**/debug-*.js
+**/test-*.js
+*.backup.*
+*.bak
+*.tmp
+
+# Setup scripts (kept in docs/)
+/scripts/setup-*.js
+
+# Cleanup scripts
+/cleanup-console.js
+/remove-console.sh

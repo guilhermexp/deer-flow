@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '~/core/contexts/auth-context';
 import { notesService } from '~/services/supabase/notes';
+import { getSupabaseClient } from '~/lib/supabase/client';
 import type { Note } from '~/app/(with-sidebar)/notes/page';
 
 /**
@@ -22,17 +23,40 @@ export function useNotesSupabase() {
 
     try {
       setLoading(true);
+      setError(null);
+      console.log('🔄 Carregando notas para o usuário:', user.id);
+      
+      // Verificar se a tabela notes existe
+      const supabase = getSupabaseClient();
+      const { error: tableCheckError } = await supabase
+        .from('notes')
+        .select('count')
+        .limit(1)
+        .throwOnError();
+      
+      if (tableCheckError) {
+        console.error('❌ Erro ao verificar tabela notes:', tableCheckError);
+        throw new Error(`Tabela 'notes' não encontrada ou inacessível: ${tableCheckError.message}`);
+      }
+      
+      // Buscar notas
       const fetchedNotes = await notesService.fetchNotes(user.id);
+      console.log(`✅ ${fetchedNotes.length} notas carregadas`);
       setNotes(fetchedNotes);
       
       // Tentar migrar do localStorage se necessário
-      await notesService.migrateFromLocalStorage(user.id);
-      
-      // Recarregar após migração
-      const updatedNotes = await notesService.fetchNotes(user.id);
-      setNotes(updatedNotes);
+      try {
+        await notesService.migrateFromLocalStorage(user.id);
+        
+        // Recarregar após migração
+        const updatedNotes = await notesService.fetchNotes(user.id);
+        setNotes(updatedNotes);
+      } catch (migrationErr) {
+        console.warn('⚠️ Erro na migração (não crítico):', migrationErr);
+        // Continuar mesmo se a migração falhar
+      }
     } catch (err) {
-      console.error('Erro ao carregar notas:', err);
+      console.error('❌ Erro ao carregar notas:', err);
       setError(err instanceof Error ? err : new Error('Erro ao carregar notas'));
       
       // Fallback para localStorage se Supabase falhar
@@ -41,10 +65,10 @@ export function useNotesSupabase() {
         if (stored) {
           const localNotes = JSON.parse(stored) as Note[];
           setNotes(localNotes);
-          console.log('Usando notas do localStorage como fallback');
+          console.log('📝 Usando notas do localStorage como fallback');
         }
       } catch (localErr) {
-        console.error('Erro ao carregar fallback:', localErr);
+        console.error('❌ Erro ao carregar fallback:', localErr);
       }
     } finally {
       setLoading(false);

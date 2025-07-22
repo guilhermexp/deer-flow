@@ -1,6 +1,3 @@
-// Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
-// SPDX-License-Identifier: MIT
-
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
@@ -30,135 +27,136 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const supabase = getSupabaseClient();
 
-  const checkAuth = useCallback(async () => {
+  // Helper function to get user profile
+  const getUserProfile = async (userId: string) => {
     try {
-      console.log('🔍 Auth: Checking authentication...');
-      
-      // Add timeout to prevent infinite loading
-      const timeout = setTimeout(() => {
-        console.log('⚠️ Auth: Timeout reached, setting loading to false');
-        setIsLoading(false);
-      }, 10000); // 10 seconds timeout
+      const { data: profile, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
 
-      // First check if we have a session
+      if (error) {
+        // Profile fetch error (non-critical)
+        return null;
+      }
+
+      return profile;
+    } catch (error) {
+      // Keep console.error for critical errors
+      console.error('❌ Auth: Exception fetching profile:', error);
+      return null;
+    }
+  };
+
+  // Helper function to set user data
+  const setUserData = async (supabaseUser: SupabaseUser) => {
+    const profile = await getUserProfile(supabaseUser.id);
+    const userData: User = {
+      id: supabaseUser.id,
+      email: supabaseUser.email || '',
+      profile: profile || undefined,
+    };
+    setUser(userData);
+    return userData;
+  };
+
+  const checkAuth = useCallback(async () => {
+    if (!mounted) return;
+
+    try {
+      // Checking authentication
+      
+      // Get session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      clearTimeout(timeout);
-      
-      if (sessionError || !session) {
-        // No session, user is not authenticated
-        console.log('❌ Auth: No valid session found');
+      if (sessionError) {
+        console.error('❌ Auth: Session error:', sessionError.message);
         setUser(null);
-        setIsLoading(false);
+        return;
+      }
+      
+      if (!session || !session.user) {
+        // No active session
+        setUser(null);
         return;
       }
 
-      // We have a session, get the user
-      console.log('✅ Auth: Valid session found, getting user...');
-      const { data: { user: supabaseUser }, error } = await supabase.auth.getUser();
-      
-      if (error) {
-        console.error('❌ Auth: Failed to get user:', error);
-        setUser(null);
-        setIsLoading(false);
-        return;
-      }
-
-      if (supabaseUser) {
-        console.log('✅ Auth: User found, getting profile...');
-        // Get user profile
-        const { data: profile, error: profileError } = await supabase
-          .from('user_profiles')
-          .select('*')
-          .eq('id', supabaseUser.id)
-          .maybeSingle();
-
-        if (profileError) {
-          console.log('⚠️ Auth: Profile error (non-critical):', profileError);
-        }
-
-        const userData = {
-          id: supabaseUser.id,
-          email: supabaseUser.email || '',
-          profile: (!profileError && profile) ? profile : undefined,
-        };
-        
-        console.log('✅ Auth: Authentication successful', userData);
-        setUser(userData);
-      } else {
-        console.log('❌ Auth: No user found in session');
-        setUser(null);
-      }
+      // Valid session found
+      await setUserData(session.user);
+      // User data loaded
     } catch (error) {
       console.error('❌ Auth: Exception during auth check:', error);
       setUser(null);
     } finally {
-      console.log('🏁 Auth: Setting loading to false');
       setIsLoading(false);
     }
-  }, [supabase]);
+  }, [mounted, supabase]);
 
+  // Setup effect - runs once after mount
   useEffect(() => {
-    let mounted = true;
-    
-    const initAuth = async () => {
-      if (mounted) {
-        await checkAuth();
-      }
-    };
-    
-    initAuth();
+    setMounted(true);
+  }, []);
+
+  // Auth check effect - runs after mounted
+  useEffect(() => {
+    if (!mounted) return;
+
+    // Check auth immediately
+    checkAuth();
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (!mounted) return;
+        // Auth state changed: event
         
         if (event === 'SIGNED_IN' && session?.user) {
-          // Get user profile
-          const { data: profile, error: profileError } = await supabase
-            .from('user_profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-            profile: (!profileError && profile) ? profile : undefined,
-          });
+          await setUserData(session.user);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
+        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+          // Update user data on token refresh
+          await setUserData(session.user);
         }
+        
         setIsLoading(false);
       }
     );
 
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
-  }, []); // Remove dependencies to run only once
+  }, [mounted, checkAuth, supabase]);
 
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
+      // Attempting login
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error('❌ Auth: Login error:', error.message);
         throw error;
       }
 
+      if (!data.user) {
+        throw new Error('Login failed - no user returned');
+      }
+
+      // Login successful
       // The onAuthStateChange listener will handle setting the user
-      router.push('/chat');
+      // But we can also set it immediately for better UX
+      await setUserData(data.user);
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('❌ Auth: Login failed:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -168,38 +166,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, password: string, username?: string) => {
     try {
       setIsLoading(true);
+      // Attempting registration
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (error) {
+        console.error('❌ Auth: Registration error:', error.message);
         throw error;
       }
 
-      // Create user profile if user was created
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('user_profiles')
-          .insert([
-            {
-              id: data.user.id,
-              username: username || email.split('@')[0] || null,
-              full_name: username || email.split('@')[0] || null,
-              avatar_url: null,
-              role: null,
-            }
-          ]);
-
-        if (profileError) {
-          console.error('Failed to create user profile:', profileError);
-        }
+      if (!data.user) {
+        throw new Error('Registration failed - no user returned');
       }
 
-      // The onAuthStateChange listener will handle setting the user
-      router.push('/chat');
+      // Create user profile
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .insert([
+          {
+            id: data.user.id,
+            username: username || email.split('@')[0] || null,
+            full_name: username || email.split('@')[0] || null,
+            avatar_url: null,
+            role: null,
+          }
+        ]);
+
+      if (profileError) {
+        console.error('⚠️ Auth: Profile creation error:', profileError.message);
+        // Don't throw here - user is created, profile is optional
+      }
+
+      // Registration successful
+      // Set user data immediately
+      await setUserData(data.user);
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error('❌ Auth: Registration failed:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -208,17 +213,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
+      // Logging out
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('❌ Auth: Logout error:', error.message);
+        throw error;
+      }
+      
       setUser(null);
+      // Logout successful
       router.push('/login');
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('❌ Auth: Logout failed:', error);
+      // Even if logout fails, clear local state
+      setUser(null);
+      router.push('/login');
     }
   };
 
   const value: AuthContextType = {
     user,
-    isLoading,
+    isLoading: isLoading || !mounted, // Loading until mounted
     isAuthenticated: !!user,
     login,
     register,

@@ -58,6 +58,10 @@ export default function CalendarPage({ className }: { className?: string }) {
     isDateToday,
     getDaysForMonthView,
   } = useCalendar()
+  
+  console.log('📱 CalendarPage - viewMode:', viewMode);
+  console.log('📅 CalendarPage - currentDate:', currentDate);
+  console.log('🎯 CalendarPage - eventsForSelectedDayInDayView:', eventsForSelectedDayInDayView);
 
   const [addEventInitialDate, setAddEventInitialDate] = useState<Date | undefined>(undefined)
 

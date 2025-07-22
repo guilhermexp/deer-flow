@@ -40,10 +40,8 @@ export interface WebhookRequest {
   metadata?: Record<string, unknown>
 }
 
-// URL padrão do webhook; pode ser sobrescrita via variável de ambiente
-const WEBHOOK_URL =
-  process.env.NEXT_PUBLIC_WEBHOOK_URL ??
-  "https://primary-production-f504.up.railway.app/webhook-test/AssistenteNeuroDesk"
+// URL do proxy local para evitar problemas de CORS
+const WEBHOOK_URL = '/api/webhook-proxy'
 
 export async function sendToWebhook(data: WebhookData): Promise<WebhookResponse> {
   try {

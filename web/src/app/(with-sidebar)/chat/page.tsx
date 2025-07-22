@@ -10,7 +10,7 @@ import type { HistoryItem } from "~/core/store/history-store";
 
 import { HistoryPanel } from "./components/history-panel";
 
-const Main = dynamic(() => import("./main"), {
+const Main = dynamic(() => import("./chat-with-supabase"), {
   ssr: false,
   loading: () => (
     <div className="flex h-full w-full items-center justify-center">

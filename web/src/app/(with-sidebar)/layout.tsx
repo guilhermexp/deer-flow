@@ -1,8 +1,8 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type React from "react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 import AppHeader from "~/components/jarvis/app-header";
 import { AppSidebar } from "~/components/jarvis/app-sidebar-optimized";
@@ -32,16 +32,41 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const pageTitle = routeTitles[pathname] ?? "";
-  const { user } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
   
   const toggleMobileSidebar = useCallback(() => {
     setIsMobileSidebarOpen(prev => !prev);
   }, []);
 
+  // Verificar autenticação
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isLoading, isAuthenticated, router]);
+
   // Páginas que precisam de altura total
   const fullHeightPages = ['/projects', '/chat', '/notes', '/health'];
   const isFullHeightPage = fullHeightPages.includes(pathname);
+  
+  // Mostrar loading enquanto verifica autenticação
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#0a0a0a]">
+        <div className="text-center">
+          <div className="text-2xl mb-2">🦌</div>
+          <div className="text-muted-foreground">Verificando autenticação...</div>
+        </div>
+      </div>
+    );
+  }
+  
+  // Se não está autenticado, não renderiza nada (será redirecionado)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="bg-[#0a0a0a] text-foreground min-h-screen">

@@ -4,19 +4,12 @@ import type { CalendarEvent, CalendarViewMode, CalendarFilter } from "../lib/typ
 import { CALENDAR_HOURS } from "../lib/constants" // Importa a nova constante
 
 /**
- * Converte uma string de data no formato 'YYYY-MM-DD' para um objeto Date,
- * garantindo que seja interpretada no fuso horário local do usuário, e não em UTC.
- * Isso evita o bug comum onde a data pode pular para o dia anterior.
- * @param dateString A data no formato 'YYYY-MM-DD'.
- * @returns Um objeto Date representando a meia-noite no fuso horário local.
+ * Converte uma string de data ISO para um objeto Date.
+ * @param dateString A data no formato ISO (pode incluir timestamp).
+ * @returns Um objeto Date.
  */
 const parseLocalDate = (dateString: string): Date => {
-  const parts = dateString.split("-").map(Number)
-  const year = parts[0] ?? new Date().getFullYear()
-  const month = parts[1] ?? 1
-  const day = parts[2] ?? 1
-  // Criar a data com componentes numéricos a interpreta como local.
-  return new Date(year, month - 1, day)
+  return new Date(dateString)
 }
 
 export const useCalendarDisplayLogic = (
@@ -25,6 +18,11 @@ export const useCalendarDisplayLogic = (
   monthDisplayDate: Date, // Para MonthView
   startOfWeekDateForWeekView: Date, // Para WeekView
 ) => {
+  console.log('🎯 useCalendarDisplayLogic - Total de eventos recebidos:', allEvents.length);
+  if (allEvents.length > 0) {
+    console.log('📅 Primeiro evento:', allEvents[0]);
+  }
+  
   const [liveTime, setLiveTime] = useState(new Date())
   const [activeFilter, setActiveFilter] = useState<CalendarFilter>("all")
   const [viewMode, setViewMode] = useState<CalendarViewMode>("day")
@@ -48,12 +46,28 @@ export const useCalendarDisplayLogic = (
 
   const getEventsForSpecificDate = useCallback(
     (date: Date) => {
-      return filteredEvents.filter((event) => {
+      console.log('🔍 getEventsForSpecificDate chamado para:', date.toDateString());
+      console.log('📋 Total de eventos filtrados:', filteredEvents.length);
+      
+      const eventsForDate = filteredEvents.filter((event) => {
         if (!event.date) return false
         // CORREÇÃO: Usa a função de parsing local para evitar problemas de fuso horário.
         const eventDate = parseLocalDate(event.date)
-        return eventDate.toDateString() === date.toDateString()
+        const match = eventDate.toDateString() === date.toDateString()
+        
+        if (match) {
+          console.log('✅ Evento encontrado para a data:', {
+            title: event.title,
+            eventDate: eventDate.toDateString(),
+            targetDate: date.toDateString()
+          });
+        }
+        
+        return match
       })
+      
+      console.log(`📊 ${eventsForDate.length} eventos encontrados para ${date.toDateString()}`);
+      return eventsForDate;
     },
     [filteredEvents],
   )
