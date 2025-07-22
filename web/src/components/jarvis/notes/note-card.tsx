@@ -4,7 +4,7 @@ import React from "react"
 import { motion } from "framer-motion"
 import { Card, CardContent } from "~/components/ui/card"
 import { Badge } from "~/components/ui/badge"
-import { FileText, Play, Clock, HardDrive } from "lucide-react"
+import { FileText, Play, Clock, HardDrive, Youtube } from "lucide-react"
 import { cn } from "~/lib/utils"
 import { ThumbnailImage } from "./thumbnail-image"
 import type { Note } from "~/app/(with-sidebar)/notes/page"
@@ -19,6 +19,19 @@ interface NoteCardProps {
 
 const NoteCardComponent: React.FC<NoteCardProps> = ({ note, index, onNoteClick, getSourceIcon, getSourceColor }) => {
   const SourceIcon = getSourceIcon(note.source)
+  
+  // Debug log
+  React.useEffect(() => {
+    if (note.source === "YouTube") {
+      console.log('📺 YouTube Note Card:', { 
+        id: note.id,
+        title: note.title, 
+        mediaUrl: note.mediaUrl, 
+        youtubeId: note.youtubeId,
+        mediaType: note.mediaType
+      })
+    }
+  }, [note])
 
   return (
     <motion.article
@@ -41,6 +54,14 @@ const NoteCardComponent: React.FC<NoteCardProps> = ({ note, index, onNoteClick, 
             <div className="flex items-center justify-center h-full">
               <FileText className="h-16 w-16 text-gray-400 group-hover:scale-105 transition-transform duration-150" />
             </div>
+          ) : note.source === "YouTube" && note.youtubeId ? (
+            <ThumbnailImage
+              src={`https://img.youtube.com/vi/${note.youtubeId}/hqdefault.jpg`}
+              alt={note.title}
+              youtubeId={note.youtubeId}
+              className="group-hover:scale-105 transition-transform duration-150"
+              fallbackSrc={`https://img.youtube.com/vi/${note.youtubeId}/default.jpg`}
+            />
           ) : note.mediaUrl ? (
             <ThumbnailImage
               src={note.mediaUrl}
@@ -50,7 +71,11 @@ const NoteCardComponent: React.FC<NoteCardProps> = ({ note, index, onNoteClick, 
             />
           ) : (
             <div className="w-full h-full bg-white/[0.05] flex items-center justify-center group-hover:scale-105 transition-transform duration-150">
-              <span className="text-gray-400 text-xs">{note.title}</span>
+              {note.source === "YouTube" ? (
+                <Youtube className="h-16 w-16 text-red-400 opacity-50" />
+              ) : (
+                <span className="text-gray-400 text-xs">{note.title}</span>
+              )}
             </div>
           )}
           {note.mediaType === "video" && (

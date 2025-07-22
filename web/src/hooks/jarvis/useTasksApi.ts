@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { dashboardApi } from "~/core/api/dashboard"
 import type { Task as ApiTask } from "~/core/api/client"
+import { useAuth } from "~/core/contexts/auth-context"
 // Define Task type locally
 export interface Task {
   id: string;
@@ -53,6 +54,7 @@ export function useTasksApi() {
   const [tasksByDay, setTasksByDay] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth()
 
   const [currentDay, setCurrentDay] = useState<string>(() => {
     const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
@@ -75,10 +77,14 @@ export function useTasksApi() {
     }
   }, [])
 
-  // Load tasks on mount
+  // Load tasks on mount, but only after authentication is ready
   useEffect(() => {
-    loadTasks()
-  }, [loadTasks])
+    if (!isAuthLoading && isAuthenticated) {
+      loadTasks()
+    } else if (!isAuthLoading && !isAuthenticated) {
+      setIsLoading(false)
+    }
+  }, [loadTasks, isAuthLoading, isAuthenticated])
 
   // Create task
   const createTask = useCallback(async (task: Partial<Task>) => {

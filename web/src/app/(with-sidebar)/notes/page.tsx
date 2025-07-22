@@ -4,7 +4,7 @@ import dynamic from "next/dynamic"
 import * as React from "react"
 import { useState, useCallback } from "react"
 
-import { useNotesStorage } from "~/hooks/use-notes-storage"
+import { useNotesSupabase } from "~/hooks/use-notes-supabase"
 import {
   getSourceColor,
   getSourceIcon,
@@ -63,8 +63,8 @@ export default function NotesDashboardWithDetails() {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
   const [chatSessions, setChatSessions] = useState<Record<string, ChatSession>>({})
   
-  // Use async storage hook for notes
-  const { notes, loading, addNote } = useNotesStorage()
+  // Use Supabase hook for notes
+  const { notes, loading, addNote, isAuthenticated } = useNotesSupabase()
 
   const handleNoteClick = useCallback(
     (note: Note) => {
@@ -79,6 +79,8 @@ export default function NotesDashboardWithDetails() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSaveContext = useCallback(async (contextType: string, webhookResponse: WebhookResponse & { originalData?: any }) => {
+    console.log('🎯 handleSaveContext chamado:', { contextType, webhookResponse })
+    
     if (!webhookResponse.success) {
       console.error('Erro no processamento:', webhookResponse.error)
       return
@@ -86,9 +88,10 @@ export default function NotesDashboardWithDetails() {
 
     // Create new note from webhook response
     const newNote = createNoteFromWebhook(contextType, webhookResponse)
+    console.log('📝 Nova nota criada:', newNote)
 
-    // Add new note to list using async storage
-    addNote(newNote)
+    // Add new note to list using Supabase
+    await addNote(newNote)
     
     // Automatically select new note to show details
     setSelectedNote(newNote)
@@ -102,6 +105,20 @@ export default function NotesDashboardWithDetails() {
           <div className="animate-pulse">
             <div className="w-48 h-4 bg-white/10 rounded mx-auto mb-4"></div>
             <div className="w-32 h-4 bg-white/5 rounded mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show authentication message if user is not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center space-y-4">
+          <div className="text-gray-400">
+            <p className="text-lg font-medium mb-2">Faça login para acessar suas notas</p>
+            <p className="text-sm">Suas notas serão sincronizadas automaticamente</p>
           </div>
         </div>
       </div>

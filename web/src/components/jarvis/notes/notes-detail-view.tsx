@@ -16,6 +16,7 @@ import {
   Clock,
   HardDrive,
   FileText,
+  Youtube,
   type LucideIcon,
 } from "lucide-react"
 import AnimatedPageWrapperOptimized from "~/components/jarvis/animated-page-wrapper-optimized"
@@ -111,28 +112,28 @@ export function NotesDetailView({
   }, [chatSessions, onChatSessionsUpdate])
 
   return (
-    <AnimatedPageWrapperOptimized className="min-h-full">
-      <div className="bg-[#0a0a0a] text-gray-100">
-        <div className="flex">
-          <main className="flex-1 lg:mr-[24rem]">
-            <div>
+    <AnimatedPageWrapperOptimized className="h-full">
+      <div className="h-full bg-[#0a0a0a] text-gray-100">
+        <div className="flex h-full">
+          <main className="flex-1 lg:mr-[24rem] overflow-y-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="max-w-7xl mx-auto">
               {/* Back button and Title */}
-              <div className="mb-6 sm:mb-8 flex items-center gap-4">
+              <div className="mb-6 flex items-center gap-4">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={onBack}
                     aria-label="Voltar para dashboard"
-                    className="h-9 w-9 p-2 rounded-md flex-shrink-0 bg-white/[0.05] border-white/10 hover:bg-white/[0.08]"
+                    className="h-10 w-10 rounded-lg flex-shrink-0 bg-white/[0.05] border-white/10 hover:bg-white/[0.08] transition-colors"
                   >
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowLeft className="h-5 w-5" />
                   </Button>
                 </motion.div>
                 <motion.h1
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="text-2xl font-semibold text-white truncate"
+                  className="text-2xl lg:text-3xl font-semibold text-white truncate flex-1"
                 >
                   {selectedNote.title}
                 </motion.h1>
@@ -143,10 +144,10 @@ export function NotesDetailView({
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="mb-8 sm:mb-12"
+                className="mb-8"
               >
-                <div className="flex flex-col xl:flex-row gap-6 sm:gap-8 mb-6 sm:mb-8">
-                  <div className="w-full xl:w-2/3 flex-shrink-0">
+                <div className="flex flex-col lg:flex-row gap-6">
+                  <div className="w-full lg:w-2/3 flex-shrink-0">
                     <motion.figure
                       id={`youtube-${selectedNote.id}`}
                       whileHover={{ scale: 1.005 }}
@@ -161,23 +162,40 @@ export function NotesDetailView({
                               className="w-full h-full rounded-lg"
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                               allowFullScreen
-                              style={{ width: "100%", height: "100%", borderRadius: "0.5rem" }}
-                            ></iframe>
+                            />
                           ) : (
-                            <div
-                              className="w-full h-full bg-cover bg-center rounded-lg"
-                              style={{
-                                backgroundImage: selectedNote.mediaUrl ? `url(${selectedNote.mediaUrl})` : undefined,
-                              }}
-                            >
+                            <div className="relative w-full h-full">
+                              {selectedNote.mediaUrl ? (
+                                <Image
+                                  src={selectedNote.mediaUrl}
+                                  alt={selectedNote.title}
+                                  fill
+                                  className="object-cover rounded-lg"
+                                  priority
+                                  sizes="(min-width: 1280px) 66vw, 100vw"
+                                  onError={(e) => {
+                                    // Fallback para thumbnail padrão se a imagem falhar
+                                    const target = e.target as HTMLImageElement
+                                    if (selectedNote.youtubeId) {
+                                      target.src = `https://img.youtube.com/vi/${selectedNote.youtubeId}/hqdefault.jpg`
+                                    }
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-white/[0.05] flex items-center justify-center">
+                                  <Youtube className="h-20 w-20 text-gray-400" />
+                                </div>
+                              )}
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <motion.div
+                                <motion.button
                                   whileHover={{ scale: 1.1 }}
-                                  className="bg-blue-500/20 rounded-full p-3 sm:p-4 backdrop-blur-sm shadow-lg cursor-pointer border border-blue-500/50 hover:bg-blue-500/30"
+                                  whileTap={{ scale: 0.95 }}
+                                  className="bg-red-600/90 rounded-full p-4 backdrop-blur-sm shadow-lg cursor-pointer border border-red-500/50 hover:bg-red-600 transition-colors"
                                   onClick={() => setShowYoutubeIframe(true)}
+                                  aria-label="Reproduzir vídeo"
                                 >
-                                  <Play className="h-6 w-6 sm:h-8 text-white fill-white" />
-                                </motion.div>
+                                  <Play className="h-8 w-8 text-white fill-white" />
+                                </motion.button>
                               </div>
                             </div>
                           )}
@@ -218,8 +236,8 @@ export function NotesDetailView({
                   </div>
 
                   {/* Note Info Section */}
-                  <section className="flex-1 space-y-4 sm:space-y-5">
-                    <header className="flex items-center gap-3 mb-1">
+                  <section className="flex-1 space-y-4">
+                    <header className="flex items-center gap-3">
                       <motion.span whileHover={{ scale: 1.05 }} className="inline-flex">
                         <Badge
                           variant="outline"
@@ -285,7 +303,7 @@ export function NotesDetailView({
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto p-1 bg-white/[0.05] rounded-lg mb-8 sm:mb-10 border border-white/10">
+                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto p-1 bg-white/[0.05] rounded-lg mb-6 border border-white/10">
                     {["resumo", "transcricao", "podcast", "aprendizado"].map((tabValue) => (
                       <TabsTrigger
                         key={tabValue}
@@ -348,7 +366,7 @@ export function NotesDetailView({
                           <CardTitle className="text-lg font-semibold">Transcrição Completa</CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 pt-0">
-                          <ScrollArea className="h-[400px] sm:h-[500px] pr-3 sm:pr-4">
+                          <ScrollArea className="h-[400px] pr-3 sm:pr-4">
                             {selectedNote.transcript && selectedNote.transcript.trim() ? (
                               <div className="formatted-content text-sm">
                                 {formatWebhookText(selectedNote.transcript)}
@@ -434,7 +452,7 @@ export function NotesDetailView({
           </main>
 
           {/* Assistant Panel */}
-          <aside className="hidden lg:block fixed right-0 top-20 w-[24rem] h-[calc(100vh-5rem)] border-l border-white/10 bg-white/[0.05] backdrop-blur-md shadow-xl">
+          <aside className="hidden lg:block fixed right-0 top-0 w-[24rem] h-screen border-l border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md shadow-xl">
             <Suspense fallback={<div className="flex items-center justify-center h-full"><div className="animate-pulse text-gray-400">Carregando assistente...</div></div>}>
               <AssistantPanel
                 noteId={selectedNote.id}

@@ -102,7 +102,8 @@ export const extractRealThumbnail = (contextType: string, originalUrl: string, y
   switch (contextType) {
     case 'youtube':
       if (youtubeId) {
-        return `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`
+        // Usar hqdefault como padrão pois sempre existe
+        return `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
       }
       return ""
     
@@ -263,40 +264,101 @@ export const createNoteFromWebhook = (
   contextType: string,
   webhookResponse: WebhookResponse & { originalData?: { url?: string } }
 ): Note => {
+  // Debugging logs
+  console.log('🔍 createNoteFromWebhook - Input data:', {
+    contextType,
+    webhookResponse,
+    hasSuccess: webhookResponse.success,
+    summary: webhookResponse.summary,
+    resumo: webhookResponse.resumo,
+    transcript: webhookResponse.transcript,
+    transcricao: webhookResponse.transcricao,
+    title: webhookResponse.title,
+    titulo: webhookResponse.titulo
+  })
+
   const originalUrl = webhookResponse.originalData?.url ?? ""
   
   // Extract YouTube ID if it's a YouTube video
   let youtubeId: string | undefined
   if (contextType === 'youtube' && originalUrl) {
-    const match = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/.exec(originalUrl)
-    youtubeId = match ? match[1] : undefined
+    // Suporta múltiplos formatos de URLs do YouTube
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([^&\n?#\/]+)/,
+      /youtube\.com\/shorts\/([^&\n?#\/]+)/,
+      /m\.youtube\.com\/watch\?v=([^&\n?#\/]+)/
+    ]
+    
+    for (const pattern of patterns) {
+      const match = pattern.exec(originalUrl)
+      if (match) {
+        youtubeId = match[1]
+        break
+      }
+    }
+    
+    console.log('🎥 YouTube ID extraction:', { originalUrl, youtubeId })
   }
 
   // Extract thumbnail
   let thumbnailUrl = ""
   if (webhookResponse.thumbnail) {
     thumbnailUrl = webhookResponse.thumbnail
+  } else if (youtubeId) {
+    // Para YouTube, sempre usar a thumbnail do YouTube
+    thumbnailUrl = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
   } else {
     thumbnailUrl = extractRealThumbnail(contextType, originalUrl, youtubeId)
   }
+  
+  console.log('🖼️ Thumbnail extraction:', { 
+    contextType, 
+    hasWebhookThumbnail: !!webhookResponse.thumbnail,
+    youtubeId,
+    thumbnailUrl 
+  })
 
-  return {
+  // Extract AI summary and transcript with debugging
+  const aiSummary = webhookResponse.summary ?? webhookResponse.resumo ?? ""
+  const transcript = webhookResponse.transcript ?? webhookResponse.transcricao ?? ""
+  
+  console.log('📝 createNoteFromWebhook - Extracted content:', {
+    aiSummary: aiSummary ? `${aiSummary.substring(0, 100)}...` : 'EMPTY',
+    transcript: transcript ? `${transcript.substring(0, 100)}...` : 'EMPTY',
+    aiSummaryLength: aiSummary.length,
+    transcriptLength: transcript.length
+  })
+
+  const newNote: Note = {
     id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    title: webhookResponse.title ?? `Nova Nota - ${contextType}`,
-    description: "Nota processada automaticamente via IA",
+    title: webhookResponse.title ?? webhookResponse.titulo ?? `Nova Nota - ${contextType}`,
+    description: webhookResponse.description ?? "Nota processada automaticamente via IA",
     source: getSourceFromType(contextType),
     date: new Date().toLocaleDateString('pt-BR'),
     tags: [contextType],
     mediaType: getMediaTypeFromSource(contextType),
     mediaUrl: thumbnailUrl,
-    youtubeId,
-    aiSummary: webhookResponse.summary ?? webhookResponse.resumo ?? "",
-    transcript: webhookResponse.transcript ?? webhookResponse.transcricao ?? "",
+    youtubeId: youtubeId,
+    aiSummary,
+    transcript,
     podcastContent: "",
+    duration: webhookResponse.duration,
+    fileSize: webhookResponse.fileSize,
     webhookData: {
       type: contextType,
       originalUrl: originalUrl ?? undefined,
       processedAt: new Date().toISOString()
     }
   }
+
+  console.log('✅ createNoteFromWebhook - Final note object:', {
+    id: newNote.id,
+    title: newNote.title,
+    hasAiSummary: !!newNote.aiSummary,
+    hasTranscript: !!newNote.transcript,
+    aiSummaryPreview: newNote.aiSummary ? `${newNote.aiSummary.substring(0, 50)}...` : 'EMPTY',
+    transcriptPreview: newNote.transcript ? `${newNote.transcript.substring(0, 50)}...` : 'EMPTY'
+  })
+
+  return newNote
 }

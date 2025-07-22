@@ -19,6 +19,17 @@ export function useNotesStorage() {
         const stored = localStorage.getItem(NOTES_STORAGE_KEY);
         if (stored) {
           const parsedNotes = JSON.parse(stored) as Note[];
+          
+          // Debug: Verificar notas do YouTube
+          const youtubeNotes = parsedNotes.filter(note => note.source === 'YouTube');
+          console.log('📱 Loaded YouTube notes:', youtubeNotes.map(note => ({
+            id: note.id,
+            title: note.title,
+            youtubeId: note.youtubeId,
+            mediaUrl: note.mediaUrl,
+            mediaType: note.mediaType
+          })));
+          
           setNotes(parsedNotes);
         }
       }
@@ -43,6 +54,14 @@ export function useNotesStorage() {
   }, [notes, loading]);
 
   const addNote = (note: Note) => {
+    console.log('➕ Adding note to storage:', {
+      id: note.id,
+      title: note.title,
+      source: note.source,
+      youtubeId: note.youtubeId,
+      mediaUrl: note.mediaUrl,
+      mediaType: note.mediaType
+    });
     setNotes((prevNotes) => [note, ...prevNotes]);
   };
 

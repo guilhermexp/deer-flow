@@ -11,7 +11,7 @@ import { BloodPressureCard } from "./blood-pressure-card";
 import { NextWorkoutCard } from "./next-workout-card";
 import { HealthSidebar } from "./health-sidebar";
 import { HealthTabs } from "./health-tabs";
-import { useHealthDataJWT } from "./hooks/use-health-data-jwt";
+import { useHealthDataJWT } from "./hooks/use-health-data";
 import DashboardSettingsModal from "../dashboard-settings-modal";
 import type { CardConfig } from "../dashboard-settings-modal";
 

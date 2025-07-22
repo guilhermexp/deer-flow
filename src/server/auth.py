@@ -62,7 +62,7 @@ async def get_current_user(
     token: Optional[str] = Depends(oauth2_scheme), 
     db: Session = Depends(get_db)
 ) -> User:
-    """Get the current authenticated user. Supports both JWT and Supabase tokens."""
+    """Get the current authenticated user using Supabase authentication only."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -77,30 +77,20 @@ async def get_current_user(
     if not actual_token:
         raise credentials_exception
     
-    # Try JWT authentication first (for backward compatibility)
-    try:
-        payload = jwt.decode(actual_token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        token_type: str = payload.get("type")
-
-        if username is not None and token_type == "access":
-            user = db.query(User).filter(User.username == username).first()
-            if user:
-                return user
-    except JWTError:
-        # JWT validation failed, try Supabase
-        pass
+    # Use Supabase authentication only
+    if not supabase_auth.supabase:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Authentication service not available",
+        )
+        
+    supabase_user = await supabase_auth.verify_token(actual_token)
+    if not supabase_user:
+        raise credentials_exception
     
-    # Try Supabase authentication
-    if supabase_auth.supabase:
-        supabase_user = await supabase_auth.verify_token(actual_token)
-        if supabase_user:
-            # Get or create local user
-            user = await supabase_auth.get_or_create_local_user(supabase_user, db)
-            return user
-    
-    # If both methods failed, raise exception
-    raise credentials_exception
+    # Get or create local user
+    user = await supabase_auth.get_or_create_local_user(supabase_user, db)
+    return user
 
 
 async def get_current_active_user(

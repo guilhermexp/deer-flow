@@ -21,6 +21,11 @@ export const ThumbnailImage: React.FC<ThumbnailImageProps> = ({
 }) => {
   const [currentSrc, setCurrentSrc] = useState(src)
   const [hasError, setHasError] = useState(false)
+  
+  // Debug log
+  React.useEffect(() => {
+    console.log('🖼️ ThumbnailImage:', { src, alt, youtubeId, currentSrc })
+  }, [src, alt, youtubeId, currentSrc])
 
   const handleError = () => {
     if (!hasError) {
@@ -69,6 +74,8 @@ export const ThumbnailImage: React.FC<ThumbnailImageProps> = ({
           sizes="(max-width: 768px) 100vw, 33vw"
           className="object-cover rounded-lg"
           onError={handleError}
+          priority
+          unoptimized={currentSrc.includes('youtube.com')}
         />
       )}
       

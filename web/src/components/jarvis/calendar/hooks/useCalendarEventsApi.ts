@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react"
 import { calendarApi } from "~/core/api/calendar"
 import type { CalendarEvent as ApiEvent } from "~/core/api/calendar"
 import type { CalendarEvent, NewEventFormData } from "../lib/types"
+import { useAuth } from "~/core/contexts/auth-context"
 
 // Helper para formatar a hora
 const formatHourForDisplay = (hour: number): string => {
@@ -70,6 +71,7 @@ export const useCalendarEventsApi = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth()
 
   // Load events from API
   const loadEvents = useCallback(async () => {
@@ -98,10 +100,14 @@ export const useCalendarEventsApi = () => {
     }
   }, [])
 
-  // Load events on mount
+  // Load events on mount, but only after authentication is ready
   useEffect(() => {
-    loadEvents()
-  }, [loadEvents])
+    if (!isAuthLoading && isAuthenticated) {
+      loadEvents()
+    } else if (!isAuthLoading && !isAuthenticated) {
+      setIsLoading(false)
+    }
+  }, [loadEvents, isAuthLoading, isAuthenticated])
 
   // Add event
   const addEvent = useCallback(async (newEventData: NewEventFormData) => {

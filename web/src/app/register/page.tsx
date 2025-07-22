@@ -46,7 +46,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      await register(username, email, password);
+      await register(email, password, username);
       router.push('/chat');
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');

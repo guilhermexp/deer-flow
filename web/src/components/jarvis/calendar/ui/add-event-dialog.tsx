@@ -217,7 +217,7 @@ export function AddEventDialog({ open, setOpen, onAddEvent, initialDate }: AddEv
                             <SelectValue placeholder="Hora" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-popover border-border">
+                        <SelectContent className="bg-popover border-border z-[100]">
                           {availableHours.map((hour) => (
                             <SelectItem key={hour} value={String(hour)} className="text-gray-100">
                               {`${String(hour).padStart(2, "0")}:00`}
@@ -241,7 +241,7 @@ export function AddEventDialog({ open, setOpen, onAddEvent, initialDate }: AddEv
                             <SelectValue placeholder="Duração" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-popover border-border">
+                        <SelectContent className="bg-popover border-border z-[100]">
                           {availableDurations.map((dur) => (
                             <SelectItem key={dur} value={String(dur)} className="text-gray-100">
                               {dur}h
@@ -267,7 +267,7 @@ export function AddEventDialog({ open, setOpen, onAddEvent, initialDate }: AddEv
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-popover border-border">
+                        <SelectContent className="bg-popover border-border z-[100]">
                           {CALENDAR_FILTERS.filter((f) => f.value !== "all").map((catFilter) => (
                             <SelectItem
                               key={catFilter.value}
@@ -295,7 +295,7 @@ export function AddEventDialog({ open, setOpen, onAddEvent, initialDate }: AddEv
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-popover border-border">
+                        <SelectContent className="bg-popover border-border z-[100]">
                           {EVENT_COLOR_NAMES.map((colorName) => (
                             <SelectItem key={colorName} value={colorName} className="text-gray-100">
                               <div className="flex items-center gap-2">

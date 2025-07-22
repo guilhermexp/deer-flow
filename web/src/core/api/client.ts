@@ -4,7 +4,7 @@
 import axios, { AxiosError } from 'axios';
 import { env } from '~/env.js';
 
-const API_URL = env.NEXT_PUBLIC_API_URL || 'http://localhost:9090/api';
+const API_URL = env.NEXT_PUBLIC_API_URL || 'http://localhost:8005/api';
 
 // Create axios instance
 export const apiClient = axios.create({
@@ -14,50 +14,37 @@ export const apiClient = axios.create({
   },
 });
 
-// Token management
-let accessToken: string | null = null;
-let refreshToken: string | null = null;
+// Token management removed - using Supabase authentication only
 
-export const setTokens = (access: string, refresh: string) => {
-  accessToken = access;
-  refreshToken = refresh;
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('access_token', access);
-    localStorage.setItem('refresh_token', refresh);
-  }
-};
-
-export const getTokens = () => {
-  if (typeof window !== 'undefined' && !accessToken) {
-    accessToken = localStorage.getItem('access_token');
-    refreshToken = localStorage.getItem('refresh_token');
-  }
-  return { accessToken, refreshToken };
-};
-
-export const clearTokens = () => {
-  accessToken = null;
-  refreshToken = null;
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-  }
-};
-
-// Request interceptor to add auth token
-// DISABLED - Using Supabase authentication instead
-/*
+// Request interceptor to add Supabase auth token
 apiClient.interceptors.request.use(
-  (config) => {
-    const { accessToken } = getTokens();
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+  async (config) => {
+    // Get Supabase session token
+    if (typeof window !== 'undefined') {
+      try {
+        // Import dynamically to avoid SSR issues
+        const { getSupabaseClient } = await import('~/lib/supabase/client');
+        const supabase = getSupabaseClient();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Supabase getSession error:', error);
+        }
+        
+        if (session?.access_token) {
+          config.headers.Authorization = `Bearer ${session.access_token}`;
+          console.log('🔐 API Request: Added Supabase token to', config.url);
+        } else {
+          console.warn('⚠️ API Request: No Supabase session available for', config.url);
+        }
+      } catch (error) {
+        console.error('Failed to get Supabase session:', error);
+      }
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
-*/
 
 // Response interceptor - only for error handling, no JWT refresh
 apiClient.interceptors.response.use(
@@ -77,11 +64,6 @@ export interface User {
   is_active: boolean;
 }
 
-export interface LoginResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-}
 
 export interface Task {
   id: number;

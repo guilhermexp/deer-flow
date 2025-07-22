@@ -10,7 +10,7 @@ from typing import Annotated, List, Optional, cast
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Depends
 
 # Load environment variables
 load_dotenv()
@@ -59,6 +59,8 @@ from src.server.conversations_routes import router as conversations_router
 
 # Import database initialization
 from src.database.base import create_tables
+from src.database.models import User
+from src.server.auth import get_current_active_user
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +120,10 @@ app.include_router(conversations_router)
 
 
 @app.post("/api/chat/stream")
-async def chat_stream(request: ChatRequest):
+async def chat_stream(
+    request: ChatRequest,
+    current_user: User = Depends(get_current_active_user),
+):
     thread_id = request.thread_id
     if thread_id == "__default__":
         thread_id = str(uuid4())
@@ -273,7 +278,10 @@ def _make_event(event_type: str, data: dict[str, any]):
 
 
 @app.post("/api/tts")
-async def text_to_speech(request: TTSRequest):
+async def text_to_speech(
+    request: TTSRequest,
+    current_user: User = Depends(get_current_active_user),
+):
     """Convert text to speech using volcengine TTS API."""
     app_id = os.getenv("VOLCENGINE_TTS_APPID", "")
     if not app_id:
@@ -329,7 +337,10 @@ async def text_to_speech(request: TTSRequest):
 
 
 @app.post("/api/podcast/generate")
-async def generate_podcast(request: GeneratePodcastRequest):
+async def generate_podcast(
+    request: GeneratePodcastRequest,
+    current_user: User = Depends(get_current_active_user),
+):
     try:
         report_content = request.content
         logger.info(
@@ -362,7 +373,10 @@ async def generate_podcast(request: GeneratePodcastRequest):
 
 
 @app.post("/api/podcast/generate-stream")
-async def generate_podcast_stream(request: GeneratePodcastRequest):
+async def generate_podcast_stream(
+    request: GeneratePodcastRequest,
+    current_user: User = Depends(get_current_active_user),
+):
     """Generate podcast with streaming progress updates"""
 
     async def podcast_stream_generator():
@@ -462,7 +476,10 @@ async def generate_podcast_stream(request: GeneratePodcastRequest):
 
 
 @app.post("/api/ppt/generate")
-async def generate_ppt(request: GeneratePPTRequest):
+async def generate_ppt(
+    request: GeneratePPTRequest,
+    current_user: User = Depends(get_current_active_user),
+):
     try:
         report_content = request.content
         print(report_content)
@@ -481,7 +498,10 @@ async def generate_ppt(request: GeneratePPTRequest):
 
 
 @app.post("/api/prose/generate")
-async def generate_prose(request: GenerateProseRequest):
+async def generate_prose(
+    request: GenerateProseRequest,
+    current_user: User = Depends(get_current_active_user),
+):
     try:
         sanitized_prompt = request.prompt.replace("\r\n", "").replace("\n", "")
         logger.info(f"Generating prose for prompt: {sanitized_prompt}")
@@ -505,7 +525,10 @@ async def generate_prose(request: GenerateProseRequest):
 
 
 @app.post("/api/prompt/enhance")
-async def enhance_prompt(request: EnhancePromptRequest):
+async def enhance_prompt(
+    request: EnhancePromptRequest,
+    current_user: User = Depends(get_current_active_user),
+):
     try:
         sanitized_prompt = request.prompt.replace("\r\n", "").replace("\n", "")
         logger.info(f"Enhancing prompt: {sanitized_prompt}")

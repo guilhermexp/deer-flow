@@ -43,7 +43,7 @@ export interface WebhookRequest {
 // URL padrão do webhook; pode ser sobrescrita via variável de ambiente
 const WEBHOOK_URL =
   process.env.NEXT_PUBLIC_WEBHOOK_URL ??
-  "https://auto-n8n.brnfyg.easypanel.host/webhook/6ee109b8-8f6c-4530-a360-a62b18887422"
+  "https://primary-production-f504.up.railway.app/webhook-test/AssistenteNeuroDesk"
 
 export async function sendToWebhook(data: WebhookData): Promise<WebhookResponse> {
   try {
@@ -90,7 +90,42 @@ export async function sendToWebhook(data: WebhookData): Promise<WebhookResponse>
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const result = await response.json()
+    // Check if response has content
+    const contentType = response.headers.get('content-type')
+    const contentLength = response.headers.get('content-length')
+    
+    // Check if response is empty or not JSON
+    if (!contentType || !contentType.includes('application/json') || contentLength === '0') {
+      console.log('⚠️ Webhook returned non-JSON or empty response')
+      return {
+        success: true,
+        summary: 'Webhook executado com sucesso',
+        transcript: '',
+        title: 'Resposta do webhook'
+      }
+    }
+
+    let result
+    try {
+      const text = await response.text()
+      if (!text || text.trim() === '') {
+        console.log('⚠️ Webhook returned empty response body')
+        return {
+          success: true,
+          summary: 'Webhook executado com sucesso',
+          transcript: '',
+          title: 'Resposta do webhook'
+        }
+      }
+      result = JSON.parse(text)
+    } catch (parseError) {
+      console.error('❌ Error parsing webhook response:', parseError)
+      console.log('Response text:', await response.text())
+      return {
+        success: false,
+        error: 'Resposta inválida do webhook'
+      }
+    }
     
     // Log da resposta completa para debug
     console.log('🔄 Resposta completa do webhook:', result)
