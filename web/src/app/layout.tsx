@@ -16,7 +16,6 @@ import { AuthProvider } from "~/core/contexts/auth-context";
 import { env } from "~/env.js";
 
 import { Toaster } from "../components/deer-flow/toaster";
-import { SupabaseStatus } from "~/components/supabase-status";
 
 
 export const metadata: Metadata = {
@@ -57,7 +56,6 @@ export default async function RootLayout({
           <ThemeProviderWrapper>
             <AuthProvider>
               <AnimationProvider>
-                <SupabaseStatus />
                 {children}
               </AnimationProvider>
             </AuthProvider>

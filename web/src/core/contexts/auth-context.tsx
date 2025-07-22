@@ -27,7 +27,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const supabase = getSupabaseClient();
 
@@ -41,96 +40,131 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle();
 
       if (error) {
-        // Profile fetch error (non-critical)
+        console.warn('Profile fetch failed (non-critical):', error.message);
         return null;
       }
 
       return profile;
     } catch (error) {
-      // Keep console.error for critical errors
-      console.error('❌ Auth: Exception fetching profile:', error);
+      console.warn('Profile fetch exception:', error);
       return null;
     }
   };
 
   // Helper function to set user data
   const setUserData = async (supabaseUser: SupabaseUser) => {
-    const profile = await getUserProfile(supabaseUser.id);
-    const userData: User = {
-      id: supabaseUser.id,
-      email: supabaseUser.email || '',
-      profile: profile || undefined,
-    };
-    setUser(userData);
-    return userData;
+    try {
+      const profile = await getUserProfile(supabaseUser.id);
+      const userData: User = {
+        id: supabaseUser.id,
+        email: supabaseUser.email || '',
+        profile: profile || undefined,
+      };
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      console.error('Error setting user data:', error);
+      // Set basic user data without profile
+      const userData: User = {
+        id: supabaseUser.id,
+        email: supabaseUser.email || '',
+      };
+      setUser(userData);
+      return userData;
+    }
   };
 
   const checkAuth = useCallback(async () => {
-    if (!mounted) return;
-
     try {
-      // Checking authentication
+      console.log('🔍 Checking authentication...');
       
-      // Get session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      // Get session with 5 second timeout
+      const sessionPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Session check timeout')), 5000)
+      );
+      
+      const { data: { session }, error: sessionError } = await Promise.race([
+        sessionPromise,
+        timeoutPromise
+      ]) as any;
       
       if (sessionError) {
-        console.error('❌ Auth: Session error:', sessionError.message);
+        console.error('❌ Session error:', sessionError.message);
         setUser(null);
+        setIsLoading(false);
         return;
       }
       
       if (!session || !session.user) {
-        // No active session
+        console.log('📤 No active session found');
         setUser(null);
+        setIsLoading(false);
         return;
       }
 
-      // Valid session found
-      await setUserData(session.user);
-      // User data loaded
+      console.log('✅ Valid session found, setting user data');
+      // Set basic user data immediately
+      const userData: User = {
+        id: session.user.id,
+        email: session.user.email || '',
+      };
+      setUser(userData);
+      setIsLoading(false);
+      
+      // Load profile in background (non-blocking)
+      getUserProfile(session.user.id).then(profile => {
+        if (profile) {
+          setUser(prev => prev ? { ...prev, profile } : userData);
+        }
+      }).catch(err => {
+        console.warn('Profile load failed:', err);
+      });
+      
     } catch (error) {
-      console.error('❌ Auth: Exception during auth check:', error);
+      console.error('❌ Auth check failed:', error);
       setUser(null);
-    } finally {
       setIsLoading(false);
     }
-  }, [mounted, supabase]);
+  }, [supabase]);
 
-  // Setup effect - runs once after mount
+  // Initialize auth check on mount
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    let mounted = true;
+    
+    const initAuth = async () => {
+      if (mounted) {
+        await checkAuth();
+      }
+    };
 
-  // Auth check effect - runs after mounted
-  useEffect(() => {
-    if (!mounted) return;
-
-    // Check auth immediately
-    checkAuth();
+    initAuth();
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        // Auth state changed: event
+        if (!mounted) return;
+        
+        console.log('🔄 Auth state changed:', event);
         
         if (event === 'SIGNED_IN' && session?.user) {
           await setUserData(session.user);
+          setIsLoading(false);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
+          setIsLoading(false);
         } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-          // Update user data on token refresh
           await setUserData(session.user);
+          setIsLoading(false);
         }
-        
-        setIsLoading(false);
       }
     );
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
-  }, [mounted, checkAuth, supabase]);
+  }, [checkAuth, supabase]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -234,7 +268,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value: AuthContextType = {
     user,
-    isLoading: isLoading || !mounted, // Loading until mounted
+    isLoading,
     isAuthenticated: !!user,
     login,
     register,

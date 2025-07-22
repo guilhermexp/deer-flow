@@ -119,6 +119,12 @@ app.include_router(notes_router)
 app.include_router(conversations_router)
 
 
+@app.get("/health")
+async def health_check():
+    """Simple health check endpoint"""
+    return {"status": "ok", "message": "DeerFlow API is running"}
+
+
 @app.post("/api/chat/stream")
 async def chat_stream(
     request: ChatRequest,
