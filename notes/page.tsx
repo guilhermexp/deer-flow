@@ -91,7 +91,7 @@ export default function NotesDashboardWithDetails({ className }: NotesDashboardW
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSaveContext = useCallback(async (contextType: string, webhookResponse: WebhookResponse & { originalData?: any }) => {
     if (!webhookResponse.success) {
-      console.error('Erro no processamento:', webhookResponse.error)
+      // Error processing webhook
       return
     }
 

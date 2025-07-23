@@ -73,13 +73,13 @@ async function getCurrentUser() {
   
   const { data: { session }, error } = await supabase.auth.getSession();
   if (error || !session) {
-    console.error('Erro ao obter sessão:', error);
+    // Error getting session
     throw new Error('Usuário não autenticado');
   }
   
   // Verificar se o user existe e tem id
   if (!session.user || !session.user.id) {
-    console.error('Sessão inválida:', session);
+    // Invalid session
     throw new Error('Sessão de usuário inválida');
   }
   
@@ -94,7 +94,6 @@ export const healthService = {
     
     const today = new Date().toISOString().split('T')[0];
     
-    console.log('🔍 Buscando dados de saúde:', { userId: user.id, date: today });
     
     const { data, error } = await supabase
       .from('health_data')
@@ -104,10 +103,8 @@ export const healthService = {
       .maybeSingle();
     
     if (error) {
-      console.error('Erro ao buscar dados de saúde:', error);
       // Se for erro de RLS, retornar null ao invés de lançar erro
       if (error.message?.includes('row-level security') || error.code === 'PGRST301') {
-        console.warn('⚠️ Erro de RLS ao buscar dados de saúde, retornando null');
         return null;
       }
       throw error;
@@ -129,10 +126,8 @@ export const healthService = {
       .maybeSingle();
     
     if (error) {
-      console.error('Erro ao buscar dados de saúde por data:', error);
       // Se for erro de RLS, retornar null ao invés de lançar erro
       if (error.message?.includes('row-level security') || error.code === 'PGRST301') {
-        console.warn('⚠️ Erro de RLS ao buscar dados de saúde, retornando null');
         return null;
       }
       throw error;
@@ -202,10 +197,8 @@ export const healthService = {
       .single();
     
     if (error) {
-      console.error('Erro ao criar dados de saúde:', error);
       // Se for erro de RLS, retornar dados padrão ao invés de lançar erro
       if (error.message?.includes('row-level security') || error.code === 'PGRST301') {
-        console.warn('⚠️ Erro de RLS ao criar dados de saúde, retornando dados padrão');
         return mergedData;
       }
       throw error;
