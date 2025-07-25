@@ -27,7 +27,7 @@ export const setupService = {
   async checkTableExists(tableName: string): Promise<boolean> {
     // Se já verificamos, usar cache
     if (this.tablesChecked && this.tableStatus.has(tableName)) {
-      return this.tableStatus.get(tableName) || false;
+      return this.tableStatus.get(tableName) ?? false;
     }
 
     const supabase = getSupabaseClient();

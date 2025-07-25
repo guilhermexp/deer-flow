@@ -62,6 +62,7 @@ from src.server.conversations_routes import router as conversations_router
 from src.database.base import create_tables
 from src.database.models import User
 from src.server.auth import get_current_active_user
+from src.server.supabase_client import get_supabase_client
 
 logger = logging.getLogger(__name__)
 
@@ -149,6 +150,7 @@ async def chat_stream(
             request.report_style,
             request.enable_deep_thinking,
             request.model,
+            current_user,
         ),
         media_type="text/event-stream",
         headers={
@@ -173,8 +175,11 @@ async def _astream_workflow_generator(
     report_style: ReportStyle,
     enable_deep_thinking: bool,
     selected_model: Optional[str],
+    current_user: Optional[User] = None,
 ):
     try:
+        # Obter cliente Supabase (pode ser None se não configurado)
+        supabase_client = get_supabase_client()
         input_ = {
             "messages": messages,
             "plan_iterations": 0,
@@ -192,8 +197,22 @@ async def _astream_workflow_generator(
                 resume_msg += f" {messages[-1]['content']}"
             input_ = Command(resume=resume_msg)
 
+        # Criar ou obter conversa no Supabase
+        if supabase_client and current_user:
+            try:
+                await supabase_client.get_or_create_conversation(
+                    thread_id, 
+                    current_user.id,
+                    messages[-1]["content"][:100] if messages else "Nova conversa"
+                )
+            except Exception as e:
+                logger.warning(f"Erro ao criar conversa no Supabase: {e}")
+        
         # Keep track of last event time for keep-alive
         last_event_time = asyncio.get_event_loop().time()
+        
+        # Keep track of messages for Supabase
+        message_cache = {}
 
         async for agent, _, event_data in graph.astream(
             input_,
@@ -246,6 +265,27 @@ async def _astream_workflow_generator(
                 event_stream_message["finish_reason"] = (
                     message_chunk.response_metadata.get("finish_reason")
                 )
+            # Armazenar/atualizar mensagem no cache
+            message_id = event_stream_message["id"]
+            if message_id not in message_cache:
+                message_cache[message_id] = {
+                    "id": message_id,
+                    "role": event_stream_message["role"],
+                    "agent": event_stream_message.get("agent"),
+                    "content": "",
+                    "reasoning_content": "",
+                    "tool_calls": [],
+                    "finish_reason": None,
+                }
+            
+            # Atualizar cache com novo conteúdo
+            if event_stream_message.get("content"):
+                message_cache[message_id]["content"] += event_stream_message["content"]
+            if event_stream_message.get("reasoning_content"):
+                message_cache[message_id]["reasoning_content"] += event_stream_message["reasoning_content"]
+            if event_stream_message.get("finish_reason"):
+                message_cache[message_id]["finish_reason"] = event_stream_message["finish_reason"]
+            
             if isinstance(message_chunk, ToolMessage):
                 # Tool Message - Return the result of the tool call
                 event_stream_message["tool_call_id"] = message_chunk.tool_call_id
@@ -258,6 +298,7 @@ async def _astream_workflow_generator(
                     event_stream_message["tool_call_chunks"] = (
                         message_chunk.tool_call_chunks
                     )
+                    message_cache[message_id]["tool_calls"] = message_chunk.tool_calls
                     yield _make_event("tool_calls", event_stream_message)
                 elif message_chunk.tool_call_chunks:
                     # AI Message - Tool Call Chunks
@@ -268,6 +309,23 @@ async def _astream_workflow_generator(
                 else:
                     # AI Message - Raw message tokens
                     yield _make_event("message_chunk", event_stream_message)
+                
+                # Salvar no Supabase quando a mensagem estiver completa
+                if supabase_client and current_user and event_stream_message.get("finish_reason"):
+                    try:
+                        msg_data = message_cache[message_id]
+                        await supabase_client.save_message(
+                            conversation_id=thread_id,
+                            message_id=message_id,
+                            role=msg_data["role"],
+                            content=msg_data["content"],
+                            agent=msg_data.get("agent"),
+                            finish_reason=msg_data.get("finish_reason"),
+                            reasoning_content=msg_data.get("reasoning_content") or None,
+                            tool_calls=msg_data.get("tool_calls") or None,
+                        )
+                    except Exception as e:
+                        logger.warning(f"Erro ao salvar mensagem no Supabase: {e}")
 
             # Update last event time
             last_event_time = asyncio.get_event_loop().time()

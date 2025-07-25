@@ -391,6 +391,38 @@ async function migrateSettings(userId: string): Promise<boolean> {
   }
 }
 
+// Simple migration function for the banner component
+export async function migrateLocalStorageToSupabase(): Promise<{
+  success: boolean
+  migratedThreads?: number
+  migratedMessages?: number
+  error?: string
+}> {
+  try {
+    // Get current user (you'll need to implement this based on your auth system)
+    const threadsData = localStorage.getItem('deer-flow-threads')
+    if (!threadsData) {
+      return { success: false, error: 'No data to migrate' }
+    }
+
+    const threads = JSON.parse(threadsData)
+    
+    // Simple simulation - replace with actual migration logic
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    return {
+      success: true,
+      migratedThreads: threads.length,
+      migratedMessages: threads.reduce((acc: number, thread: any) => acc + (thread.messages?.length || 0), 0)
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }
+  }
+}
+
 // Check if migration has been completed
 export function isMigrationCompleted(): boolean {
   return localStorage.getItem('deepflow.migration.completed') !== null

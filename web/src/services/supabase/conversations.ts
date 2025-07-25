@@ -8,7 +8,8 @@ export const conversationsService = {
   async list(userId: string, options?: { 
     limit?: number
     offset?: number
-    archived?: boolean 
+    archived?: boolean
+    projectId?: string | null
   }) {
     const supabase = getSupabaseClient()
     
@@ -20,6 +21,14 @@ export const conversationsService = {
 
     if (options?.archived !== undefined) {
       query = query.eq('is_archived', options.archived)
+    }
+    
+    if (options?.projectId !== undefined) {
+      if (options.projectId === null) {
+        query = query.is('project_id', null)
+      } else {
+        query = query.eq('project_id', options.projectId)
+      }
     }
 
     if (options?.limit) {
@@ -86,6 +95,7 @@ export const conversationsService = {
   async update(conversationId: string, updates: {
     title?: string
     is_archived?: boolean
+    project_id?: string | null
     metadata?: unknown
   }) {
     const supabase = getSupabaseClient()

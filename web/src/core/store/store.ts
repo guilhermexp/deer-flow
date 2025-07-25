@@ -13,6 +13,7 @@ import { parseJSON } from "../utils";
 
 import { addToHistory, useHistoryStore } from "./history-store";
 import { getChatStreamSettings } from "./settings-store";
+import { storeEvents } from "./events";
 
 const THREAD_ID = nanoid();
 
@@ -55,11 +56,17 @@ export const useStore = create<{
       messageIds: [...state.messageIds, message.id],
       messages: new Map(state.messages).set(message.id, message),
     }));
+    
+    // Emitir evento após atualizar o store
+    storeEvents.emit({ type: 'MESSAGE_APPENDED', message });
   },
   updateMessage(message: Message) {
     set((state) => ({
       messages: new Map(state.messages).set(message.id, message),
     }));
+    
+    // Emitir evento após atualizar o store
+    storeEvents.emit({ type: 'MESSAGE_UPDATED', message });
   },
   updateMessages(messages: Message[]) {
     set((state) => {
@@ -67,6 +74,9 @@ export const useStore = create<{
       messages.forEach((m) => newMessages.set(m.id, m));
       return { messages: newMessages };
     });
+    
+    // Emitir evento após atualizar o store
+    storeEvents.emit({ type: 'MESSAGES_UPDATED', messages });
   },
   openResearch(researchId: string | null) {
     set({ openResearchId: researchId });

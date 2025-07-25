@@ -10,7 +10,9 @@ import { GlobalCommandPalette } from "~/components/jarvis/global-command-palette
 import PageTitleProvider from "~/components/jarvis/page-title-provider";
 import { RouteWarmup } from "~/components/jarvis/route-warmup";
 import { ServiceWorkerRegister } from "~/components/jarvis/service-worker-register";
+import { MigrationBanner } from "~/components/migration-banner";
 import { Toaster } from "~/components/ui/sonner";
+
 import { useAuth } from "~/core/contexts/auth-context";
 
 interface SidebarLayoutProps {
@@ -74,15 +76,16 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
       <ServiceWorkerRegister />
       <AppSidebar isMobileOpen={isMobileSidebarOpen} toggleMobileSidebar={toggleMobileSidebar} />
       <div className={`h-screen flex flex-col lg:pl-12 overflow-hidden bg-[#0a0a0a]`}>
+        <MigrationBanner />
         {pathname !== '/chat' && pathname !== '/dashboard' && pathname !== '/calendar' && pathname !== '/projects' && pathname !== '/notes' && pathname !== '/health' && (
           <AppHeader 
-            userName={user?.email?.split('@')[0] || "User"}
+            userName={user?.email?.split('@')[0] ?? "User"}
             pageTitle={pageTitle}
             onMenuClick={toggleMobileSidebar}
           />
         )}
         <PageTitleProvider
-          userName={user?.email?.split('@')[0] || "User"}
+          userName={user?.email?.split('@')[0] ?? "User"}
           toggleCommandPalette={() => setIsCommandPaletteOpen(prev => !prev)}
         >
           <main className={`flex-1 ${isFullHeightPage ? 'overflow-hidden' : 'px-4 sm:px-6 lg:px-8 py-3 lg:py-4 overflow-auto'}`}>

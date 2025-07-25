@@ -2,13 +2,24 @@
 # SPDX-License-Identifier: MIT
 
 import pytest
+import os
 from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime, timedelta
 from fastapi import HTTPException
 from jose import jwt
 
-from src.server.auth import get_current_user, SECRET_KEY, ALGORITHM
+from src.server.auth import get_current_user
 from src.database.models import User
+
+# Mock environment variables for testing
+@pytest.fixture(autouse=True)
+def mock_env_vars():
+    with patch.dict(os.environ, {
+        'JWT_SECRET_KEY': 'test-secret-key-for-testing-only',
+        'SUPABASE_URL': '',
+        'SUPABASE_ANON_KEY': ''
+    }):
+        yield
 
 
 class TestDualAuthentication:
@@ -16,14 +27,8 @@ class TestDualAuthentication:
     
     @pytest.mark.asyncio
     async def test_jwt_auth_success(self):
-        """Test successful JWT authentication."""
-        # Create a valid JWT token
-        token_data = {
-            "sub": "testuser",
-            "type": "access",
-            "exp": datetime.utcnow() + timedelta(minutes=30)
-        }
-        token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+        """Test successful Supabase authentication."""
+        token = "mock-supabase-token"
         
         # Mock database
         db = Mock()
@@ -34,19 +39,22 @@ class TestDualAuthentication:
             is_active=True
         )
         
-        query_mock = Mock()
-        query_mock.filter.return_value.first.return_value = mock_user
-        db.query.return_value = query_mock
-        
-        # Test authentication
-        result = await get_current_user(
-            authorization=None,
-            token=token,
-            db=db
-        )
-        
-        assert result == mock_user
-        db.query.assert_called_once_with(User)
+        # Mock Supabase auth verification
+        with patch('src.server.supabase_auth.supabase_auth.verify_token', new_callable=AsyncMock) as mock_verify:
+            with patch('src.server.supabase_auth.supabase_auth.get_or_create_local_user', new_callable=AsyncMock) as mock_get_user:
+                mock_verify.return_value = {"sub": "testuser", "email": "test@example.com"}
+                mock_get_user.return_value = mock_user
+                
+                # Test authentication
+                result = await get_current_user(
+                    authorization=None,
+                    token=token,
+                    db=db
+                )
+                
+                assert result == mock_user
+                mock_verify.assert_called_once_with(token)
+                mock_get_user.assert_called_once_with({"sub": "testuser", "email": "test@example.com"}, db)
     
     @pytest.mark.asyncio
     @patch('src.server.auth.supabase_auth')

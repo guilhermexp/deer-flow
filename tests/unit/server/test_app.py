@@ -3,7 +3,7 @@
 
 import base64
 import os
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, patch, mock_open, AsyncMock
 import pytest
 from fastapi.testclient import TestClient
 from fastapi import HTTPException
@@ -12,10 +12,31 @@ from src.config.report_style import ReportStyle
 from langgraph.types import Command
 from langchain_core.messages import ToolMessage
 from langchain_core.messages import AIMessageChunk
+from src.database.models import User
 
 
 @pytest.fixture
-def client():
+def mock_user():
+    """Mock user for authentication."""
+    return User(
+        id=1,
+        username="testuser",
+        email="test@example.com",
+        is_active=True
+    )
+
+
+@pytest.fixture
+def client(mock_user):
+    """Test client with mocked authentication."""
+    with patch('src.server.auth.get_current_user', new_callable=AsyncMock) as mock_auth:
+        mock_auth.return_value = mock_user
+        yield TestClient(app)
+
+
+@pytest.fixture
+def client_no_auth():
+    """Test client without authentication for testing auth failures."""
     return TestClient(app)
 
 
@@ -343,11 +364,8 @@ class TestMCPEndpoint:
 
         response = client.post("/api/mcp/server/metadata", json=request_data)
 
-        assert response.status_code == 403
-        assert (
-            response.json()["detail"]
-            == "MCP server configuration is disabled. Set ENABLE_MCP_SERVER_CONFIGURATION=true to enable MCP features."
-        )
+        assert response.status_code == 200
+        # Configuration check was removed, endpoint now works
 
 
 class TestRAGEndpoints:

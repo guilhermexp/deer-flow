@@ -8,6 +8,7 @@ import { useMemo, useEffect, useRef } from "react";
 import { useStore } from "~/core/store";
 import { cn } from "~/lib/utils";
 
+import { ChatHeader } from "./components/chat-header";
 import { MessagesBlock } from "./components/messages-block";
 import { ResearchBlock } from "./components/research-block";
 
@@ -33,19 +34,21 @@ export default function Main() {
     };
   }, []);
   return (
-    <div
-      className={cn(
-        "flex h-full w-full px-2 sm:px-4 pt-4 pb-4",
-        "justify-center bg-[#0a0a0a]",
-      )}
-    >
+    <div className="flex flex-col h-full w-full bg-[#0a0a0a]">
+      <ChatHeader />
       <div
         className={cn(
-          "flex transition-all duration-300 ease-out w-full",
-          !doubleColumnMode && "max-w-[768px]",
-          doubleColumnMode && "gap-4 md:gap-6 lg:gap-8 flex-col lg:flex-row max-w-[1600px]",
+          "flex h-full w-full px-2 sm:px-4 pt-4 pb-4",
+          "justify-center",
         )}
       >
+        <div
+          className={cn(
+            "flex transition-all duration-300 ease-out w-full",
+            !doubleColumnMode && "max-w-[768px]",
+            doubleColumnMode && "gap-4 md:gap-6 lg:gap-8 flex-col lg:flex-row max-w-[1600px]",
+          )}
+        >
         <MessagesBlock
           ref={messagesBlockRef}
           className={cn(
@@ -62,6 +65,7 @@ export default function Main() {
           )}
           researchId={openResearchId}
         />
+        </div>
       </div>
     </div>
   );
