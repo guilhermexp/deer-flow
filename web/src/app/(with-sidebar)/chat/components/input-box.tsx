@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowUp, Lightbulb, X, Paperclip } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 
+import { FileUpload } from "~/components/deer-flow/file-upload";
 import { Detective } from "~/components/deer-flow/icons/detective";
 import MessageInput, {
   type MessageInputRef,
@@ -13,7 +14,6 @@ import MessageInput, {
 import { ModelSelector } from "~/components/deer-flow/model-selector";
 import { ReportStyleDialog } from "~/components/deer-flow/report-style-dialog";
 import { Tooltip } from "~/components/deer-flow/tooltip";
-import { FileUpload } from "~/components/deer-flow/file-upload";
 import { BorderBeam } from "~/components/magicui/border-beam";
 import { Button } from "~/components/ui/button";
 import {

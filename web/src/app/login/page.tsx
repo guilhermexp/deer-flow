@@ -3,16 +3,18 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '~/core/contexts/auth-context';
+import { useState, useEffect } from 'react';
+
+import { Alert, AlertDescription } from '~/components/ui/alert';
 import { Button } from '~/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
-import { AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '~/components/ui/alert';
+import { useAuth } from '~/core/contexts/auth-context';
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -22,7 +24,7 @@ export default function LoginPage() {
   const { login, isAuthenticated } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectedFrom = searchParams.get('redirectedFrom') || '/dashboard';
+  const redirectedFrom = searchParams.get('redirectedFrom') ?? '/dashboard';
 
   // Redirecionar se já estiver autenticado
   useEffect(() => {
@@ -40,8 +42,9 @@ export default function LoginPage() {
       // Use email as username since backend accepts email in username field
       await login(email, password);
       router.push(redirectedFrom);
-    } catch (err: any) {
-      setError(err.message || 'Login failed. Please try again.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
+      setError(message ?? 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -92,7 +95,7 @@ export default function LoginPage() {
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link href="/register" className="text-primary hover:underline">
                 Sign up
               </Link>

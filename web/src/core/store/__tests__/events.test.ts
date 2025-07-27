@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { storeEvents } from '../events';
 import type { StoreEvent } from '../events';
 
@@ -87,7 +88,9 @@ describe('storeEvents', () => {
     });
 
     it('deve capturar erros em listeners', async () => {
-      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {
+        // Mock implementation to suppress console.error during tests
+      });
       const goodListener = vi.fn();
       
       storeEvents.on('SYNC_ERROR', () => {

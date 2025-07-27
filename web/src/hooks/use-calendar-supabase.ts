@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+
+import type { CalendarEvent, NewEventFormData } from '~/components/jarvis/calendar/lib/types';
 import { useAuth } from '~/core/contexts/auth-context';
 import { calendarService } from '~/services/supabase/calendar';
-import type { CalendarEvent, NewEventFormData } from '~/components/jarvis/calendar/lib/types';
 
 /**
  * Hook para gerenciar eventos de calendário com Supabase

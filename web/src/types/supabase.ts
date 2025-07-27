@@ -708,9 +708,7 @@ export type Database = {
       research_status: "planning" | "executing" | "completed" | "failed"
       user_role: "user" | "admin"
     }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+    CompositeTypes: Record<never, never>
   }
 }
 

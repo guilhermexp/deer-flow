@@ -3,10 +3,12 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { migrateLocalStorageToSupabase } from '../migration';
+
 import { getSupabaseClient } from '~/lib/supabase/client';
+
 import { conversationsService } from '../conversations';
 import { messagesService } from '../messages';
+import { migrateLocalStorageToSupabase } from '../migration';
 
 // Mock dos módulos
 vi.mock('~/lib/supabase/client', () => ({

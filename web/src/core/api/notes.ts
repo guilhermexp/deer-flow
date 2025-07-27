@@ -11,7 +11,7 @@ export interface Note {
   source_url?: string;
   transcript?: string;
   summary?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -23,7 +23,7 @@ export interface NoteCreate {
   source_url?: string;
   transcript?: string;
   summary?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface NoteUpdate extends Partial<NoteCreate> {}
@@ -40,7 +40,7 @@ export interface ExtractContentResponse {
   source_url: string;
   transcript: string;
   summary: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 export const notesApi = {

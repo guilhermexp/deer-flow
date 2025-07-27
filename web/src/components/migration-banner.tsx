@@ -5,12 +5,7 @@ import { AlertCircle, Check, Loader2, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { useAuth } from "~/core/contexts/auth-context";
-import {
-  migrateAllUserData,
-  isMigrationCompleted,
-  getMigrationStatus,
-  clearLocalStorageData
-} from "~/utils/migration/localStorage-to-supabase";
+import { migrateLocalStorageToSupabase } from "~/utils/migration/localStorage-to-supabase";
 
 export function MigrationBanner() {
   const { user } = useAuth();
@@ -18,19 +13,27 @@ export function MigrationBanner() {
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationError, setMigrationError] = useState<string | null>(null);
   const [migrationStatus, setMigrationStatus] = useState<any>(null);
+  const [dataCount, setDataCount] = useState({ threads: 0, messages: 0 });
   
   useEffect(() => {
-    // Verificar se há dados no localStorage e se a migração ainda não foi feita
-    if (user && !isMigrationCompleted()) {
-      const hasLocalData = 
-        localStorage.getItem('deerflow.history') ||
-        localStorage.getItem('jarvis-notes') ||
-        localStorage.getItem('jarvis-calendar-events') ||
-        localStorage.getItem('kanban-projects-v2') ||
-        localStorage.getItem('jarvis-health-data');
-      
-      if (hasLocalData) {
-        setShowBanner(true);
+    // Check if migration was already dismissed
+    const dismissed = localStorage.getItem('migrationBannerDismissed');
+    if (dismissed) return;
+    
+    // Check if there's data to migrate
+    const threadsData = localStorage.getItem('deer-flow-threads');
+    if (threadsData && user) {
+      try {
+        const threads = JSON.parse(threadsData);
+        if (Array.isArray(threads) && threads.length > 0) {
+          const totalMessages = threads.reduce((sum, thread) => {
+            return sum + (thread.messages ? thread.messages.length : 0);
+          }, 0);
+          setDataCount({ threads: threads.length, messages: totalMessages });
+          setShowBanner(true);
+        }
+      } catch (error) {
+        console.error('Error parsing threads data:', error);
       }
     }
   }, [user]);
@@ -42,22 +45,24 @@ export function MigrationBanner() {
     setMigrationError(null);
     
     try {
-      const status = await migrateAllUserData(user.id);
-      setMigrationStatus(status);
+      const result = await migrateLocalStorageToSupabase();
       
-      // Verificar se tudo foi migrado com sucesso
-      const allSuccess = Object.values(status).every(success => success);
-      
-      if (allSuccess) {
-        // Opcionalmente limpar localStorage
-        // clearLocalStorageData();
-        setShowBanner(false);
+      if (result.success) {
+        setMigrationStatus({
+          migratedThreads: result.migratedThreads ?? 0,
+          migratedMessages: result.migratedMessages ?? 0
+        });
+        
+        // Auto dismiss after 5 seconds
+        setTimeout(() => {
+          handleDismiss();
+        }, 5000);
       } else {
-        setMigrationError("Alguns dados não foram migrados completamente. Verifique o console para detalhes.");
+        setMigrationError(result.error ?? 'Unknown error');
       }
     } catch (error) {
-      console.error("Erro na migração:", error);
-      setMigrationError("Ocorreu um erro durante a migração. Por favor, tente novamente.");
+      console.error('Migration error:', error);
+      setMigrationError('Ocorreu um erro durante a migração. Por favor, tente novamente.');
     } finally {
       setIsMigrating(false);
     }
@@ -65,8 +70,7 @@ export function MigrationBanner() {
   
   const handleDismiss = () => {
     setShowBanner(false);
-    // Salvar que o usuário optou por não migrar agora
-    localStorage.setItem('deepflow.migration.dismissed', new Date().toISOString());
+    localStorage.setItem('migrationBannerDismissed', 'true');
   };
   
   if (!showBanner || !user) return null;
@@ -76,25 +80,18 @@ export function MigrationBanner() {
       <AlertCircle className="h-4 w-4 text-blue-500" />
       <AlertDescription className="flex items-center justify-between">
         <div className="flex-1">
-          <p className="font-medium text-sm">Migração de Dados Disponível</p>
+          <p className="font-medium text-sm">Migrar dados locais</p>
           <p className="text-xs text-muted-foreground mt-1">
-            Detectamos dados salvos localmente. Deseja migrar para a nuvem para sincronização entre dispositivos?
+            Encontramos {dataCount.threads} conversas e {dataCount.messages} mensagens salvos localmente. Migrar para sincronização?
           </p>
           {migrationError && (
             <p className="text-xs text-red-500 mt-2">{migrationError}</p>
           )}
           {migrationStatus && (
-            <div className="mt-2 text-xs space-y-1">
-              {Object.entries(migrationStatus).map(([key, success]) => (
-                <div key={key} className="flex items-center gap-2">
-                  {success ? (
-                    <Check className="h-3 w-3 text-green-500" />
-                  ) : (
-                    <X className="h-3 w-3 text-red-500" />
-                  )}
-                  <span className="capitalize">{key}</span>
-                </div>
-              ))}
+            <div className="mt-2 text-xs">
+              <div className="text-green-600">
+                Migração concluída: {migrationStatus.migratedThreads} conversas e {migrationStatus.migratedMessages} mensagens
+              </div>
             </div>
           )}
         </div>
@@ -105,7 +102,7 @@ export function MigrationBanner() {
             onClick={handleDismiss}
             disabled={isMigrating}
           >
-            Depois
+            Descartar
           </Button>
           <Button
             size="sm"
@@ -118,7 +115,7 @@ export function MigrationBanner() {
                 Migrando...
               </>
             ) : (
-              "Migrar Agora"
+              "Migrar agora"
             )}
           </Button>
         </div>

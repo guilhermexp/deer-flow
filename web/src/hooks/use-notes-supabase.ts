@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '~/core/contexts/auth-context';
-import { notesService } from '~/services/supabase/notes';
-import { getSupabaseClient } from '~/lib/supabase/client';
+
 import type { Note } from '~/app/(with-sidebar)/notes/page';
+import { useAuth } from '~/core/contexts/auth-context';
+import { getSupabaseClient } from '~/lib/supabase/client';
+import { notesService } from '~/services/supabase/notes';
 
 /**
  * Hook para gerenciar notas com Supabase

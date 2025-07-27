@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import { create } from "zustand";
+
 import { conversationsApi } from "../api/conversations";
 import type { Conversation } from "../api/conversations";
 import type { Message } from "../messages";
@@ -34,11 +35,11 @@ interface HistoryState {
 function convertApiToLocal(conv: Conversation): HistoryItem {
   return {
     id: conv.id.toString(),
-    title: conv.title || conv.query || "Untitled",
-    query: conv.query || "",
+    title: conv.title ?? conv.query ?? "Untitled",
+    query: conv.query ?? "",
     timestamp: new Date(conv.updated_at).getTime(),
     threadId: conv.thread_id,
-    messages: conv.messages,
+    messages: conv.messages as any,
     summary: conv.summary,
   };
 }
@@ -73,7 +74,7 @@ export const useHistoryStoreApi = create<HistoryState>((set, get) => ({
         thread_id: item.threadId,
         title: item.title,
         query: item.query,
-        messages: item.messages || [],
+        messages: item.messages as any ?? [],
         summary: item.summary,
       });
 

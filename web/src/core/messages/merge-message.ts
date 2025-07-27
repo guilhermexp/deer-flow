@@ -14,10 +14,10 @@ import { deepClone } from "../utils/deep-clone";
 import type { Message } from "./types";
 
 // Helper function to try to extract partial JSON data
-function tryExtractPartialJSON(str: string): Record<string, any> | null {
+function tryExtractPartialJSON(str: string): Record<string, unknown> | null {
   try {
     // Try to extract key-value pairs using regex
-    const result: Record<string, any> = {};
+    const result: Record<string, unknown> = {};
     const keyValueRegex = /"(\w+)":\s*"([^"]*)"/g;
     let match;
     while ((match = keyValueRegex.exec(str)) !== null) {
@@ -69,14 +69,14 @@ export function mergeMessage(message: Message, event: ChatEvent) {
             delete toolCall.argsChunks;
           } catch (error) {
             console.error("Failed to parse tool call args:", error);
-            console.error("Raw args string:", toolCall.argsChunks?.join("") || "");
+            console.error("Raw args string:", toolCall.argsChunks?.join("") ?? "");
             // Try to extract partial data if possible
-            const rawString = toolCall.argsChunks?.join("") || "";
+            const rawString = toolCall.argsChunks?.join("") ?? "";
             toolCall.args = { 
               error: "Failed to parse arguments", 
               raw: rawString,
               // Attempt to extract any valid fields
-              ...(tryExtractPartialJSON(rawString) || {})
+              ...(tryExtractPartialJSON(rawString) ?? {})
             };
             delete toolCall.argsChunks;
           }

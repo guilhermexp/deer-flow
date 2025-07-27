@@ -3,12 +3,20 @@
 
 import { apiClient } from './client';
 
+export interface Message {
+  id?: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp?: string;
+  metadata?: Record<string, unknown>;
+}
+
 export interface Conversation {
   id: number;
   thread_id: string;
   title?: string;
   query?: string;
-  messages: any[];
+  messages: Message[];
   summary?: string;
   created_at: string;
   updated_at: string;
@@ -18,14 +26,14 @@ export interface ConversationCreate {
   thread_id: string;
   title?: string;
   query?: string;
-  messages?: any[];
+  messages?: Message[];
   summary?: string;
 }
 
 export interface ConversationUpdate {
   title?: string;
   query?: string;
-  messages?: any[];
+  messages?: Message[];
   summary?: string;
 }
 
@@ -58,7 +66,7 @@ export const conversationsApi = {
     await apiClient.delete(`/conversations/${threadId}`);
   },
 
-  async addMessages(threadId: string, messages: any[]): Promise<{ thread_id: string; message_count: number }> {
+  async addMessages(threadId: string, messages: Message[]): Promise<{ thread_id: string; message_count: number }> {
     const response = await apiClient.post<{ thread_id: string; message_count: number }>(
       `/conversations/${threadId}/messages`,
       messages

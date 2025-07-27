@@ -1,6 +1,6 @@
+import type { HealthData as AppHealthData } from "~/lib/health-data"
 import { getSupabaseClient } from "~/lib/supabase/client"
 import type { Database } from "~/types/supabase"
-import type { HealthData as AppHealthData } from "~/lib/health-data"
 
 type SupabaseHealthData = Database['public']['Tables']['health_data']['Row']
 type SupabaseHealthDataInsert = Database['public']['Tables']['health_data']['Insert']
@@ -78,7 +78,7 @@ async function getCurrentUser() {
   }
   
   // Verificar se o user existe e tem id
-  if (!session.user || !session.user.id) {
+  if (!session.user?.id) {
     // Invalid session
     throw new Error('Sessão de usuário inválida');
   }
@@ -98,7 +98,7 @@ export const healthService = {
     const { data, error } = await supabase
       .from('health_data')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', user.id!)
       .eq('date', today)
       .maybeSingle();
     
@@ -121,7 +121,7 @@ export const healthService = {
     const { data, error } = await supabase
       .from('health_data')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', user.id!)
       .eq('date', date)
       .maybeSingle();
     
@@ -184,7 +184,7 @@ export const healthService = {
     const mergedData = healthData ? { ...defaultData, ...healthData } : defaultData;
     
     // Converter para formato Supabase
-    const supabaseData = convertAppToSupabase(mergedData, user.id);
+    const supabaseData = convertAppToSupabase(mergedData, user.id!);
     
     // Tentar inserir, mas usar upsert se já existir
     const { data, error } = await supabase
@@ -220,7 +220,7 @@ export const healthService = {
       const { data } = await supabase
         .from('health_data')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user.id!)
         .eq('date', today)
         .maybeSingle();
       
@@ -268,7 +268,7 @@ export const healthService = {
   },
   
   // Buscar histórico de saúde
-  async getHealthHistory(days: number = 7): Promise<AppHealthData[]> {
+  async getHealthHistory(days = 7): Promise<AppHealthData[]> {
     const supabase = getSupabaseClient();
     const user = await getCurrentUser();
     
@@ -280,7 +280,7 @@ export const healthService = {
     const { data, error } = await supabase
       .from('health_data')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', user.id!)
       .gte('date', startDateStr)
       .order('date', { ascending: false });
     
@@ -339,5 +339,225 @@ export const healthService = {
       console.warn('⚠️ Não foi possível verificar/criar tabela health_data:', error);
       // Não lançar erro para permitir uso com dados mockados
     }
+  },
+
+  // Adicionar água
+  async addWaterIntake(amount: number): Promise<AppHealthData> {
+    const currentData = await this.getTodayHealthData();
+    
+    if (!currentData) {
+      // Se não existem dados, criar com a quantidade de água
+      return this.createTodayHealthData({
+        hydration: {
+          current: amount,
+          goal: 2000,
+          history: []
+        }
+      });
+    }
+    
+    // Atualizar dados existentes
+    const newAmount = (currentData.hydration?.current || 0) + amount;
+    return this.updateHealthData({
+      hydration: {
+        ...currentData.hydration,
+        current: newAmount
+      }
+    });
+  },
+
+  // Calcular e atualizar score de saúde
+  async calculateHealthScore(): Promise<void> {
+    const currentData = await this.getTodayHealthData();
+    
+    if (!currentData) {
+      return;
+    }
+    
+    // Lógica simples de cálculo de score
+    let score = 0;
+    
+    // Hidratação (30 pontos máximo)
+    const hydrationRatio = (currentData.hydration?.current || 0) / (currentData.hydration?.goal || 2000);
+    score += Math.min(hydrationRatio * 30, 30);
+    
+    // Sono (30 pontos máximo)
+    const sleepHours = currentData.sleep?.duration || 0;
+    if (sleepHours >= 7 && sleepHours <= 9) {
+      score += 30;
+    } else if (sleepHours >= 6 && sleepHours <= 10) {
+      score += 20;
+    } else if (sleepHours > 0) {
+      score += 10;
+    }
+    
+    // Exercícios (20 pontos máximo)
+    const workoutRatio = (currentData.workout?.weeklyCompleted || 0) / (currentData.workout?.weeklyGoal || 5);
+    score += Math.min(workoutRatio * 20, 20);
+    
+    // Qualidade do sono (10 pontos máximo)
+    const sleepQuality = currentData.sleep?.quality || 0;
+    score += (sleepQuality / 5) * 10;
+    
+    // Pressão arterial (10 pontos máximo)
+    const systolic = currentData.bloodPressure?.systolic || 120;
+    const diastolic = currentData.bloodPressure?.diastolic || 80;
+    if (systolic >= 90 && systolic <= 140 && diastolic >= 60 && diastolic <= 90) {
+      score += 10;
+    } else {
+      score += 5;
+    }
+    
+    // Arredondar para inteiro
+    const finalScore = Math.round(Math.max(0, Math.min(100, score)));
+    
+    // Atualizar score
+    await this.updateHealthData({ score: finalScore });
+  },
+
+  // Atualizar dados de sono
+  async updateSleepData(duration: number, quality: number): Promise<AppHealthData> {
+    const currentData = await this.getTodayHealthData();
+    
+    const sleepData = {
+      duration,
+      quality,
+      bedTime: currentData?.sleep?.bedTime || '23:00',
+      wakeTime: currentData?.sleep?.wakeTime || '06:30',
+      phases: currentData?.sleep?.phases || {
+        deep: 0,
+        light: 0,
+        rem: 0,
+        awake: 0
+      }
+    };
+    
+    if (!currentData) {
+      return this.createTodayHealthData({
+        sleep: sleepData
+      });
+    }
+    
+    return this.updateHealthData({
+      sleep: sleepData
+    });
+  },
+
+  // Atualizar pressão arterial
+  async updateBloodPressure(systolic: number, diastolic: number, pulse: number): Promise<AppHealthData> {
+    const currentData = await this.getTodayHealthData();
+    
+    const bloodPressureData = {
+      systolic,
+      diastolic,
+      pulse,
+      history: currentData?.bloodPressure?.history || []
+    };
+    
+    if (!currentData) {
+      return this.createTodayHealthData({
+        bloodPressure: bloodPressureData
+      });
+    }
+    
+    return this.updateHealthData({
+      bloodPressure: bloodPressureData
+    });
+  },
+
+  // Alternar medicação
+  async toggleMedication(medicationName: string): Promise<AppHealthData> {
+    const currentData = await this.getTodayHealthData();
+    const medications = currentData?.medications || [];
+    
+    const existingIndex = medications.findIndex(med => med.name === medicationName);
+    let updatedMedications;
+    
+    if (existingIndex >= 0) {
+      // Toggle taken status
+      updatedMedications = medications.map((med, index) => 
+        index === existingIndex ? { ...med, taken: !med.taken } : med
+      );
+    } else {
+      // Add new medication
+      updatedMedications = [...medications, { name: medicationName, taken: true, time: '08:00' }];
+    }
+    
+    if (!currentData) {
+      return this.createTodayHealthData({
+        medications: updatedMedications
+      });
+    }
+    
+    return this.updateHealthData({
+      medications: updatedMedications
+    });
+  },
+
+  // Adicionar medicação
+  async addMedication(medicationName: string, time: string): Promise<AppHealthData> {
+    const currentData = await this.getTodayHealthData();
+    const medications = currentData?.medications || [];
+    
+    const newMedication = { name: medicationName, taken: false, time };
+    const updatedMedications = [...medications, newMedication];
+    
+    if (!currentData) {
+      return this.createTodayHealthData({
+        medications: updatedMedications
+      });
+    }
+    
+    return this.updateHealthData({
+      medications: updatedMedications
+    });
+  },
+
+  // Remover medicação
+  async removeMedication(medicationName: string): Promise<AppHealthData> {
+    const currentData = await this.getTodayHealthData();
+    const medications = currentData?.medications || [];
+    
+    const updatedMedications = medications.filter(med => med.name !== medicationName);
+    
+    if (!currentData) {
+      return this.createTodayHealthData({
+        medications: updatedMedications
+      });
+    }
+    
+    return this.updateHealthData({
+      medications: updatedMedications
+    });
+  },
+
+  // Completar treino
+  async completeWorkout(): Promise<AppHealthData> {
+    const currentData = await this.getTodayHealthData();
+    const currentCompleted = currentData?.workout?.weeklyCompleted || 0;
+    
+    const workoutData = {
+      nextWorkout: currentData?.workout?.nextWorkout || {
+        time: '18:00',
+        type: 'Treino de Força',
+        duration: 60,
+        intensity: 'Moderada'
+      },
+      weeklyGoal: currentData?.workout?.weeklyGoal || 5,
+      weeklyCompleted: currentCompleted + 1
+    };
+    
+    if (!currentData) {
+      return this.createTodayHealthData({
+        workout: workoutData
+      });
+    }
+    
+    return this.updateHealthData({
+      workout: workoutData
+    });
   }
 };
+
+// Export HealthData type for compatibility
+export type HealthData = AppHealthData;

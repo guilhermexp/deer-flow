@@ -9,14 +9,12 @@ export type StoreEvent =
   | { type: 'MESSAGE_UPDATED'; message: Message }
   | { type: 'MESSAGES_UPDATED'; messages: Message[] }
   | { type: 'CONVERSATION_CREATED'; conversationId: string; title?: string }
-  | { type: 'CONVERSATION_UPDATED'; conversationId: string; updates: any }
+  | { type: 'CONVERSATION_UPDATED'; conversationId: string; updates: Record<string, unknown> }
   | { type: 'SYNC_STARTED' }
   | { type: 'SYNC_COMPLETED' }
   | { type: 'SYNC_ERROR'; error: Error };
 
-export interface StoreEventListener {
-  (event: StoreEvent): void | Promise<void>;
-}
+export type StoreEventListener = (event: StoreEvent) => void | Promise<void>;
 
 class EventEmitter {
   private listeners = new Map<string, Set<StoreEventListener>>();

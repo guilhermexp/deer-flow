@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { nanoid } from 'nanoid';
+import { useState, useCallback } from 'react';
+
 import { useAuth } from '~/core/contexts/auth-context';
+import type { Message } from '~/core/messages';
+import { addToHistory } from '~/core/store/history-store';
 import { conversationsService } from '~/services/supabase/conversations';
 import { messagesService } from '~/services/supabase/messages';
-import type { Message } from '~/core/messages';
-import { nanoid } from 'nanoid';
-import { addToHistory } from '~/core/store/history-store';
 
 /**
  * Hook para gerenciar conversas e mensagens de chat com Supabase

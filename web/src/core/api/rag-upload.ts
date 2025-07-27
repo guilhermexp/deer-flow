@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { Resource } from "../messages";
+
 import { resolveServiceURL } from "./resolve-service-url";
 
 export interface RAGUploadResponse {
@@ -14,8 +15,8 @@ export interface RAGUploadResponse {
 
 export async function uploadToRAG(
   file: File,
-  datasetName: string = "My Documents",
-  datasetDescription: string = "Documents uploaded via chat"
+  datasetName = "My Documents",
+  datasetDescription = "Documents uploaded via chat"
 ): Promise<RAGUploadResponse> {
   const formData = new FormData();
   formData.append("file", file);

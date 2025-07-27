@@ -102,7 +102,7 @@ export async function deleteHealthData(id: number): Promise<void> {
   await apiClient.delete(`/health/data/${id}`);
 }
 
-export async function getHealthStats(days: number = 30): Promise<HealthStats> {
+export async function getHealthStats(days = 30): Promise<HealthStats> {
   const response = await apiClient.get<HealthStats>('/health/stats', { 
     params: { days } 
   });

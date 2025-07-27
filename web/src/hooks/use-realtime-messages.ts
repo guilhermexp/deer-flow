@@ -2,12 +2,13 @@
  * Hook para real-time subscriptions de mensagens usando Supabase
  */
 
-import { useEffect, useRef } from 'react';
-import { getSupabaseClient } from '~/lib/supabase/client';
-import { storeEvents } from '~/core/store/events';
-import type { Message } from '~/core/messages';
-import { convertSupabaseToMessage } from '~/services/supabase/messages';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { useEffect, useRef } from 'react';
+
+import type { Message } from '~/core/messages';
+import { storeEvents } from '~/core/store/events';
+import { getSupabaseClient } from '~/lib/supabase/client';
+import { convertSupabaseToMessage } from '~/services/supabase/messages';
 
 export function useRealtimeMessages(conversationId: string | undefined) {
   const channelRef = useRef<RealtimeChannel | null>(null);

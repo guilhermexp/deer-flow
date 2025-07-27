@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+
 import { useAuth } from '~/core/contexts/auth-context';
-import { healthService } from '~/services/supabase/health';
 import type { HealthData } from '~/lib/health-data';
+import { healthService } from '~/services/supabase/health';
 
 /**
  * Hook para gerenciar dados de saúde com Supabase
@@ -196,7 +197,7 @@ export function useHealthSupabase() {
   }, [updateHealthData]);
 
   const handleToggleMedication = useCallback(async (index: number) => {
-    if (!healthData || !healthData.medications[index]) return;
+    if (!healthData?.medications[index]) return;
     
     const medication = healthData.medications[index];
     if (!medication) return;
@@ -217,7 +218,7 @@ export function useHealthSupabase() {
   }, [healthData, updateHealthData]);
 
   const handleRemoveMedication = useCallback(async (index: number) => {
-    if (!healthData || !healthData.medications[index]) return;
+    if (!healthData?.medications[index]) return;
     
     const updatedMeds = healthData.medications.filter((_, i) => i !== index);
     await updateHealthData({ medications: updatedMeds });

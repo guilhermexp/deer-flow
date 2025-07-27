@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { projectsService } from "~/services/supabase/projects"
+
 import type { Task as AppTask } from "~/components/jarvis/kanban/lib/types"
 import { useAuth } from "~/core/contexts/auth-context"
+import { projectsService } from "~/services/supabase/projects"
 
 // Task interface para compatibilidade com useTasksApi
 export interface Task {

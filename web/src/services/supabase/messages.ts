@@ -1,7 +1,7 @@
-import { getSupabaseClient } from "~/lib/supabase/client"
-import type { Database } from "~/types/supabase"
 import type { Message } from "~/core/messages"
+import { getSupabaseClient } from "~/lib/supabase/client"
 import { withRetry } from "~/lib/supabase/retry"
+import type { Database } from "~/types/supabase"
 
 type SupabaseMessage = Database['public']['Tables']['messages']['Row']
 type SupabaseMessageInsert = Database['public']['Tables']['messages']['Insert']

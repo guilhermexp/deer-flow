@@ -2,12 +2,14 @@
  * Testes para o hook de real-time messages
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, waitFor } from '@testing-library/react';
-import { useRealtimeMessages } from '../use-realtime-messages';
-import { getSupabaseClient } from '~/lib/supabase/client';
-import { storeEvents } from '~/core/store/events';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { renderHook, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+import { storeEvents } from '~/core/store/events';
+import { getSupabaseClient } from '~/lib/supabase/client';
+
+import { useRealtimeMessages } from '../use-realtime-messages';
 
 // Mock do cliente Supabase
 vi.mock('~/lib/supabase/client', () => ({

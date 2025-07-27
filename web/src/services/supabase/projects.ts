@@ -1,6 +1,6 @@
+import type { Project as AppProject, Task as AppTask, TaskStatus } from "~/components/jarvis/kanban/lib/types"
 import { getSupabaseClient } from "~/lib/supabase/client"
 import type { Database } from "~/types/supabase"
-import type { Project as AppProject, Task as AppTask, TaskStatus } from "~/components/jarvis/kanban/lib/types"
 
 type SupabaseProject = {
   id: string;
@@ -16,13 +16,13 @@ type SupabaseProject = {
 
 type SupabaseTask = {
   id: string;
-  project_id: string;
   title: string;
   description: string | null;
-  status: string;
+  status: string | null;
   priority: string | null;
   due_date: string | null;
-  order: number;
+  category: string | null;
+  completed_at: string | null;
   created_at: string | null;
   updated_at: string | null;
   user_id: string;
@@ -31,7 +31,7 @@ type SupabaseTask = {
 type SupabaseProjectInsert = Omit<SupabaseProject, 'id' | 'created_at' | 'updated_at'>;
 type SupabaseProjectUpdate = Partial<Omit<SupabaseProject, 'id' | 'created_at' | 'updated_at' | 'user_id'>>;
 type SupabaseTaskInsert = Omit<SupabaseTask, 'id' | 'created_at' | 'updated_at'>;
-type SupabaseTaskUpdate = Partial<Omit<SupabaseTask, 'id' | 'created_at' | 'updated_at' | 'user_id' | 'project_id'>>;
+type SupabaseTaskUpdate = Partial<Omit<SupabaseTask, 'id' | 'created_at' | 'updated_at' | 'user_id'>>;
 
 // Converter formato da aplicação para formato Supabase
 export function convertProjectToSupabase(project: Partial<AppProject>, userId: string): SupabaseProjectInsert {
@@ -57,47 +57,42 @@ export function convertSupabaseToProject(supabaseProject: SupabaseProject): AppP
 }
 
 // Converter tarefa da aplicação para formato Supabase
-export function convertTaskToSupabase(task: Partial<AppTask>, projectId: string, userId: string): SupabaseTaskInsert {
+export function convertTaskToSupabase(task: Partial<AppTask>, userId: string, category?: string): SupabaseTaskInsert {
   // Mapear status da aplicação para status do Supabase
-  const statusMap: { [key in TaskStatus]: string } = {
-    'not-started': 'TODO',
-    'in-progress': 'IN_PROGRESS',
-    'done': 'DONE',
-    'paused': 'TODO'
+  const statusMap: Record<TaskStatus, string> = {
+    'not-started': 'not-started',
+    'in-progress': 'in-progress',
+    'done': 'done',
+    'paused': 'paused'
   }
   
   return {
-    project_id: projectId,
     title: task.title || 'Nova Tarefa',
     description: task.description || null,
-    status: statusMap[task.status || 'not-started'] || 'TODO',
+    status: statusMap[task.status || 'not-started'] || 'not-started',
     priority: 'medium',
     due_date: null,
-    order: 0,
+    category: category || null,
+    completed_at: task.status === 'done' ? new Date().toISOString() : null,
     user_id: userId
   }
 }
 
 // Converter tarefa do Supabase para formato da aplicação
-export function convertSupabaseToTask(supabaseTask: SupabaseTask): AppTask {
-  // Mapear status do Supabase para status da aplicação
-  const statusMap: { [key: string]: TaskStatus } = {
-    'TODO': 'not-started',
-    'IN_PROGRESS': 'in-progress',
-    'DONE': 'done'
-  }
+export function convertSupabaseToTask(supabaseTask: SupabaseTask, projectId?: string): AppTask {
+  const status = (supabaseTask.status as TaskStatus) || 'not-started';
   
   return {
     id: supabaseTask.id,
-    projectId: supabaseTask.project_id,
+    projectId: projectId || supabaseTask.category || '',
     title: supabaseTask.title,
     description: supabaseTask.description || undefined,
     date: new Date(supabaseTask.created_at || '').toLocaleDateString('pt-BR'),
-    progress: supabaseTask.status === 'DONE' ? 100 : (supabaseTask.status === 'IN_PROGRESS' ? 50 : 0),
+    progress: status === 'done' ? 100 : (status === 'in-progress' ? 50 : 0),
     comments: 0,
     attachments: 0,
     assignees: [],
-    status: statusMap[supabaseTask.status] || 'not-started',
+    status: status,
     weekDay: 'none'
   }
 }
@@ -226,9 +221,9 @@ export const projectsService = {
     const { data, error } = await supabase
       .from('tasks')
       .select('*')
-      .eq('project_id', projectId)
+      .eq('category', projectId)
       .eq('user_id', user.id)
-      .order('order', { ascending: true });
+      .order('created_at', { ascending: true });
     
     if (error) {
       console.error('Erro ao buscar tarefas do projeto:', error);
@@ -239,20 +234,20 @@ export const projectsService = {
   },
   
   // Criar tarefa
-  async createTask(projectId: string, taskData: Partial<AppTask>, status: string = 'TODO'): Promise<AppTask> {
+  async createTask(projectId: string, taskData: Partial<AppTask>, status = 'TODO'): Promise<AppTask> {
     const supabase = getSupabaseClient();
     const user = await getCurrentUser();
     
     // Obter a ordem mais alta atual para o status
     const { data: existingTasks } = await supabase
       .from('tasks')
-      .select('order')
-      .eq('project_id', projectId)
+      .select('id')
+      .eq('category', projectId)
       .eq('status', status)
-      .order('order', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(1);
     
-    const highestOrder = existingTasks && existingTasks.length > 0 ? existingTasks[0].order : -1;
+    const highestOrder = -1; // Using category instead of order field
     
     const taskWithStatus = {
       ...taskData,
@@ -261,8 +256,7 @@ export const projectsService = {
               status === 'done' ? 'done' : 'not-started'
     };
     
-    const supabaseTask = convertTaskToSupabase(taskWithStatus, projectId, user.id);
-    supabaseTask.order = highestOrder + 1;
+    const supabaseTask = convertTaskToSupabase(taskWithStatus, user.id, projectId);
     
     const { data, error } = await supabase
       .from('tasks')
@@ -289,7 +283,7 @@ export const projectsService = {
     if (updates.description !== undefined) supabaseUpdates.description = updates.description;
     
     if (updates.status !== undefined) {
-      const statusMap: { [key in TaskStatus]: string } = {
+      const statusMap: Record<TaskStatus, string> = {
         'not-started': 'TODO',
         'in-progress': 'IN_PROGRESS',
         'done': 'DONE',
@@ -319,7 +313,7 @@ export const projectsService = {
     const user = await getCurrentUser();
     
     // Mapear status da aplicação para status do Supabase
-    const statusMap: { [key: string]: string } = {
+    const statusMap: Record<string, string> = {
       'backlog': 'TODO',
       'todo': 'TODO',
       'in_progress': 'IN_PROGRESS',
@@ -332,10 +326,10 @@ export const projectsService = {
       .from('tasks')
       .update({
         status: supabaseStatus,
-        order: newOrder
+        category: projectId
       })
       .eq('id', taskId)
-      .eq('project_id', projectId)
+      .eq('category', projectId)
       .select()
       .single();
     
@@ -395,9 +389,9 @@ export const projectsService = {
     const { data: tasksData, error: tasksError } = await supabase
       .from('tasks')
       .select('*')
-      .eq('project_id', projectId)
+      .eq('category', projectId)
       .eq('user_id', user.id)
-      .order('order', { ascending: true });
+      .order('created_at', { ascending: true });
     
     if (tasksError) {
       console.error('Erro ao buscar tarefas para kanban:', tasksError);
@@ -405,7 +399,7 @@ export const projectsService = {
     }
     
     // Converter tarefas
-    const tasks = (tasksData || []).map(task => convertSupabaseToTask(task as SupabaseTask));
+    const tasks = (tasksData || []).map(task => convertSupabaseToTask(task as SupabaseTask, projectId));
     
     // Agrupar tarefas por status
     const todoTasks = tasks.filter(task => task.status === 'not-started' || task.status === 'paused');

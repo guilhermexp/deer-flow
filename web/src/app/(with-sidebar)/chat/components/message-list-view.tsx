@@ -592,7 +592,7 @@ function PodcastCard({
             {!hasError ? (
               <RainbowText animated={isGenerating}>
                 {isGenerating
-                  ? progressMessage || "Generating podcast..."
+                  ? progressMessage ?? "Generating podcast..."
                   : isPlaying
                     ? "Now playing podcast..."
                     : "Podcast"}
@@ -629,7 +629,7 @@ function PodcastCard({
           <div className="space-y-2">
             <Progress value={progress} className="w-full" />
             <p className="text-sm text-muted-foreground text-center">
-              {progressMessage || "Processing..."}
+              {progressMessage ?? "Processing..."}
             </p>
           </div>
         ) : audioUrl ? (

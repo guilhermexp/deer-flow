@@ -3,11 +3,12 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '~/test/test-utils';
 import userEvent from '@testing-library/user-event';
 import { SearchDialog } from '../search-dialog';
 import { conversationsService } from '~/services/supabase/conversations';
 import { messagesService } from '~/services/supabase/messages';
+import type { Database } from '~/types/supabase';
 
 // Mock dos serviços
 vi.mock('~/services/supabase/conversations', () => ({
@@ -61,7 +62,10 @@ describe('SearchDialog', () => {
         id: 'conv-1',
         title: 'Test conversation',
         created_at: '2024-01-01T00:00:00Z',
-        user_id: 'user-1'
+        user_id: 'user-1',
+        query: null,
+        thread_id: 'thread-1',
+        updated_at: null
       }
     ]);
     
@@ -95,13 +99,19 @@ describe('SearchDialog', () => {
         id: 'conv-1',
         title: 'Machine Learning Discussion',
         created_at: '2024-01-01T00:00:00Z',
-        user_id: 'user-1'
+        user_id: 'user-1',
+        query: null,
+        thread_id: 'thread-1',
+        updated_at: null
       },
       {
         id: 'conv-2',
         title: 'API Design',
         created_at: '2024-01-02T00:00:00Z',
-        user_id: 'user-1'
+        user_id: 'user-1',
+        query: null,
+        thread_id: 'thread-2',
+        updated_at: null
       }
     ]);
     
@@ -127,7 +137,13 @@ describe('SearchDialog', () => {
         content: 'This is a test message about React hooks',
         conversation_id: 'conv-1',
         created_at: '2024-01-01T00:00:00Z',
-        role: 'user',
+        role: 'user' as Database['public']['Enums']['message_role'],
+        agent: null,
+        finish_reason: null,
+        metadata: null,
+        reasoning_content: null,
+        resources: null,
+        tool_calls: null,
         conversation: {
           title: 'React Discussion'
         }
@@ -151,7 +167,10 @@ describe('SearchDialog', () => {
         id: 'conv-1',
         title: 'Testing React Components',
         created_at: '2024-01-01T00:00:00Z',
-        user_id: 'user-1'
+        user_id: 'user-1',
+        query: null,
+        thread_id: 'thread-1',
+        updated_at: null
       }
     ]);
     
@@ -175,7 +194,10 @@ describe('SearchDialog', () => {
         id: 'conv-1',
         title: 'Test Conversation',
         created_at: '2024-01-01T00:00:00Z',
-        user_id: 'user-1'
+        user_id: 'user-1',
+        query: null,
+        thread_id: 'thread-1',
+        updated_at: null
       }
     ]);
     
@@ -215,7 +237,10 @@ describe('SearchDialog', () => {
         id: 'conv-1',
         title: 'Test',
         created_at: '2024-01-01T00:00:00Z',
-        user_id: 'user-1'
+        user_id: 'user-1',
+        query: null,
+        thread_id: 'thread-1',
+        updated_at: null
       }
     ]);
     
@@ -280,13 +305,19 @@ describe('SearchDialog', () => {
         id: 'conv-1',
         title: 'Recent',
         created_at: new Date().toISOString(),
-        user_id: 'user-1'
+        user_id: 'user-1',
+        query: null,
+        thread_id: 'thread-1',
+        updated_at: null
       },
       {
         id: 'conv-2',
         title: 'Old',
         created_at: '2023-01-01T00:00:00Z',
-        user_id: 'user-1'
+        user_id: 'user-1',
+        query: null,
+        thread_id: 'thread-2',
+        updated_at: null
       }
     ]);
     

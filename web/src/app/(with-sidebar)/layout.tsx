@@ -12,7 +12,6 @@ import { RouteWarmup } from "~/components/jarvis/route-warmup";
 import { ServiceWorkerRegister } from "~/components/jarvis/service-worker-register";
 import { MigrationBanner } from "~/components/migration-banner";
 import { Toaster } from "~/components/ui/sonner";
-
 import { useAuth } from "~/core/contexts/auth-context";
 
 interface SidebarLayoutProps {

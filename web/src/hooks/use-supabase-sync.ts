@@ -3,11 +3,13 @@
  */
 
 import { useEffect } from "react";
+
+import { useAuth } from "~/core/contexts/auth-context";
+import { useStore } from "~/core/store";
 import { storeEvents } from "~/core/store/events";
+
 import { useChatSupabase } from "./use-chat-supabase";
 import { useRealtimeMessages, useRealtimeConversations } from "./use-realtime-messages";
-import { useStore } from "~/core/store";
-import { useAuth } from "~/core/contexts/auth-context";
 
 export function useSupabaseSync() {
   const chatSupabase = useChatSupabase();

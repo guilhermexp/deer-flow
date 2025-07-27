@@ -11,9 +11,9 @@ import type { Message, Resource } from "../messages";
 import { mergeMessage } from "../messages";
 import { parseJSON } from "../utils";
 
+import { storeEvents } from "./events";
 import { addToHistory, useHistoryStore } from "./history-store";
 import { getChatStreamSettings } from "./settings-store";
-import { storeEvents } from "./events";
 
 const THREAD_ID = nanoid();
 
@@ -58,7 +58,7 @@ export const useStore = create<{
     }));
     
     // Emitir evento após atualizar o store
-    storeEvents.emit({ type: 'MESSAGE_APPENDED', message });
+    void storeEvents.emit({ type: 'MESSAGE_APPENDED', message });
   },
   updateMessage(message: Message) {
     set((state) => ({
@@ -66,7 +66,7 @@ export const useStore = create<{
     }));
     
     // Emitir evento após atualizar o store
-    storeEvents.emit({ type: 'MESSAGE_UPDATED', message });
+    void storeEvents.emit({ type: 'MESSAGE_UPDATED', message });
   },
   updateMessages(messages: Message[]) {
     set((state) => {
@@ -76,7 +76,7 @@ export const useStore = create<{
     });
     
     // Emitir evento após atualizar o store
-    storeEvents.emit({ type: 'MESSAGES_UPDATED', messages });
+    void storeEvents.emit({ type: 'MESSAGES_UPDATED', messages });
   },
   openResearch(researchId: string | null) {
     set({ openResearchId: researchId });
@@ -122,7 +122,7 @@ export const useStore = create<{
           } else if ((msg.agent === "researcher" || msg.agent === "coder") && researchIds.length > 0) {
             const researchId = researchIds[researchIds.length - 1];
             if (researchId) {
-              const activities = researchActivityIds.get(researchId) || [];
+              const activities = researchActivityIds.get(researchId) ?? [];
               activities.push(msg.id);
               researchActivityIds.set(researchId, activities);
             }
@@ -173,7 +173,7 @@ export async function sendMessage(
   } = {},
   options: { abortSignal?: AbortSignal } = {},
 ) {
-  const currentThreadId = useStore.getState().threadId || THREAD_ID;
+  const currentThreadId = useStore.getState().threadId ?? THREAD_ID;
   
   if (content != null) {
     appendMessage({

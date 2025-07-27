@@ -42,7 +42,7 @@ export function withAnimation<P extends object>(
   animatedProps: Partial<P>,
   staticProps?: Partial<P>
 ) {
-  const AnimatedComponent = React.forwardRef<any, P>((props, ref) => {
+  const AnimatedComponent = React.forwardRef<unknown, P>((props, ref) => {
     const { shouldAnimate } = useAnimation();
     const finalProps = shouldAnimate 
       ? { ...props, ...animatedProps }

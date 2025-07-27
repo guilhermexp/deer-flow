@@ -35,6 +35,13 @@ export interface KanbanTask {
   created_at: string;
 }
 
+export interface KanbanTaskCreate {
+  title: string;
+  description?: string;
+  priority: 'low' | 'medium' | 'high';
+  order?: number;
+}
+
 export interface KanbanColumn {
   id: string;
   title: string;
@@ -87,7 +94,7 @@ export const projectsApi = {
     return response.data;
   },
 
-  async createKanbanTask(projectId: number, task: any, columnId: string = 'backlog'): Promise<KanbanTask> {
+  async createKanbanTask(projectId: number, task: KanbanTaskCreate, columnId = 'backlog'): Promise<KanbanTask> {
     const response = await apiClient.post<KanbanTask>(
       `/projects/${projectId}/tasks?column_id=${columnId}`,
       task

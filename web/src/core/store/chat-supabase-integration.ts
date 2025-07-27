@@ -4,8 +4,10 @@
  */
 
 import { useChatSupabase } from '~/hooks/use-chat-supabase';
-import { useStore } from './store';
+
 import type { Message } from '../messages';
+
+import { useStore } from './store';
 
 // Singleton para o hook do Supabase
 let supabaseHook: ReturnType<typeof useChatSupabase> | null = null;
@@ -27,48 +29,51 @@ export function setupChatSupabaseIntegration(hook: ReturnType<typeof useChatSupa
   
   // Override appendMessage
   useStore.setState({
-    appendMessage: async (message: Message) => {
+    appendMessage: (message: Message) => {
       // Primeiro atualiza o store local
       originalAppendMessage(message);
       
-      // Depois salva no Supabase
+      // Depois salva no Supabase assincronamente
       if (supabaseHook?.appendMessage) {
-        try {
-          await supabaseHook.appendMessage(message);
-          console.log('✅ Mensagem salva no Supabase:', message.id);
-        } catch (error) {
-          console.error('❌ Erro ao salvar mensagem no Supabase:', error);
-        }
+        void supabaseHook.appendMessage(message)
+          .then(() => {
+            console.log('✅ Mensagem salva no Supabase:', message.id);
+          })
+          .catch((error) => {
+            console.error('❌ Erro ao salvar mensagem no Supabase:', error);
+          });
       }
     },
     
-    updateMessage: async (message: Message) => {
+    updateMessage: (message: Message) => {
       // Primeiro atualiza o store local
       originalUpdateMessage(message);
       
-      // Depois atualiza no Supabase
+      // Depois atualiza no Supabase assincronamente
       if (supabaseHook?.updateMessage) {
-        try {
-          await supabaseHook.updateMessage(message);
-          console.log('✅ Mensagem atualizada no Supabase:', message.id);
-        } catch (error) {
-          console.error('❌ Erro ao atualizar mensagem no Supabase:', error);
-        }
+        void supabaseHook.updateMessage(message)
+          .then(() => {
+            console.log('✅ Mensagem atualizada no Supabase:', message.id);
+          })
+          .catch((error) => {
+            console.error('❌ Erro ao atualizar mensagem no Supabase:', error);
+          });
       }
     },
     
-    updateMessages: async (messages: Message[]) => {
+    updateMessages: (messages: Message[]) => {
       // Primeiro atualiza o store local
       originalUpdateMessages(messages);
       
-      // Depois atualiza no Supabase
+      // Depois atualiza no Supabase assincronamente
       if (supabaseHook?.updateMessages) {
-        try {
-          await supabaseHook.updateMessages(messages);
-          console.log('✅ Mensagens atualizadas no Supabase:', messages.length);
-        } catch (error) {
-          console.error('❌ Erro ao atualizar mensagens no Supabase:', error);
-        }
+        void supabaseHook.updateMessages(messages)
+          .then(() => {
+            console.log('✅ Mensagens atualizadas no Supabase:', messages.length);
+          })
+          .catch((error) => {
+            console.error('❌ Erro ao atualizar mensagens no Supabase:', error);
+          });
       }
     }
   });

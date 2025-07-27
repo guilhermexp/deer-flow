@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
     // Obter o webhook URL do ambiente ou usar o padrão
-    const webhookUrl = process.env.WEBHOOK_URL || 
+    const webhookUrl = process.env.WEBHOOK_URL ??
       'https://primary-production-f504.up.railway.app/webhook-test/AssistenteNeuroDesk';
     
     // Obter o FormData da requisição
@@ -20,10 +20,10 @@ export async function POST(request: NextRequest) {
     const contentType = response.headers.get('content-type');
     let responseData;
     
-    if (contentType && contentType.includes('application/json')) {
+    if (contentType?.includes('application/json')) {
       try {
         responseData = await response.json();
-      } catch (e) {
+      } catch {
         // Se falhar ao fazer parse, retornar resposta padrão
         responseData = {
           success: true,

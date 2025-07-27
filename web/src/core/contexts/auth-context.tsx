@@ -1,9 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { getSupabaseClient } from '~/lib/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+
+import { getSupabaseClient } from '~/lib/supabase/client';
 import type { UserProfile } from '~/types/supabase';
 
 interface User {
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const router = useRouter();
   const supabase = getSupabaseClient();
 
@@ -52,13 +54,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Helper function to set user data
-  const setUserData = async (supabaseUser: SupabaseUser) => {
+  const setUserData = useCallback(async (supabaseUser: SupabaseUser) => {
     try {
       const profile = await getUserProfile(supabaseUser.id);
       const userData: User = {
         id: supabaseUser.id,
-        email: supabaseUser.email || '',
-        profile: profile || undefined,
+        email: supabaseUser.email ?? '',
+        profile: profile ?? undefined,
       };
       setUser(userData);
       return userData;
@@ -67,15 +69,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Set basic user data without profile
       const userData: User = {
         id: supabaseUser.id,
-        email: supabaseUser.email || '',
+        email: supabaseUser.email ?? '',
       };
       setUser(userData);
       return userData;
     }
-  };
+  }, [getUserProfile]);
 
   const checkAuth = useCallback(async () => {
+    if (isCheckingAuth) {
+      console.log('🔄 Auth check already in progress, skipping...');
+      return;
+    }
+    
     try {
+      setIsCheckingAuth(true);
       console.log('🔍 Checking authentication...');
       
       // Get session with 5 second timeout
@@ -87,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data: { session }, error: sessionError } = await Promise.race([
         sessionPromise,
         timeoutPromise
-      ]) as any;
+      ]) as { data: { session: { user: SupabaseUser } | null }; error: Error | null };
       
       if (sessionError) {
         console.error('❌ Session error:', sessionError.message);
@@ -96,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       
-      if (!session || !session.user) {
+      if (!session?.user) {
         console.log('📤 No active session found');
         setUser(null);
         setIsLoading(false);
@@ -107,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Set basic user data immediately
       const userData: User = {
         id: session.user.id,
-        email: session.user.email || '',
+        email: session.user.email ?? '',
       };
       setUser(userData);
       setIsLoading(false);
@@ -125,20 +133,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('❌ Auth check failed:', error);
       setUser(null);
       setIsLoading(false);
+    } finally {
+      setIsCheckingAuth(false);
     }
-  }, [supabase]);
+  }, [supabase, isCheckingAuth, setUserData, getUserProfile]);
 
   // Initialize auth check on mount
   useEffect(() => {
     let mounted = true;
     
-    const initAuth = async () => {
-      if (mounted) {
-        await checkAuth();
-      }
-    };
-
-    initAuth();
+    if (mounted) {
+      void checkAuth();
+    }
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -164,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [checkAuth, supabase]);
+  }, [supabase, checkAuth, setUserData]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -222,8 +228,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .insert([
           {
             id: data.user.id,
-            username: username || email.split('@')[0] || null,
-            full_name: username || email.split('@')[0] || null,
+            username: username ?? email.split('@')[0] ?? null,
+            full_name: username ?? email.split('@')[0] ?? null,
             avatar_url: null,
             role: null,
           }

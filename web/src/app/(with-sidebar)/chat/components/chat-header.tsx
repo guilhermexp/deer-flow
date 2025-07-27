@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Search, History, Settings } from "lucide-react";
+import { useState } from "react";
 
-import { Button } from "~/components/ui/button";
 import { SearchDialog } from "~/components/deer-flow/search-dialog";
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 interface ChatHeaderProps {

@@ -1,10 +1,11 @@
 // Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 // SPDX-License-Identifier: MIT
 
-import axios, { AxiosError } from 'axios';
+import axios, { type AxiosError } from 'axios';
+
 import { env } from '~/env.js';
 
-const API_URL = env.NEXT_PUBLIC_API_URL || 'http://localhost:8005/api';
+const API_URL = env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8005/api';
 
 // Create axios instance
 export const apiClient = axios.create({
@@ -43,7 +44,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(new Error(error instanceof Error ? error.message : String(error)))
 );
 
 // Response interceptor - only for error handling, no JWT refresh
@@ -52,7 +53,7 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     // Just log errors, don't redirect or try to refresh tokens
     console.error('API Error:', error.response?.status, error.response?.data);
-    return Promise.reject(error);
+    return Promise.reject(new Error(error instanceof Error ? error.message : 'Unknown error'));
   }
 );
 

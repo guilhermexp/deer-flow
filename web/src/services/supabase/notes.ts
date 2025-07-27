@@ -1,6 +1,6 @@
+import type { Note } from "~/app/(with-sidebar)/notes/page"
 import { getSupabaseClient } from "~/lib/supabase/client"
 import type { Database } from "~/types/supabase"
-import type { Note } from "~/app/(with-sidebar)/notes/page"
 
 type SupabaseNote = Database['public']['Tables']['notes']['Row']
 type SupabaseNoteInsert = Database['public']['Tables']['notes']['Insert']

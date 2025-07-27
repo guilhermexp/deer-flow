@@ -8,43 +8,8 @@ import type { HealthData } from '~/lib/health-data'
 function convertSupabaseToLocal(data: SupabaseHealthData | null): HealthData | null {
   if (!data) return null;
   
-  return {
-    score: data.health_score || 85,
-    hydration: {
-      current: data.hydration_ml || 0,
-      goal: data.hydration_goal_ml || 2000,
-      history: [] // We'll implement history tracking later
-    },
-    sleep: {
-      duration: data.sleep_hours || 0,
-      quality: data.sleep_quality || 0,
-      bedTime: '23:00',
-      wakeTime: '06:30',
-      phases: data.sleep_phases || {
-        deep: 0,
-        light: 0,
-        rem: 0,
-        awake: 0
-      }
-    },
-    bloodPressure: {
-      systolic: data.blood_pressure_systolic || 120,
-      diastolic: data.blood_pressure_diastolic || 80,
-      pulse: data.pulse || 72,
-      history: [] // We'll implement history tracking later
-    },
-    workout: {
-      nextWorkout: {
-        time: '18:00',
-        type: 'Treino de Força',
-        duration: 60,
-        intensity: 'Moderada'
-      },
-      weeklyGoal: data.workouts_goal || 5,
-      weeklyCompleted: data.workouts_completed || 0
-    },
-    medications: data.medications || []
-  };
+  // The SupabaseHealthData is already in the correct format from the service
+  return data;
 }
 
 export function useHealthDataSupabase() {
@@ -114,9 +79,9 @@ export function useHealthDataSupabase() {
   }, [])
 
   // Toggle medication
-  const handleToggleMedication = useCallback(async (index: number) => {
+  const handleToggleMedication = useCallback(async (medicationName: string) => {
     try {
-      const updated = await healthService.toggleMedication(index)
+      const updated = await healthService.toggleMedication(medicationName)
       const localData = convertSupabaseToLocal(updated)
       setHealthData(localData)
     } catch (err) {
@@ -125,9 +90,9 @@ export function useHealthDataSupabase() {
   }, [])
 
   // Add medication
-  const handleAddMedication = useCallback(async (name: string, dosage: string, time: string) => {
+  const handleAddMedication = useCallback(async (name: string, time: string) => {
     try {
-      const updated = await healthService.addMedication(name, dosage, time)
+      const updated = await healthService.addMedication(name, time)
       const localData = convertSupabaseToLocal(updated)
       setHealthData(localData)
     } catch (err) {
@@ -136,9 +101,9 @@ export function useHealthDataSupabase() {
   }, [])
 
   // Remove medication
-  const handleRemoveMedication = useCallback(async (index: number) => {
+  const handleRemoveMedication = useCallback(async (medicationName: string) => {
     try {
-      const updated = await healthService.removeMedication(index)
+      const updated = await healthService.removeMedication(medicationName)
       const localData = convertSupabaseToLocal(updated)
       setHealthData(localData)
     } catch (err) {

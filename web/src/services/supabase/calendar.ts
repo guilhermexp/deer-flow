@@ -1,6 +1,6 @@
+import type { CalendarEvent as AppCalendarEvent, NewEventFormData } from "~/components/jarvis/calendar/lib/types"
 import { getSupabaseClient } from "~/lib/supabase/client"
 import type { Database } from "~/types/supabase"
-import type { CalendarEvent as AppCalendarEvent, NewEventFormData } from "~/components/jarvis/calendar/lib/types"
 
 type SupabaseCalendarEvent = Database['public']['Tables']['calendar_events']['Row']
 type SupabaseCalendarEventInsert = Database['public']['Tables']['calendar_events']['Insert']

@@ -316,7 +316,7 @@ async function migrateHealthData(userId: string): Promise<boolean> {
             metrics.push({
               user_id: userId,
               metric_type: metricType,
-              value: record as any,
+              value: record,
               recorded_at: record.date ?? new Date().toISOString(),
               created_at: new Date().toISOString(),
             })
@@ -326,7 +326,7 @@ async function migrateHealthData(userId: string): Promise<boolean> {
           metrics.push({
             user_id: userId,
             metric_type: metricType,
-            value: data[metricType] as any,
+            value: data[metricType],
             recorded_at: new Date().toISOString(),
             created_at: new Date().toISOString(),
           })

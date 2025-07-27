@@ -3,16 +3,18 @@
 
 'use client';
 
-import { useState } from 'react';
+import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '~/core/contexts/auth-context';
+import { useState } from 'react';
+
+import { Alert, AlertDescription } from '~/components/ui/alert';
 import { Button } from '~/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '~/components/ui/card';
-import { AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '~/components/ui/alert';
+import { useAuth } from '~/core/contexts/auth-context';
+
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -48,8 +50,9 @@ export default function RegisterPage() {
     try {
       await register(email, password, username);
       router.push('/chat');
-    } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Registration failed. Please try again.';
+      setError(message ?? 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

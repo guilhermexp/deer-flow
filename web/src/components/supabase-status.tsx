@@ -73,7 +73,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave
 
   if (status === 'error') {
     return (
-      <Alert variant="warning" className="mb-4">
+      <Alert variant="destructive" className="mb-4">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Problema de conexão com Supabase</AlertTitle>
         <AlertDescription>

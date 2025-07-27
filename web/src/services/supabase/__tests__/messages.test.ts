@@ -3,8 +3,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { messagesService } from '../messages';
+
 import type { Message } from '~/core/messages';
+
+import { messagesService } from '../messages';
 
 // Mock do cliente Supabase
 vi.mock('~/lib/supabase/client', () => ({

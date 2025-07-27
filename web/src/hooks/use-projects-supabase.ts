@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+
+import type { Project, Task, TaskStatus, ActiveTabValue } from '~/components/jarvis/kanban/lib/types';
 import { useAuth } from '~/core/contexts/auth-context';
 import { projectsService } from '~/services/supabase/projects';
-import type { Project, Task, TaskStatus, ActiveTabValue } from '~/components/jarvis/kanban/lib/types';
 
 /**
  * Hook para gerenciar projetos e tarefas com Supabase
@@ -9,7 +10,7 @@ import type { Project, Task, TaskStatus, ActiveTabValue } from '~/components/jar
 export function useProjectsSupabase() {
   const { user, isAuthenticated } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [tasksByProject, setTasksByProject] = useState<{ [projectId: string]: Task[] }>({});
+  const [tasksByProject, setTasksByProject] = useState<Record<string, Task[]>>({});
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTabValue>("projectList");
   const [loading, setLoading] = useState(true);
@@ -162,7 +163,7 @@ export function useProjectsSupabase() {
   }, [isAuthenticated, user?.id, currentProject]);
 
   // Criar tarefa
-  const createTask = useCallback(async (projectId: string, taskData: Partial<Task>, columnId: string = 'backlog'): Promise<Task | null> => {
+  const createTask = useCallback(async (projectId: string, taskData: Partial<Task>, columnId = 'backlog'): Promise<Task | null> => {
     if (!isAuthenticated || !user?.id) {
       setError('Usuário não autenticado');
       return null;
@@ -199,7 +200,7 @@ export function useProjectsSupabase() {
         const projectTasks = prev[projectId] || [];
         const updatedTasks = projectTasks.map(task => {
           if (task.id === taskId) {
-            const statusMap: { [key: string]: TaskStatus } = {
+            const statusMap: Record<string, TaskStatus> = {
               'backlog': 'not-started',
               'todo': 'not-started',
               'in_progress': 'in-progress',

@@ -1,6 +1,45 @@
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+  }),
+  useSearchParams: () => ({
+    get: vi.fn(),
+  }),
+  usePathname: () => '/',
+}));
+
+// Mock Supabase client
+vi.mock('~/lib/supabase/client', () => ({
+  getSupabaseClient: () => ({
+    auth: {
+      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+      onAuthStateChange: () => ({
+        data: { subscription: { unsubscribe: () => { /* empty */ } } }
+      }),
+      signInWithPassword: () => Promise.resolve({ data: { user: null }, error: null }),
+      signUp: () => Promise.resolve({ data: { user: null }, error: null }),
+      signOut: () => Promise.resolve({ error: null })
+    },
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: () => Promise.resolve({ data: null, error: null })
+        })
+      }),
+      insert: () => Promise.resolve({ error: null })
+    })
+  })
+}));
+
 // Mock do window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

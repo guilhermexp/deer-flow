@@ -33,7 +33,8 @@ export const setupService = {
     const supabase = getSupabaseClient();
     
     try {
-      const { error } = await supabase
+      // Use a type assertion to work around the strict typing
+      const { error } = await (supabase as any)
         .from(tableName)
         .select('count')
         .limit(1);
@@ -160,6 +161,10 @@ Para verificar o status do setup, acesse: /test-supabase
    * Cria dados de exemplo para teste
    */
   async createSampleData(userId: string): Promise<void> {
+    if (!userId) {
+      throw new Error('userId is required to create sample data');
+    }
+    
     const supabase = getSupabaseClient();
 
     try {
@@ -170,7 +175,7 @@ Para verificar o status do setup, acesse: /test-supabase
           title: 'Nota de Exemplo',
           content: 'Esta é uma nota de exemplo criada automaticamente.',
           source: 'Arquivos',
-          user_id: userId,
+          user_id: userId!,
           metadata: {
             tags: ['exemplo', 'teste'],
             mediaType: 'file'
@@ -186,7 +191,7 @@ Para verificar o status do setup, acesse: /test-supabase
       const { error: healthError } = await supabase
         .from('health_data')
         .insert({
-          user_id: userId,
+          user_id: userId!,
           date: today,
           health_score: 85,
           hydration_ml: 1200,
