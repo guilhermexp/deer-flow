@@ -4,10 +4,14 @@
 import os
 import logging
 import traceback
+from datetime import datetime
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from src.server.error_responses import ErrorResponse, ErrorDetail, ValidationErrorResponse
+from src.server.exceptions import DeerFlowException
 
 logger = logging.getLogger(__name__)
 
@@ -36,10 +40,14 @@ GENERIC_ERROR_MESSAGES = {
 async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
     """Handle HTTP exceptions with appropriate detail level"""
     
+    # Get request ID from request state
+    request_id = getattr(request.state, "request_id", request.headers.get("X-Request-ID", ""))
+    
     # Log the full error details server-side
     logger.error(
         f"HTTP Exception: {exc.status_code} - {exc.detail}",
         extra={
+            "request_id": request_id,
             "path": request.url.path,
             "method": request.method,
             "headers": dict(request.headers),
@@ -61,17 +69,21 @@ async def custom_http_exception_handler(request: Request, exc: StarletteHTTPExce
             "detail": detail,
             "status_code": exc.status_code,
             # Include request ID if available for tracking
-            "request_id": request.headers.get("X-Request-ID", ""),
+            "request_id": request_id,
         }
     )
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """Handle validation errors with appropriate detail level"""
     
+    # Get request ID from request state
+    request_id = getattr(request.state, "request_id", request.headers.get("X-Request-ID", ""))
+    
     # Log validation errors
     logger.warning(
         f"Validation Error: {exc.errors()}",
         extra={
+            "request_id": request_id,
             "path": request.url.path,
             "method": request.method,
             "client": request.client.host if request.client else "unknown",
@@ -85,6 +97,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             content={
                 "detail": "Validation error in request data",
                 "status_code": 422,
+                "request_id": request_id,
             }
         )
     else:
@@ -95,17 +108,22 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
                 "detail": exc.errors(),
                 "body": exc.body,
                 "status_code": 422,
+                "request_id": request_id,
             }
         )
 
 async def general_exception_handler(request: Request, exc: Exception):
     """Handle all unhandled exceptions"""
     
+    # Get request ID from request state
+    request_id = getattr(request.state, "request_id", request.headers.get("X-Request-ID", ""))
+    
     # Log the full traceback server-side
     logger.error(
         f"Unhandled Exception: {type(exc).__name__}: {str(exc)}",
         exc_info=True,
         extra={
+            "request_id": request_id,
             "path": request.url.path,
             "method": request.method,
             "client": request.client.host if request.client else "unknown",
@@ -119,7 +137,7 @@ async def general_exception_handler(request: Request, exc: Exception):
             content={
                 "detail": "Internal Server Error",
                 "status_code": 500,
-                "request_id": request.headers.get("X-Request-ID", ""),
+                "request_id": request_id,
             }
         )
     else:
@@ -131,11 +149,48 @@ async def general_exception_handler(request: Request, exc: Exception):
                 "type": type(exc).__name__,
                 "traceback": traceback.format_exc().split('\n'),
                 "status_code": 500,
+                "request_id": request_id,
             }
         )
 
+async def deerflow_exception_handler(request: Request, exc: DeerFlowException):
+    """Handle DeerFlow custom exceptions."""
+    
+    # Get request ID from request state
+    request_id = getattr(request.state, "request_id", request.headers.get("X-Request-ID", ""))
+    
+    # Log the error
+    logger.error(
+        f"DeerFlow Exception: {exc.error_code} - {exc.detail}",
+        extra={
+            "request_id": request_id,
+            "error_code": exc.error_code,
+            "path": request.url.path,
+            "method": request.method,
+            "client": request.client.host if request.client else "unknown",
+            "extra_data": exc.extra_data,
+        }
+    )
+    
+    # Create error response
+    error_response = ErrorResponse(
+        error_code=exc.error_code,
+        message=exc.detail,
+        request_id=request_id,
+        status_code=exc.status_code,
+        extra_data=exc.extra_data if not IS_PRODUCTION else None
+    )
+    
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=error_response.model_dump(exclude_none=True),
+        headers=exc.headers
+    )
+
+
 def setup_error_handlers(app):
     """Setup all error handlers for the FastAPI app"""
+    app.add_exception_handler(DeerFlowException, deerflow_exception_handler)
     app.add_exception_handler(StarletteHTTPException, custom_http_exception_handler)
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(Exception, general_exception_handler)
