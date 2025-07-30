@@ -11,8 +11,30 @@ from sqlalchemy import desc
 from src.database.base import get_db
 from src.database.models import HealthData, User
 from src.server.auth import get_current_active_user
+from src.server.health_check import HealthChecker
 
 router = APIRouter(prefix="/api/health", tags=["health"])
+
+
+@router.get("/check")
+async def health_check():
+    """Comprehensive health check endpoint for monitoring"""
+    return await HealthChecker.check_all()
+
+
+@router.get("/check/{service}")
+async def health_check_service(service: str):
+    """Check specific service health"""
+    if service == "database":
+        return await HealthChecker.check_database()
+    elif service == "redis":
+        return await HealthChecker.check_redis()
+    elif service == "supabase":
+        return await HealthChecker.check_supabase()
+    elif service == "external_apis":
+        return await HealthChecker.check_external_apis()
+    else:
+        raise HTTPException(status_code=404, detail=f"Unknown service: {service}")
 
 
 class SleepPhases(BaseModel):

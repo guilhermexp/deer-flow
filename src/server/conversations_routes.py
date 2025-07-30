@@ -11,6 +11,8 @@ from sqlalchemy import desc
 from src.database.base import get_db
 from src.database.models import Conversation, User
 from src.server.auth import get_current_active_user
+from src.server.pagination import PaginationParams, PaginatedResponse, paginate, create_paginated_response
+from src.server.cache import cache, cached
 
 router = APIRouter(prefix="/api/conversations", tags=["conversations"])
 
@@ -44,15 +46,15 @@ class ConversationResponse(BaseModel):
         from_attributes = True
 
 
-@router.get("/", response_model=List[ConversationResponse])
+@router.get("/", response_model=PaginatedResponse[ConversationResponse])
 async def get_conversations(
     search: Optional[str] = None,
-    limit: int = Query(50, le=200),
-    offset: int = 0,
+    pagination: PaginationParams = Depends(),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Get user's conversations with optional search."""
+    """Get user's conversations with optional search and pagination."""
+    # Build base query
     query = db.query(Conversation).filter(Conversation.user_id == current_user.id)
 
     if search:
@@ -62,13 +64,21 @@ async def get_conversations(
             | Conversation.summary.ilike(f"%{search}%")
         )
 
-    conversations = (
-        query.order_by(desc(Conversation.updated_at)).offset(offset).limit(limit).all()
+    # Order by updated_at
+    query = query.order_by(desc(Conversation.updated_at))
+    
+    # Paginate
+    items, pagination_info = paginate(
+        query,
+        page=pagination.page,
+        per_page=pagination.per_page
     )
-    return [ConversationResponse.from_orm(conv) for conv in conversations]
+    
+    return create_paginated_response(items, pagination_info, ConversationResponse)
 
 
 @router.get("/{thread_id}", response_model=ConversationResponse)
+@cached(prefix="conversation", ttl=300)  # Cache for 5 minutes
 async def get_conversation(
     thread_id: str,
     current_user: User = Depends(get_current_active_user),
@@ -86,7 +96,7 @@ async def get_conversation(
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
-    return ConversationResponse.from_orm(conversation)
+    return ConversationResponse.from_orm(conversation).dict()
 
 
 @router.post("/", response_model=ConversationResponse)

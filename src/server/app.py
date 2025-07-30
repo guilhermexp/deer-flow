@@ -63,6 +63,8 @@ from src.database.base import create_tables
 from src.database.models import User
 from src.server.auth import get_current_active_user
 from src.server.supabase_client import get_supabase_client
+from src.server.cache import cache
+from src.server.observability import observability
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +94,29 @@ app.add_middleware(
 from src.server.rate_limiter import rate_limit_middleware
 app.middleware("http")(rate_limit_middleware)
 
+# Add observability middleware
+import time
+from fastapi import Request
+
+@app.middleware("http")
+async def observability_middleware(request: Request, call_next):
+    """Track request metrics"""
+    start_time = time.time()
+    
+    # Process request
+    response = await call_next(request)
+    
+    # Record metrics
+    duration = time.time() - start_time
+    observability.record_request(
+        method=request.method,
+        endpoint=request.url.path,
+        status_code=response.status_code,
+        duration=duration
+    )
+    
+    return response
+
 # Setup error handlers
 from src.server.error_handler import setup_error_handlers
 setup_error_handlers(app)
@@ -99,14 +124,33 @@ setup_error_handlers(app)
 # Database initialization on startup
 @app.on_event("startup")
 async def startup_event():
-    """Initialize database tables on startup"""
+    """Initialize database tables, cache, and observability on startup"""
     try:
         logger.info("Creating database tables...")
         create_tables()
         logger.info("Database tables created successfully")
+        
+        # Initialize Redis cache
+        logger.info("Connecting to Redis cache...")
+        await cache.connect()
+        
+        # Setup observability
+        logger.info("Setting up observability...")
+        observability.setup(app)
+        
     except Exception as e:
-        logger.error(f"Failed to create database tables: {e}")
+        logger.error(f"Failed to initialize application: {e}")
         raise
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown"""
+    try:
+        # Disconnect from Redis
+        await cache.disconnect()
+        logger.info("Application shutdown complete")
+    except Exception as e:
+        logger.error(f"Error during shutdown: {e}")
 
 
 graph = build_graph_with_memory()

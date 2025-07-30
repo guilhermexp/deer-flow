@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import func, case
 
 from src.database.base import get_db
@@ -97,25 +97,28 @@ async def get_projects(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Get user's projects with task counts."""
-    # Get projects first
-    query = db.query(Project).filter(Project.user_id == current_user.id)
+    """Get user's projects with task counts - optimized with single query."""
+    # Use a single query with aggregation to avoid N+1 queries
+    query = (
+        db.query(
+            Project,
+            func.count(Task.id).label("task_count"),
+            func.sum(case((Task.status == TaskStatus.DONE, 1), else_=0)).label("completed_task_count")
+        )
+        .outerjoin(Task, Project.id == Task.project_id)
+        .filter(Project.user_id == current_user.id)
+        .group_by(Project.id)
+    )
 
     if status:
         query = query.filter(Project.status == status)
 
-    projects_result = query.offset(offset).limit(limit).all()
+    # Apply pagination
+    results = query.offset(offset).limit(limit).all()
 
+    # Convert to response model
     projects = []
-    for project in projects_result:
-        # Get task counts for each project
-        task_count = db.query(Task).filter(Task.project_id == project.id).count()
-        completed_count = (
-            db.query(Task)
-            .filter(Task.project_id == project.id, Task.status == TaskStatus.DONE)
-            .count()
-        )
-
+    for project, task_count, completed_count in results:
         projects.append(
             ProjectResponse(
                 id=project.id,
@@ -126,8 +129,8 @@ async def get_projects(
                 status=project.status,
                 created_at=project.created_at,
                 updated_at=project.updated_at,
-                task_count=task_count,
-                completed_task_count=completed_count,
+                task_count=task_count or 0,
+                completed_task_count=completed_count or 0,
             )
         )
 
