@@ -14,6 +14,7 @@ import { ThemeProviderWrapper } from "~/components/deer-flow/theme-provider-wrap
 import { AnimationProvider } from "~/contexts/animation-context";
 import { AuthProvider } from "~/core/contexts/auth-context";
 import { env } from "~/env.js";
+import { ErrorBoundary } from "~/components/ErrorBoundary";
 
 import { Toaster } from "../components/deer-flow/toaster";
 
@@ -53,13 +54,15 @@ export default async function RootLayout({
       </head>
       <body className="bg-app">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProviderWrapper>
-            <AuthProvider>
-              <AnimationProvider>
-                {children}
-              </AnimationProvider>
-            </AuthProvider>
-          </ThemeProviderWrapper>
+          <ErrorBoundary>
+            <ThemeProviderWrapper>
+              <AuthProvider>
+                <AnimationProvider>
+                  {children}
+                </AnimationProvider>
+              </AuthProvider>
+            </ThemeProviderWrapper>
+          </ErrorBoundary>
         </NextIntlClientProvider>
         <Toaster />
         {

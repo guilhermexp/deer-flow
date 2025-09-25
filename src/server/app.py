@@ -90,6 +90,11 @@ app.add_middleware(
     max_age=3600,  # Cache preflight requests for 1 hour
 )
 
+# Add request ID middleware
+from src.server.middleware import RequestIDMiddleware, TimingMiddleware
+app.add_middleware(RequestIDMiddleware)
+app.add_middleware(TimingMiddleware)
+
 # Add rate limiting middleware
 from src.server.rate_limiter import rate_limit_middleware
 app.middleware("http")(rate_limit_middleware)
@@ -169,6 +174,13 @@ app.include_router(conversations_router)
 async def health_check():
     """Simple health check endpoint"""
     return {"status": "ok", "message": "DeerFlow API is running"}
+
+
+@app.get("/health/services")
+async def service_health_check():
+    """Check health of external services with circuit breaker status"""
+    from src.server.protected_services import get_service_health
+    return await get_service_health()
 
 
 @app.post("/api/chat/stream")
