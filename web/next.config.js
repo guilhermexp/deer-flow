@@ -82,7 +82,7 @@ const config = {
 
   // Custom server configuration
   serverRuntimeConfig: {
-    port: 4000,
+    port: parseInt(process.env.PORT || '4000', 10),
   },
 
   experimental: {
@@ -109,8 +109,11 @@ const config = {
   },
 
   async headers() {
-    return [
-      {
+    // Only enforce HTTPS in production
+    const headers = [];
+    
+    if (process.env.NODE_ENV === 'production') {
+      headers.push({
         source: "/:path*",
         headers: [
           {
@@ -118,8 +121,10 @@ const config = {
             value: "upgrade-insecure-requests",
           },
         ],
-      },
-    ];
+      });
+    }
+    
+    return headers;
   },
 
   typescript: {

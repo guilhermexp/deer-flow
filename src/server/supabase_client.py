@@ -3,10 +3,13 @@ Cliente Supabase para o backend Python
 """
 
 import os
+import logging
 from typing import Optional, Dict, Any, List
 from supabase import create_client, Client
 from datetime import datetime
 import json
+
+logger = logging.getLogger(__name__)
 
 
 class SupabaseClient:
@@ -57,8 +60,16 @@ class SupabaseClient:
             result = self.client.table("messages").insert(data).execute()
             return result.data[0] if result.data else {}
         except Exception as e:
-            print(f"Erro ao salvar mensagem no Supabase: {e}")
-            # Não falha se não conseguir salvar
+            logger.error(
+                f"Failed to save message to Supabase: {e}",
+                extra={
+                    "conversation_id": conversation_id,
+                    "message_id": message_id,
+                    "role": role,
+                    "error": str(e)
+                }
+            )
+            # Return empty dict to indicate failure without raising
             return {}
     
     async def update_message(
@@ -78,7 +89,10 @@ class SupabaseClient:
             result = self.client.table("messages").update(updates).eq("id", message_id).execute()
             return result.data[0] if result.data else {}
         except Exception as e:
-            print(f"Erro ao atualizar mensagem no Supabase: {e}")
+            logger.error(
+                f"Failed to update message in Supabase: {e}",
+                extra={"message_id": message_id, "error": str(e)}
+            )
             return {}
     
     async def get_or_create_conversation(
@@ -108,7 +122,14 @@ class SupabaseClient:
             return result.data[0] if result.data else {}
             
         except Exception as e:
-            print(f"Erro ao gerenciar conversa no Supabase: {e}")
+            logger.error(
+                f"Failed to get or create conversation in Supabase: {e}",
+                extra={
+                    "conversation_id": conversation_id,
+                    "user_id": user_id,
+                    "error": str(e)
+                }
+            )
             return {}
     
     async def save_research_activity(
@@ -138,7 +159,15 @@ class SupabaseClient:
             result = self.client.table("research_activities").insert(data).execute()
             return result.data[0] if result.data else {}
         except Exception as e:
-            print(f"Erro ao salvar atividade de pesquisa: {e}")
+            logger.error(
+                f"Failed to save research activity: {e}",
+                extra={
+                    "conversation_id": conversation_id,
+                    "research_id": research_id,
+                    "activity_type": activity_type,
+                    "error": str(e)
+                }
+            )
             return {}
     
     async def get_user_id_from_token(self, token: str) -> Optional[str]:
@@ -148,7 +177,7 @@ class SupabaseClient:
             response = self.client.auth.get_user(token)
             return response.user.id if response.user else None
         except Exception as e:
-            print(f"Erro ao verificar token: {e}")
+            logger.error(f"Failed to verify token: {e}", extra={"error": str(e)})
             return None
 
 
@@ -164,7 +193,7 @@ def get_supabase_client() -> Optional[SupabaseClient]:
         try:
             _supabase_client = SupabaseClient()
         except Exception as e:
-            print(f"Supabase não configurado: {e}")
+            logger.warning(f"Supabase not configured: {e}", extra={"error": str(e)})
             return None
     
     return _supabase_client

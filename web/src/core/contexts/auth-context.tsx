@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 import { getSupabaseClient } from '~/lib/supabase/client';
+import { retry } from '~/lib/retry-utils';
 import type { UserProfile } from '~/types/supabase';
 
 interface User {
@@ -33,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = getSupabaseClient();
 
   // Helper function to get user profile
-  const getUserProfile = async (userId: string) => {
+  const getUserProfile = useCallback(async (userId: string) => {
     try {
       const { data: profile, error } = await supabase
         .from('user_profiles')
@@ -51,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.warn('Profile fetch exception:', error);
       return null;
     }
-  };
+  }, [supabase]);
 
   // Helper function to set user data
   const setUserData = useCallback(async (supabaseUser: SupabaseUser) => {
@@ -82,37 +83,76 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     
+    // Complete development mode bypass - skip all Supabase calls
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🛠️ Development mode: Complete auth bypass - using mock user');
+      setIsCheckingAuth(true);
+      
+      // Immediately create mock user without any Supabase calls
+      const mockUser: User = {
+        id: 'dev-user-localhost',
+        email: 'dev@localhost.com',
+      };
+      
+      setUser(mockUser);
+      setIsLoading(false);
+      setIsCheckingAuth(false);
+      console.log('✅ Dev mode: Mock user created, auth complete');
+      return;
+    }
+    
+    // Production mode: full auth check with retries
     try {
       setIsCheckingAuth(true);
-      console.log('🔍 Checking authentication...');
+      console.log('🔍 Production auth check...');
       
-      // Get session with 5 second timeout
-      const sessionPromise = supabase.auth.getSession();
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Session check timeout')), 5000)
-      );
+      let lastError: Error | null = null;
+      let session: { user: SupabaseUser } | null = null;
       
-      const { data: { session }, error: sessionError } = await Promise.race([
-        sessionPromise,
-        timeoutPromise
-      ]) as { data: { session: { user: SupabaseUser } | null }; error: Error | null };
-      
-      if (sessionError) {
-        console.error('❌ Session error:', sessionError.message);
-        setUser(null);
-        setIsLoading(false);
-        return;
+      // Retry logic for production using retry utility
+      try {
+        const { data, error } = await retry(
+          async () => {
+            const sessionPromise = supabase.auth.getSession();
+            const timeoutPromise = new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error('Session check timeout')), 15000)
+            );
+
+            const result = await Promise.race([
+              sessionPromise,
+              timeoutPromise
+            ]);
+
+            if (result.error) {
+              throw result.error;
+            }
+
+            return result;
+          },
+          {
+            retries: 3,
+            minTimeout: 1000,
+            factor: 2,
+            onFailedAttempt: (error, attempt) => {
+              console.warn(`⚠️ Auth attempt ${attempt}/3 failed:`, error.message);
+            }
+          }
+        );
+
+        session = data.session;
+      } catch (error) {
+        lastError = error as Error;
+        console.error('❌ All auth attempts failed:', error);
       }
       
-      if (!session?.user) {
-        console.log('📤 No active session found');
+      if (lastError || !session?.user) {
+        console.error('❌ All auth attempts failed:', lastError?.message);
         setUser(null);
         setIsLoading(false);
         return;
       }
 
       console.log('✅ Valid session found, setting user data');
-      // Set basic user data immediately
       const userData: User = {
         id: session.user.id,
         email: session.user.email ?? '',
@@ -136,7 +176,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsCheckingAuth(false);
     }
-  }, [supabase, isCheckingAuth, setUserData, getUserProfile]);
+  }, [supabase, getUserProfile]);
 
   // Initialize auth check on mount
   useEffect(() => {
@@ -146,7 +186,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       void checkAuth();
     }
 
-    // Listen for auth state changes
+    // Skip Supabase listener in development mode
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🛠️ Development mode: Skipping Supabase auth listener');
+      return () => {
+        mounted = false;
+      };
+    }
+
+    // Listen for auth state changes (production only)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
@@ -170,9 +218,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase, checkAuth, setUserData]);
+  }, []);
 
   const login = async (email: string, password: string) => {
+    // Development mode - instant mock login
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🛠️ Development mode: Mock login successful');
+      const mockUser: User = {
+        id: 'dev-user-localhost',
+        email: email || 'dev@localhost.com',
+      };
+      setUser(mockUser);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       // Attempting login

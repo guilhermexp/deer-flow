@@ -20,14 +20,31 @@ export function createClient() {
         schema: 'public'
       },
       global: {
-        fetch: (url, options = {}) => {
-          // Add cache headers for better performance
-          return fetch(url, {
-            ...options,
-            cache: 'no-store', // Prevent stale data
-          });
+        fetch: async (url, options = {}) => {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+          try {
+            return await fetch(url, {
+              ...options,
+              cache: 'no-store', // Prevent stale data
+              signal: controller.signal,
+            });
+          } finally {
+            clearTimeout(timeoutId);
+            // Explicitly abort to release resources
+            controller.abort();
+          }
         },
-      }
+      },
+      // Additional settings for development reliability
+      ...(process.env.NODE_ENV === 'development' && {
+        realtime: {
+          params: {
+            eventsPerSecond: 2, // Reduce event frequency in development
+          },
+        },
+      })
     }
   )
 }

@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import "@xyflow/react/dist/style.css";
 import { useTranslations } from "next-intl";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Tooltip } from "~/components/deer-flow/tooltip";
 import { ShineBorder } from "~/components/magicui/shine-border";
@@ -56,18 +56,28 @@ export function MultiAgentVisualization({ className }: { className?: string }) {
   } = useMAVStore((state) => state);
   const flowRef = useRef<ReactFlowInstance<GraphNode, Edge>>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Track if component is mounted to prevent re-render issues
+  const [isMounted, setIsMounted] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+
+  // Use effect to set mounted state
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const { ref: anchorRef } = useIntersectionObserver({
     rootMargin: "0%",
     threshold: 0,
     onChange: (isIntersecting) => {
-      if (isIntersecting && !playing && !hasPlayed) {
+      if (isIntersecting && !playing && !hasPlayed && isMounted) {
         setHasPlayed(true);
         void play();
       }
     },
   });
+
   const toggleFullscreen = useCallback(async () => {
     if (containerRef.current) {
       if (!document.fullscreenElement) {
@@ -85,6 +95,18 @@ export function MultiAgentVisualization({ className }: { className?: string }) {
       }
     }
   }, []);
+
+  // Don't render until mounted to prevent SSR issues
+  if (!isMounted) {
+    return (
+      <div className={cn("flex h-full w-full flex-col pb-4", className)}>
+        <div className="flex h-96 w-full items-center justify-center">
+          <div className="text-gray-500">Loading visualization...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}

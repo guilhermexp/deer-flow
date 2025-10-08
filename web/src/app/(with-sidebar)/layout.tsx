@@ -41,9 +41,17 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
     setIsMobileSidebarOpen(prev => !prev);
   }, []);
 
-  // Verificar autenticação
+  // Verificar autenticação (muito permissivo em desenvolvimento)
   useEffect(() => {
+    // In development, be very permissive with auth
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🛠️ Development mode: Skipping auth redirect logic');
+      return;
+    }
+    
+    // Only redirect in production if auth is definitely failing
     if (!isLoading && !isAuthenticated) {
+      console.log('🔒 Production: Redirecting to login');
       router.push('/login');
     }
   }, [isLoading, isAuthenticated, router]);
@@ -64,8 +72,8 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
     );
   }
   
-  // Se não está autenticado, não renderiza nada (será redirecionado)
-  if (!isAuthenticated) {
+  // Em desenvolvimento, permitir acesso mesmo com problemas de auth
+  if (!isAuthenticated && process.env.NODE_ENV !== 'development') {
     return null;
   }
 

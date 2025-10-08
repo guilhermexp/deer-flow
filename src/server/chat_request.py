@@ -1,9 +1,10 @@
 # Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
+import re
 from typing import List, Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from src.rag.retriever import Resource
 from src.config.report_style import ReportStyle
@@ -72,19 +73,33 @@ class ChatRequest(BaseModel):
 
 
 class TTSRequest(BaseModel):
-    text: str = Field(..., description="The text to convert to speech")
+    text: str = Field(
+        ...,
+        description="The text to convert to speech",
+        min_length=1,
+        max_length=1024
+    )
     voice_type: Optional[str] = Field(
         "BV700_V2_streaming", description="The voice type to use"
     )
     encoding: Optional[str] = Field("mp3", description="The audio encoding format")
-    speed_ratio: Optional[float] = Field(1.0, description="Speech speed ratio")
-    volume_ratio: Optional[float] = Field(1.0, description="Speech volume ratio")
-    pitch_ratio: Optional[float] = Field(1.0, description="Speech pitch ratio")
+    speed_ratio: Optional[float] = Field(1.0, description="Speech speed ratio", ge=0.5, le=2.0)
+    volume_ratio: Optional[float] = Field(1.0, description="Speech volume ratio", ge=0.1, le=2.0)
+    pitch_ratio: Optional[float] = Field(1.0, description="Speech pitch ratio", ge=0.5, le=2.0)
     text_type: Optional[str] = Field("plain", description="Text type (plain or ssml)")
     with_frontend: Optional[int] = Field(
         1, description="Whether to use frontend processing"
     )
     frontend_type: Optional[str] = Field("unitTson", description="Frontend type")
+
+    @field_validator('text')
+    @classmethod
+    def sanitize_text(cls, v: str) -> str:
+        """Remove control characters and validate encoding"""
+        # Remove control characters (except newlines and tabs)
+        sanitized = re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f-\x9f]', '', v)
+        # Ensure valid UTF-8 encoding
+        return sanitized.encode('utf-8', errors='ignore').decode('utf-8')
 
 
 class GeneratePodcastRequest(BaseModel):

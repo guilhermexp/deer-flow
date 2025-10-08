@@ -1,0 +1,762 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   412    0     0  100   412      0    340  0:00:01  0:00:01 --:--:--   341event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+100   575    0   163  100   412     86    219  0:00:01  0:00:01 --:--:--   306event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+100  5954    0  5542  100   412   2337    173  0:00:02  0:00:02 --:--:--  2511event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+100 18994    0 18582  100   412   5488    121  0:00:03  0:00:03 --:--:--  5609event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+100 31708    0 31296  100   412   7157     94  0:00:04  0:00:04 --:--:--  7250event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": "Olá"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": "!"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": " Eu"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": " sou"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": " o"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": " Deer"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": "Flow"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": ","}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": " seu"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": " assistente"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": " am"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": "ig"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": "ável"}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "content": "."}
+
+event: message_chunk
+data: {"thread_id": "test-debug-1754029766", "agent": "coordinator", "id": "run--7b832463-5e83-4418-a8b4-18526a6fdd53", "role": "assistant", "finish_reason": "stop"}
+
+100 41936    0 41524  100   412   8094     80  0:00:05  0:00:05 --:--:-- 10587

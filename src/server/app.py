@@ -62,6 +62,7 @@ from src.server.conversations_routes import router as conversations_router
 from src.database.base import create_tables
 from src.database.models import User
 from src.server.auth import get_current_active_user
+from src.server.auth_dev import get_current_active_user_dev
 from src.server.supabase_client import get_supabase_client
 from src.server.cache import cache
 from src.server.observability import observability
@@ -85,7 +86,7 @@ app.add_middleware(
     allow_origins=allowed_origins,  # Specific allowed origins only
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Specific allowed methods
-    allow_headers=["Authorization", "Content-Type", "X-Requested-With"],  # Specific allowed headers
+    allow_headers=["Accept", "Accept-Language", "Authorization", "Content-Language", "Content-Type", "X-Requested-With"],  # Common allowed headers
     expose_headers=["Content-Length", "X-Total-Count"],  # Headers exposed to the browser
     max_age=3600,  # Cache preflight requests for 1 hour
 )
@@ -174,7 +175,10 @@ async def health_check():
 @app.post("/api/chat/stream")
 async def chat_stream(
     request: ChatRequest,
-    current_user: User = Depends(get_current_active_user),
+    current_user: Optional[User] = Depends(
+        get_current_active_user_dev if os.getenv("NODE_ENV") == "development" 
+        else get_current_active_user
+    ),
 ):
     thread_id = request.thread_id
     if thread_id == "__default__":
@@ -352,7 +356,9 @@ async def _astream_workflow_generator(
                     yield _make_event("tool_call_chunks", event_stream_message)
                 else:
                     # AI Message - Raw message tokens
-                    yield _make_event("message_chunk", event_stream_message)
+                    # Only send message_chunk if there's actual content
+                    if event_stream_message.get("content") or event_stream_message.get("reasoning_content") or event_stream_message.get("finish_reason"):
+                        yield _make_event("message_chunk", event_stream_message)
                 
                 # Salvar no Supabase quando a mensagem estiver completa
                 if supabase_client and current_user and event_stream_message.get("finish_reason"):
@@ -368,8 +374,13 @@ async def _astream_workflow_generator(
                             reasoning_content=msg_data.get("reasoning_content") or None,
                             tool_calls=msg_data.get("tool_calls") or None,
                         )
+                        # Clear from cache after successful save to prevent memory leak
+                        del message_cache[message_id]
                     except Exception as e:
                         logger.warning(f"Erro ao salvar mensagem no Supabase: {e}")
+                        # Still clear from cache even if save failed to prevent memory leak
+                        if message_id in message_cache:
+                            del message_cache[message_id]
 
             # Update last event time
             last_event_time = asyncio.get_event_loop().time()
@@ -411,9 +422,9 @@ async def text_to_speech(
             cluster=cluster,
             voice_type=voice_type,
         )
-        # Call the TTS API
+        # Call the TTS API (text is already validated and sanitized by Pydantic)
         result = tts_client.text_to_speech(
-            text=request.text[:1024],
+            text=request.text,
             encoding=request.encoding,
             speed_ratio=request.speed_ratio,
             volume_ratio=request.volume_ratio,

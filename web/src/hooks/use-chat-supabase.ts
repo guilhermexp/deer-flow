@@ -15,12 +15,20 @@ export function useChatSupabase() {
   const [threadId, setThreadId] = useState<string>(nanoid());
   const [messages, setMessages] = useState<Map<string, Message>>(new Map());
   const [messageIds, setMessageIds] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  // In development mode, start with loading: false to skip loading states
+  const [loading, setLoading] = useState(process.env.NODE_ENV === 'development' ? false : true);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   // Carregar mensagens de uma conversa
   const loadConversation = useCallback(async (conversationId: string) => {
+    // In development mode, skip authentication checks
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🛠️ Development mode: Skipping conversation loading');
+      setLoading(false);
+      return [];
+    }
+    
     if (!isAuthenticated || !user?.id) {
       setError('Usuário não autenticado');
       return;
@@ -75,6 +83,13 @@ export function useChatSupabase() {
 
   // Carregar conversa por thread ID
   const loadConversationByThreadId = useCallback(async (threadId: string) => {
+    // In development mode, skip authentication checks
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🛠️ Development mode: Skipping thread loading');
+      setLoading(false);
+      return [];
+    }
+    
     if (!isAuthenticated || !user?.id) {
       setError('Usuário não autenticado');
       return;
@@ -103,6 +118,14 @@ export function useChatSupabase() {
 
   // Adicionar mensagem
   const appendMessage = useCallback(async (message: Message) => {
+    // In development mode, just store locally
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🛠️ Development mode: Storing message locally only');
+      setMessages(prev => new Map(prev).set(message.id, message));
+      setMessageIds(prev => [...prev, message.id]);
+      return message;
+    }
+    
     if (!isAuthenticated || !user?.id) {
       setError('Usuário não autenticado');
       return;
@@ -158,6 +181,13 @@ export function useChatSupabase() {
 
   // Atualizar mensagem
   const updateMessage = useCallback(async (message: Message) => {
+    // In development mode, just update locally
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🛠️ Development mode: Updating message locally only');
+      setMessages(prev => new Map(prev).set(message.id, message));
+      return message;
+    }
+    
     if (!isAuthenticated || !user?.id) {
       setError('Usuário não autenticado');
       return;
@@ -184,7 +214,22 @@ export function useChatSupabase() {
 
   // Atualizar múltiplas mensagens
   const updateMessages = useCallback(async (messagesToUpdate: Message[]) => {
-    if (!isAuthenticated || !user?.id || messagesToUpdate.length === 0) {
+    if (messagesToUpdate.length === 0) {
+      return;
+    }
+    
+    // In development mode, just update locally
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🛠️ Development mode: Updating messages locally only');
+      const newMessages = new Map(messages);
+      messagesToUpdate.forEach(message => {
+        newMessages.set(message.id, message);
+      });
+      setMessages(newMessages);
+      return;
+    }
+    
+    if (!isAuthenticated || !user?.id) {
       return;
     }
 
@@ -231,6 +276,7 @@ export function useChatSupabase() {
     updateMessage,
     updateMessages,
     clearConversation,
-    isAuthenticated
+    // In development mode, always consider authenticated
+    isAuthenticated: process.env.NODE_ENV === 'development' ? true : isAuthenticated
   };
 }

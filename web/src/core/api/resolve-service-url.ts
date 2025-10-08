@@ -4,6 +4,11 @@
 import { env } from "~/env.js";
 
 export function resolveServiceURL(path: string) {
+  // In development mode, use the Next.js API routes to avoid CORS
+  if (process.env.NODE_ENV === 'development') {
+    return `/api/${path}`;
+  }
+  
   let BASE_URL = env.NEXT_PUBLIC_API_URL ?? "http://localhost:8005/api";
   if (!BASE_URL.endsWith("/")) {
     BASE_URL += "/";
