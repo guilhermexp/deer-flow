@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-import { useAuth } from '~/core/contexts/auth-context';
+import { useUser } from '@clerk/nextjs';
 import type { HealthData } from '~/lib/health-data';
 import { healthService } from '~/services/supabase/health';
 
@@ -8,7 +8,8 @@ import { healthService } from '~/services/supabase/health';
  * Hook para gerenciar dados de saúde com Supabase
  */
 export function useHealthSupabase() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isLoaded } = useUser();
+  const isAuthenticated = isLoaded && !!user;
   const [healthData, setHealthData] = useState<HealthData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

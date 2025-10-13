@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { projectsService } from "~/services/supabase/projects"
-import { useAuth } from "~/core/contexts/auth-context"
+import { useUser } from "@clerk/nextjs"
 import type { Task, Project, ActiveTabValue } from "../lib/types"
 
 export function useKanbanApi() {
@@ -12,8 +12,9 @@ export function useKanbanApi() {
   const [activeTab, setActiveTab] = useState<ActiveTabValue>("projectList")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
-  const { user, isAuthenticated } = useAuth()
+
+  const { user, isLoaded } = useUser()
+  const isAuthenticated = isLoaded && !!user
 
   // Carregar projetos do Supabase
   const loadProjects = useCallback(async (): Promise<Project[]> => {

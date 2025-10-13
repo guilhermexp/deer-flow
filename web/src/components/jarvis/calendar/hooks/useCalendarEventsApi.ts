@@ -5,7 +5,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { useCalendarSupabase } from "~/hooks/use-calendar-supabase"
 import type { CalendarEvent, NewEventFormData } from "../lib/types"
-import { useAuth } from "~/core/contexts/auth-context"
 
 // Helper para formatar a hora
 const formatHourForDisplay = (hour: number): string => {

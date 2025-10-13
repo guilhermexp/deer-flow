@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import type { Project, Task, TaskStatus, ActiveTabValue } from '~/components/jarvis/kanban/lib/types';
-import { useAuth } from '~/core/contexts/auth-context';
+import { useUser } from '@clerk/nextjs';
 import { projectsService } from '~/services/supabase/projects';
 
 /**
  * Hook para gerenciar projetos e tarefas com Supabase
  */
 export function useProjectsSupabase() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isLoaded } = useUser();
+  const isAuthenticated = isLoaded && !!user;
   const [projects, setProjects] = useState<Project[]>([]);
   const [tasksByProject, setTasksByProject] = useState<Record<string, Task[]>>({});
   const [currentProject, setCurrentProject] = useState<Project | null>(null);

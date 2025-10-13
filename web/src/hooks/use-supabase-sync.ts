@@ -4,7 +4,7 @@
 
 import { useEffect } from "react";
 
-import { useAuth } from "~/core/contexts/auth-context";
+import { useUser } from "@clerk/nextjs";
 import { useStore } from "~/core/store";
 import { storeEvents } from "~/core/store/events";
 
@@ -14,7 +14,7 @@ import { useRealtimeMessages, useRealtimeConversations } from "./use-realtime-me
 export function useSupabaseSync() {
   const chatSupabase = useChatSupabase();
   const store = useStore();
-  const { user } = useAuth();
+  const { user } = useUser();
   
   // Ativar real-time subscriptions
   const { isConnected: messagesConnected } = useRealtimeMessages(store.threadId);

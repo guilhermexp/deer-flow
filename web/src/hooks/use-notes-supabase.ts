@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import type { Note } from '~/app/(with-sidebar)/notes/page';
-import { useAuth } from '~/core/contexts/auth-context';
+import { useUser } from '@clerk/nextjs';
 import { getSupabaseClient } from '~/lib/supabase/client';
 import { notesService } from '~/services/supabase/notes';
 
@@ -9,7 +9,7 @@ import { notesService } from '~/services/supabase/notes';
  * Hook para gerenciar notas com Supabase
  */
 export function useNotesSupabase() {
-  const { user } = useAuth();
+  const { user } = useUser();
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);

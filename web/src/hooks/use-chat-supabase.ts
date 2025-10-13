@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import { useState, useCallback } from 'react';
 
-import { useAuth } from '~/core/contexts/auth-context';
+import { useUser } from '@clerk/nextjs';
 import type { Message } from '~/core/messages';
 import { addToHistory } from '~/core/store/history-store';
 import { conversationsService } from '~/services/supabase/conversations';
@@ -11,7 +11,8 @@ import { messagesService } from '~/services/supabase/messages';
  * Hook para gerenciar conversas e mensagens de chat com Supabase
  */
 export function useChatSupabase() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isLoaded } = useUser();
+  const isAuthenticated = isLoaded && !!user;
   const [threadId, setThreadId] = useState<string>(nanoid());
   const [messages, setMessages] = useState<Map<string, Message>>(new Map());
   const [messageIds, setMessageIds] = useState<string[]>([]);

@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useRef, memo } from "react"
 import { usePathname, useRouter } from "next/navigation"
+import { useClerk } from "@clerk/nextjs"
 import {
   Home,
   CalendarDays,
@@ -19,7 +20,6 @@ import { cn } from "~/lib/utils"
 import { Button } from "~/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { useRoutePrefetch } from "~/hooks/use-route-prefetch"
-import { useAuth } from "~/core/contexts/auth-context"
 
 
 const navItems = [
@@ -98,7 +98,7 @@ const SidebarContent = memo(({
   isMobileOpen?: boolean
   router: any
 }) => {
-  const { logout, user } = useAuth()
+  const { signOut } = useClerk()
   
   return (
   <div className="flex flex-col h-full">
@@ -150,7 +150,7 @@ const SidebarContent = memo(({
         <Button
           variant="ghost"
           size="icon"
-          onClick={logout}
+          onClick={() => signOut()}
           className={cn(
             "relative w-9 h-9 rounded-xl transition-all duration-200",
             "flex items-center justify-center",

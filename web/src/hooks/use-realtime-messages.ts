@@ -1,5 +1,6 @@
 /**
- * Hook para real-time subscriptions de mensagens usando Supabase
+ * Hook para real-time subscriptions de mensagens
+ * NOTA: Desabilitado após migração para Neon PostgreSQL direto (sem Supabase)
  */
 
 import type { RealtimeChannel } from '@supabase/supabase-js';
@@ -7,16 +8,16 @@ import { useEffect, useRef } from 'react';
 
 import type { Message } from '~/core/messages';
 import { storeEvents } from '~/core/store/events';
-import { getSupabaseClient } from '~/lib/supabase/client';
-import { convertSupabaseToMessage } from '~/services/supabase/messages';
 
 export function useRealtimeMessages(conversationId: string | undefined) {
   const channelRef = useRef<RealtimeChannel | null>(null);
-  
+
   useEffect(() => {
+    // Real-time desabilitado após migração para Neon PostgreSQL
+    console.log('⚠️ Real-time subscriptions desabilitadas (migração para Neon)');
+    return;
+
     if (!conversationId) return;
-    
-    const supabase = getSupabaseClient();
     
     // Criar canal de real-time para a conversa
     const channel = supabase
@@ -85,14 +86,17 @@ export function useRealtimeMessages(conversationId: string | undefined) {
 
 /**
  * Hook para real-time de conversas do usuário
+ * NOTA: Desabilitado após migração para Neon PostgreSQL direto (sem Supabase)
  */
 export function useRealtimeConversations(userId: string | undefined) {
   const channelRef = useRef<RealtimeChannel | null>(null);
-  
+
   useEffect(() => {
+    // Real-time desabilitado após migração para Neon PostgreSQL
+    console.log('⚠️ Real-time subscriptions desabilitadas (migração para Neon)');
+    return;
+
     if (!userId) return;
-    
-    const supabase = getSupabaseClient();
     
     // Criar canal para mudanças em conversas do usuário
     const channel = supabase

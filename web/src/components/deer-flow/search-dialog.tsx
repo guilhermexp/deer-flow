@@ -13,7 +13,7 @@ import { Button } from "~/components/ui/button";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { conversationsService } from "~/services/supabase/conversations";
 import { messagesService } from "~/services/supabase/messages";
-import { useAuth } from "~/core/contexts/auth-context";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -48,7 +48,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const { user } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
   
   // Função de busca com debounce

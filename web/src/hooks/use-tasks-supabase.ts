@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 
 import type { Task as AppTask } from "~/components/jarvis/kanban/lib/types"
-import { useAuth } from "~/core/contexts/auth-context"
+import { useUser } from "@clerk/nextjs"
 import { projectsService } from "~/services/supabase/projects"
 
 // Task interface para compatibilidade com useTasksApi
@@ -56,7 +56,9 @@ export function useTasksSupabase() {
   const [tasksByDay, setTasksByDay] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth()
+  const { user, isLoaded } = useUser()
+  const isAuthenticated = isLoaded && !!user
+  const isAuthLoading = !isLoaded
   
   const [currentDay, setCurrentDay] = useState<string>(() => {
     const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]

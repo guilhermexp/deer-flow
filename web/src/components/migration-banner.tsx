@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { AlertCircle, Check, Loader2, X } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Alert, AlertDescription } from "~/components/ui/alert";
-import { useAuth } from "~/core/contexts/auth-context";
+import { useUser } from "@clerk/nextjs";
 import { migrateLocalStorageToSupabase } from "~/utils/migration/localStorage-to-supabase";
 
 export function MigrationBanner() {
-  const { user } = useAuth();
+  const { user } = useUser();
   const [showBanner, setShowBanner] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationError, setMigrationError] = useState<string | null>(null);

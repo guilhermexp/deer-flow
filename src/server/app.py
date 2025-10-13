@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Depends
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, StreamingResponse
 from langchain_core.messages import AIMessageChunk, BaseMessage, ToolMessage
@@ -95,18 +95,48 @@ app.add_middleware(
 from src.server.rate_limiter import rate_limit_middleware
 app.middleware("http")(rate_limit_middleware)
 
+# Add security headers middleware
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    """Add security headers to all responses"""
+    response = await call_next(request)
+
+    # Content Security Policy
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.amplitude.com; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' data:; "
+        "connect-src 'self' https:; "
+        "media-src 'self' https:; "
+        "object-src 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self'; "
+        "frame-ancestors 'none';"
+    )
+
+    # Additional security headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+
+    return response
+
 # Add observability middleware
 import time
-from fastapi import Request
 
 @app.middleware("http")
 async def observability_middleware(request: Request, call_next):
     """Track request metrics"""
     start_time = time.time()
-    
+
     # Process request
     response = await call_next(request)
-    
+
     # Record metrics
     duration = time.time() - start_time
     observability.record_request(
@@ -115,7 +145,7 @@ async def observability_middleware(request: Request, call_next):
         status_code=response.status_code,
         duration=duration
     )
-    
+
     return response
 
 # Setup error handlers
@@ -127,18 +157,32 @@ setup_error_handlers(app)
 async def startup_event():
     """Initialize database tables, cache, and observability on startup"""
     try:
+        # SECURITY: Validate JWT secret key
+        jwt_secret = os.getenv("JWT_SECRET_KEY")
+        if not jwt_secret:
+            raise ValueError("JWT_SECRET_KEY environment variable is required")
+        if len(jwt_secret) < 32:
+            raise ValueError("JWT_SECRET_KEY must be at least 32 characters long")
+        logger.info("✓ JWT secret validation passed")
+
+        # SECURITY: Validate CORS configuration
+        if os.getenv("NODE_ENV") == "production":
+            cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
+            if not cors_origins or "localhost" in cors_origins:
+                logger.warning("⚠️ WARNING: CORS allows localhost in production!")
+
         logger.info("Creating database tables...")
         create_tables()
         logger.info("Database tables created successfully")
-        
+
         # Initialize Redis cache
         logger.info("Connecting to Redis cache...")
         await cache.connect()
-        
+
         # Setup observability
         logger.info("Setting up observability...")
         observability.setup(app)
-        
+
     except Exception as e:
         logger.error(f"Failed to initialize application: {e}")
         raise

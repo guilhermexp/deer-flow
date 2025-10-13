@@ -9,10 +9,10 @@ import { Geist } from "next/font/google";
 import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { ClerkProvider } from '@clerk/nextjs';
 
 import { ThemeProviderWrapper } from "~/components/deer-flow/theme-provider-wrapper";
 import { AnimationProvider } from "~/contexts/animation-context";
-import { AuthProvider } from "~/core/contexts/auth-context";
 import { env } from "~/env.js";
 
 import { Toaster } from "../components/deer-flow/toaster";
@@ -37,31 +37,30 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${geist.variable}`} suppressHydrationWarning>
-      <head>
-        {/* Define a função isSpace globalmente para corrigir problemas do markdown-it com Next.js + Turbopack
-          https://github.com/markdown-it/markdown-it/issues/1082#issuecomment-2749656365 */}
-        <Script id="markdown-it-fix" strategy="beforeInteractive">
-          {`
-            if (typeof window !== 'undefined' && typeof window.isSpace === 'undefined') {
-              window.isSpace = function(code) {
-                return code === 0x20 || code === 0x09 || code === 0x0A || code === 0x0B || code === 0x0C || code === 0x0D;
-              };
-            }
-          `}
-        </Script>
-      </head>
-      <body className="bg-app">
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProviderWrapper>
-            <AuthProvider>
+    <ClerkProvider>
+      <html lang={locale} className={`${geist.variable}`} suppressHydrationWarning>
+        <head>
+          {/* Define a função isSpace globalmente para corrigir problemas do markdown-it com Next.js + Turbopack
+            https://github.com/markdown-it/markdown-it/issues/1082#issuecomment-2749656365 */}
+          <Script id="markdown-it-fix" strategy="beforeInteractive">
+            {`
+              if (typeof window !== 'undefined' && typeof window.isSpace === 'undefined') {
+                window.isSpace = function(code) {
+                  return code === 0x20 || code === 0x09 || code === 0x0A || code === 0x0B || code === 0x0C || code === 0x0D;
+                };
+              }
+            `}
+          </Script>
+        </head>
+        <body className="bg-app">
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <ThemeProviderWrapper>
               <AnimationProvider>
                 {children}
               </AnimationProvider>
-            </AuthProvider>
-          </ThemeProviderWrapper>
-        </NextIntlClientProvider>
-        <Toaster />
+            </ThemeProviderWrapper>
+          </NextIntlClientProvider>
+          <Toaster />
         {
           // NENHUM RASTREAMENTO DE COMPORTAMENTO DO USUÁRIO OU COLETA DE DADOS PRIVADOS POR PADRÃO
           //
@@ -76,7 +75,8 @@ export default async function RootLayout({
             </Script>
           </>
         )}
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

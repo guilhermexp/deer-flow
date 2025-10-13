@@ -27,6 +27,28 @@ class ChatMessage(BaseModel):
         description="The content of the message, either a string or a list of content items",
     )
 
+    @field_validator('role')
+    @classmethod
+    def validate_role(cls, v: str) -> str:
+        """Validate role is one of the allowed values"""
+        allowed_roles = ['user', 'assistant', 'system']
+        if v not in allowed_roles:
+            raise ValueError(f"Role must be one of {allowed_roles}")
+        return v
+
+    @field_validator('content')
+    @classmethod
+    def validate_content(cls, v: Union[str, List[ContentItem]]) -> Union[str, List[ContentItem]]:
+        """Validate and sanitize content"""
+        if isinstance(v, str):
+            # Max length validation
+            if len(v) > 50000:
+                raise ValueError("Content text must not exceed 50000 characters")
+            # Remove control characters
+            sanitized = re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f-\x9f]', '', v)
+            return sanitized
+        return v
+
 
 class ChatRequest(BaseModel):
     messages: Optional[List[ChatMessage]] = Field(
@@ -103,26 +125,63 @@ class TTSRequest(BaseModel):
 
 
 class GeneratePodcastRequest(BaseModel):
-    content: str = Field(..., description="The content of the podcast")
+    content: str = Field(..., description="The content of the podcast", min_length=1, max_length=100000)
+
+    @field_validator('content')
+    @classmethod
+    def sanitize_content(cls, v: str) -> str:
+        """Remove control characters from content"""
+        return re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f-\x9f]', '', v)
 
 
 class GeneratePPTRequest(BaseModel):
-    content: str = Field(..., description="The content of the ppt")
+    content: str = Field(..., description="The content of the ppt", min_length=1, max_length=100000)
+
+    @field_validator('content')
+    @classmethod
+    def sanitize_content(cls, v: str) -> str:
+        """Remove control characters from content"""
+        return re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f-\x9f]', '', v)
 
 
 class GenerateProseRequest(BaseModel):
-    prompt: str = Field(..., description="The content of the prose")
+    prompt: str = Field(..., description="The content of the prose", min_length=1, max_length=10000)
     option: str = Field(..., description="The option of the prose writer")
     command: Optional[str] = Field(
-        "", description="The user custom command of the prose writer"
+        "", description="The user custom command of the prose writer", max_length=1000
     )
+
+    @field_validator('prompt', 'command')
+    @classmethod
+    def sanitize_text(cls, v: str) -> str:
+        """Remove control characters"""
+        if not v:
+            return v
+        return re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f-\x9f]', '', v)
 
 
 class EnhancePromptRequest(BaseModel):
-    prompt: str = Field(..., description="The original prompt to enhance")
+    prompt: str = Field(..., description="The original prompt to enhance", min_length=1, max_length=10000)
     context: Optional[str] = Field(
-        "", description="Additional context about the intended use"
+        "", description="Additional context about the intended use", max_length=5000
     )
     report_style: Optional[str] = Field(
         "academic", description="The style of the report"
     )
+
+    @field_validator('prompt', 'context')
+    @classmethod
+    def sanitize_text(cls, v: str) -> str:
+        """Remove control characters"""
+        if not v:
+            return v
+        return re.sub(r'[\x00-\x08\x0b-\x0c\x0e-\x1f\x7f-\x9f]', '', v)
+
+    @field_validator('report_style')
+    @classmethod
+    def validate_style(cls, v: str) -> str:
+        """Validate report style"""
+        allowed_styles = ['academic', 'popular_science', 'news', 'social_media']
+        if v and v.lower() not in allowed_styles:
+            raise ValueError(f"Report style must be one of {allowed_styles}")
+        return v.lower() if v else "academic"

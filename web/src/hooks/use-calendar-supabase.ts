@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import type { CalendarEvent, NewEventFormData } from '~/components/jarvis/calendar/lib/types';
-import { useAuth } from '~/core/contexts/auth-context';
+import { useUser } from '@clerk/nextjs';
 import { calendarService } from '~/services/supabase/calendar';
 
 /**
  * Hook para gerenciar eventos de calendário com Supabase
  */
 export function useCalendarSupabase() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isLoaded } = useUser();
+  const isAuthenticated = isLoaded && !!user;
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
