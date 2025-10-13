@@ -2,11 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 
 import type { Note } from '~/app/(with-sidebar)/notes/page';
 import { useUser } from '@clerk/nextjs';
-import { getSupabaseClient } from '~/lib/supabase/client';
-import { notesService } from '~/services/supabase/notes';
+import { notesApiService as notesService } from '~/services/api/notes';
 
 /**
- * Hook para gerenciar notas com Supabase
+ * Hook para gerenciar notas via REST API
  */
 export function useNotesSupabase() {
   const { user } = useUser();
@@ -26,36 +25,11 @@ export function useNotesSupabase() {
       setLoading(true);
       setError(null);
       console.log('🔄 Carregando notas para o usuário:', user.id);
-      
-      // Verificar se a tabela notes existe
-      const supabase = getSupabaseClient();
-      const { error: tableCheckError } = await supabase
-        .from('notes')
-        .select('count')
-        .limit(1)
-        .throwOnError();
-      
-      if (tableCheckError) {
-        console.error('❌ Erro ao verificar tabela notes:', tableCheckError);
-        throw new Error(`Tabela 'notes' não encontrada ou inacessível: ${tableCheckError.message}`);
-      }
-      
-      // Buscar notas
-      const fetchedNotes = await notesService.fetchNotes(user.id);
+
+      // Buscar notas via API
+      const fetchedNotes = await notesService.list();
       console.log(`✅ ${fetchedNotes.length} notas carregadas`);
-      setNotes(fetchedNotes);
-      
-      // Tentar migrar do localStorage se necessário
-      try {
-        await notesService.migrateFromLocalStorage(user.id);
-        
-        // Recarregar após migração
-        const updatedNotes = await notesService.fetchNotes(user.id);
-        setNotes(updatedNotes);
-      } catch (migrationErr) {
-        console.warn('⚠️ Erro na migração (não crítico):', migrationErr);
-        // Continuar mesmo se a migração falhar
-      }
+      setNotes(fetchedNotes)
     } catch (err) {
       console.error('❌ Erro ao carregar notas:', err);
       setError(err instanceof Error ? err : new Error('Erro ao carregar notas'));
@@ -88,12 +62,17 @@ export function useNotesSupabase() {
     }
 
     try {
-      const createdNote = await notesService.createNote(note, user.id);
-      setNotes((prevNotes) => [createdNote, ...prevNotes]);
+      // Converter Note para formato da API (simplificado por enquanto)
+      const createdNote = await notesService.create({
+        title: note.title,
+        content: note.description
+      });
+      // Adicionar nota original com ID da API
+      setNotes((prevNotes) => [{ ...note, id: createdNote.id.toString() }, ...prevNotes]);
     } catch (err) {
       console.error('Erro ao adicionar nota:', err);
       setError(err instanceof Error ? err : new Error('Erro ao adicionar nota'));
-      
+
       // Fallback: adicionar localmente
       setNotes((prevNotes) => [note, ...prevNotes]);
     }
@@ -106,16 +85,20 @@ export function useNotesSupabase() {
     }
 
     try {
-      const updatedNote = await notesService.updateNote(noteId, updates, user.id);
+      const apiUpdates: any = {};
+      if (updates.title) apiUpdates.title = updates.title;
+      if (updates.description) apiUpdates.content = updates.description;
+
+      await notesService.update(parseInt(noteId), apiUpdates);
       setNotes((prevNotes) =>
         prevNotes.map((note) =>
-          note.id === noteId ? updatedNote : note
+          note.id === noteId ? { ...note, ...updates } : note
         )
       );
     } catch (err) {
       console.error('Erro ao atualizar nota:', err);
       setError(err instanceof Error ? err : new Error('Erro ao atualizar nota'));
-      
+
       // Fallback: atualizar localmente
       setNotes((prevNotes) =>
         prevNotes.map((note) =>
@@ -132,12 +115,12 @@ export function useNotesSupabase() {
     }
 
     try {
-      await notesService.deleteNote(noteId, user.id);
+      await notesService.delete(parseInt(noteId));
       setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
     } catch (err) {
       console.error('Erro ao deletar nota:', err);
       setError(err instanceof Error ? err : new Error('Erro ao deletar nota'));
-      
+
       // Fallback: deletar localmente
       setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
     }

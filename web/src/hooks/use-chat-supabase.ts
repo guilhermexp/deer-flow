@@ -4,11 +4,11 @@ import { useState, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import type { Message } from '~/core/messages';
 import { addToHistory } from '~/core/store/history-store';
-import { conversationsService } from '~/services/supabase/conversations';
-import { messagesService } from '~/services/supabase/messages';
+import { conversationsApiService as conversationsService } from '~/services/api/conversations';
+import { messagesApiService as messagesService } from '~/services/api/messages';
 
 /**
- * Hook para gerenciar conversas e mensagens de chat com Supabase
+ * Hook para gerenciar conversas e mensagens de chat via REST API
  */
 export function useChatSupabase() {
   const { user, isLoaded } = useUser();

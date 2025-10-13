@@ -22,30 +22,30 @@ export default function AppHeader({
 
   return (
     <header className={headerClasses}>
-      <div className="flex h-14 items-center px-4 sm:px-6 lg:px-8">
+      <div className="flex h-10 items-center px-3 sm:px-4 lg:px-6">
         {/* Container grid para garantir alinhamento simétrico */}
         <div className="w-full grid grid-cols-3 items-center">
           {/* Seção Esquerda (Logo e Menu) */}
-          <div className="flex justify-start items-center gap-3">
+          <div className="flex justify-start items-center gap-2">
             {/* Botão de menu apenas no mobile */}
             <Button
               variant="ghost"
               size="icon"
               onClick={onMenuClick}
-              className="lg:hidden text-muted-foreground hover:text-foreground"
+              className="lg:hidden text-muted-foreground hover:text-foreground h-8 w-8"
               aria-label="Menu"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4" />
             </Button>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🦌</span>
-              <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-slate-100 via-slate-300 to-slate-500 text-glow-white">DeerFlow</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-lg">🦌</span>
+              <span className="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-br from-slate-100 via-slate-300 to-slate-500 text-glow-white">DeerFlow</span>
             </div>
           </div>
 
           {/* Seção Central (Saudação ou Título da Página) */}
           <div className="flex items-center justify-center">
-            <h1 className="text-lg md:text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-slate-100 via-slate-300 to-slate-500 text-center">
+            <h1 className="text-sm md:text-base font-semibold tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-slate-100 via-slate-300 to-slate-500 text-center">
               {pageTitle ? (
                 <span className="text-glow-white">{pageTitle}</span>
               ) : (
@@ -55,8 +55,8 @@ export default function AppHeader({
           </div>
 
           {/* Seção Direita (Data/Hora e Botões) */}
-          <div className="flex items-center justify-end gap-4">
-            <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground bg-white/5 backdrop-blur-sm px-3 py-1.5 rounded-full">
+          <div className="flex items-center justify-end gap-3">
+            <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-muted-foreground bg-white/5 backdrop-blur-sm px-2 py-1 rounded-full">
               <span className="capitalize">{formattedDate}</span>
               <span>•</span>
               <span>{formattedTime}</span>

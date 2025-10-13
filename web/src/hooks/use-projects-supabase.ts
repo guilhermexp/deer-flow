@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 
 import type { Project, Task, TaskStatus, ActiveTabValue } from '~/components/jarvis/kanban/lib/types';
 import { useUser } from '@clerk/nextjs';
-import { projectsService } from '~/services/supabase/projects';
+import { projectsApiService as projectsService } from '~/services/api/projects';
 
 /**
- * Hook para gerenciar projetos e tarefas com Supabase
+ * Hook para gerenciar projetos e tarefas via REST API
  */
 export function useProjectsSupabase() {
   const { user, isLoaded } = useUser();
@@ -31,17 +31,27 @@ export function useProjectsSupabase() {
       console.log('🔄 Carregando projetos...');
       
       // Verificar se as tabelas existem
-      const tablesExist = await projectsService.checkProjectTablesExist();
-      
+      const tablesExist = await projectsService.checkProjectsTableExists();
+
       if (!tablesExist) {
         console.log('⚠️ Tabelas de projetos não encontradas');
         throw new Error('Tabelas de projetos não encontradas. Verifique se as tabelas do Supabase foram criadas corretamente.');
       }
-      
-      const fetchedProjects = await projectsService.getProjects();
-      console.log(`✅ ${fetchedProjects.length} projetos carregados`);
-      setProjects(fetchedProjects);
-      return fetchedProjects;
+
+      const apiProjects = await projectsService.list();
+      console.log(`✅ ${apiProjects.length} projetos carregados`);
+
+      // Converter projetos da API para formato local
+      const localProjects = apiProjects.map((p: any) => ({
+        id: p.id.toString(),
+        name: p.name,
+        description: p.description,
+        createdAt: p.created_at,
+        isPriority: false
+      }));
+
+      setProjects(localProjects);
+      return localProjects;
     } catch (err) {
       console.error('❌ Erro ao carregar projetos:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar projetos');
@@ -59,22 +69,24 @@ export function useProjectsSupabase() {
 
     try {
       console.log(`🔄 Carregando tarefas do projeto ${projectId}...`);
-      
-      const kanbanBoard = await projectsService.getKanbanBoard(projectId);
+
+      const kanbanBoard = await projectsService.getKanbanBoard(parseInt(projectId));
       const tasks: Task[] = [];
-      
+
       // Extract tasks from all columns
-      kanbanBoard.columns.forEach(column => {
-        tasks.push(...column.tasks);
-      });
-      
+      if (kanbanBoard) {
+        kanbanBoard.columns.forEach((column: any) => {
+          tasks.push(...column.tasks);
+        });
+      }
+
       console.log(`✅ ${tasks.length} tarefas carregadas`);
-      
+
       setTasksByProject(prev => ({
         ...prev,
         [projectId]: tasks
       }));
-      
+
       return tasks;
     } catch (err) {
       console.error(`❌ Erro ao carregar tarefas do projeto ${projectId}:`, err);

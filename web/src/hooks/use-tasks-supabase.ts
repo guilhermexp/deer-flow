@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 
 import type { Task as AppTask } from "~/components/jarvis/kanban/lib/types"
 import { useUser } from "@clerk/nextjs"
-import { projectsService } from "~/services/supabase/projects"
+import { projectsApiService as projectsService } from "~/services/api/projects"
 
 // Task interface para compatibilidade com useTasksApi
 export interface Task {
