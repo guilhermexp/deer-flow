@@ -1,9 +1,12 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { projectsService } from "~/services/supabase/projects"
+import { projectsApiService as projectsService, type FrontendProject } from "~/services/api/projects"
 import { useUser } from "@clerk/nextjs"
 import type { Task, Project, ActiveTabValue } from "../lib/types"
+
+// Use FrontendProject from API service which matches the frontend Project type
+type ApiProject = FrontendProject;
 
 export function useKanbanApi() {
   const [projects, setProjects] = useState<Project[]>([])
@@ -47,7 +50,7 @@ export function useKanbanApi() {
 
     try {
       console.log("🔄 Carregando tarefas do projeto:", projectId)
-      const tasks = await projectsService.getProjectTasks(projectId)
+      const tasks = await projectsService.getProjectTasks(Number(projectId))
       console.log("✅ Tarefas carregadas:", tasks)
 
       setTasksByProject(prev => ({
@@ -150,7 +153,7 @@ export function useKanbanApi() {
 
     try {
       console.log("🔄 Criando tarefa:", projectId, taskData, columnId)
-      const newTask = await projectsService.createTask(projectId, taskData, columnId)
+      const newTask = await projectsService.createTask(Number(projectId), taskData, columnId)
       console.log("✅ Tarefa criada:", newTask)
       
       setTasksByProject(prev => ({
@@ -174,16 +177,16 @@ export function useKanbanApi() {
 
     try {
       console.log("🔄 Movendo tarefa:", taskId, "para", columnId)
-      const updatedTask = await projectsService.moveTask(projectId, taskId, columnId, order)
-      console.log("✅ Tarefa movida:", updatedTask)
-      
+      await projectsService.moveTask(Number(projectId), Number(taskId), columnId, order)
+      console.log("✅ Tarefa movida")
+
       // Atualizar estado local
       setTasksByProject(prev => {
         const projectTasks = prev[projectId] || []
-        const updatedTasks = projectTasks.map(task => 
-          task.id === taskId ? updatedTask : task
+        const updatedTasks = projectTasks.map(task =>
+          task.id === taskId ? { ...task, columnId, order } : task
         )
-        
+
         return {
           ...prev,
           [projectId]: updatedTasks

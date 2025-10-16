@@ -11,8 +11,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import { conversationsService } from "~/services/supabase/conversations";
-import { messagesService } from "~/services/supabase/messages";
+import { conversationsApiService } from "~/services/api/conversations";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
@@ -63,11 +62,12 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
       
       try {
         // Buscar conversas
-        const conversations = await conversationsService.search(user.id, searchQuery);
-        
+        const conversationsResponse = await conversationsApiService.list({ search: searchQuery });
+        const conversations = conversationsResponse.items;
+
         const searchResults: SearchResult[] = conversations.map(conv => ({
           type: "conversation" as const,
-          id: conv.id,
+          id: conv.thread_id || conv.id.toString(),
           title: conv.title || "Conversa sem título",
           content: conv.query || "",
           createdAt: conv.created_at || new Date().toISOString(),

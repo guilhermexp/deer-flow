@@ -1,16 +1,20 @@
 /**
  * Cliente HTTP genérico para chamadas à API REST
+ *
+ * NOTA: Este cliente usa o proxy do Next.js em /api/[...path] que encaminha
+ * requisições para o backend FastAPI. Em desenvolvimento e produção, sempre
+ * use rotas relativas /api/* que serão proxy'd automaticamente.
  */
 
-import { auth } from '@clerk/nextjs/server';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8005/api';
+// Use relative URL to leverage Next.js API proxy at /api/[...path]
+// This avoids CORS issues and works in both development and production
+const API_URL = '/api';
 
 interface HttpClientOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
   body?: any;
-  auth?: boolean; // Requer autenticação Clerk
+  token?: string; // Token de autenticação opcional
 }
 
 class HttpClientError extends Error {
@@ -24,29 +28,6 @@ class HttpClientError extends Error {
   }
 }
 
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  try {
-    // Em ambiente de desenvolvimento, permitir requisições sem autenticação
-    if (process.env.NODE_ENV === 'development') {
-      return {};
-    }
-
-    const { getToken } = auth();
-    const token = await getToken();
-
-    if (token) {
-      return {
-        'Authorization': `Bearer ${token}`
-      };
-    }
-
-    return {};
-  } catch (error) {
-    console.error('Erro ao obter token de autenticação:', error);
-    return {};
-  }
-}
-
 export async function httpClient<T = any>(
   endpoint: string,
   options: HttpClientOptions = {}
@@ -55,7 +36,7 @@ export async function httpClient<T = any>(
     method = 'GET',
     headers: customHeaders = {},
     body,
-    auth: requiresAuth = true
+    token
   } = options;
 
   // Construir headers
@@ -64,14 +45,14 @@ export async function httpClient<T = any>(
     ...customHeaders
   };
 
-  // Adicionar headers de autenticação se necessário
-  if (requiresAuth) {
-    const authHeaders = await getAuthHeaders();
-    Object.assign(headers, authHeaders);
+  // Adicionar token de autenticação se fornecido
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
   // Construir URL completo
   const url = `${API_URL}${endpoint}`;
+  console.log('🔍 HTTP Client Debug:', { API_URL, endpoint, url, method });
 
   // Construir opções do fetch
   const fetchOptions: RequestInit = {

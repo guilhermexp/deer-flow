@@ -1,13 +1,13 @@
 "use client"
 
-import { useHealthSupabase } from '~/hooks/use-health-supabase'
+import { useHealthApi } from '~/hooks/use-health-api'
 
-// Alias para compatibilidade - usa Supabase diretamente
+// Alias para compatibilidade - usa API hook
 export function useHealthData() {
-  return useHealthSupabase()
+  return useHealthApi()
 }
 
 // Manter useHealthDataJWT como alias também para compatibilidade
 export function useHealthDataJWT() {
-  return useHealthSupabase()
+  return useHealthApi()
 }

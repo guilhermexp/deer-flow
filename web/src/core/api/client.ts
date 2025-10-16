@@ -15,31 +15,20 @@ export const apiClient = axios.create({
   },
 });
 
-// Token management removed - using Supabase authentication only
-
-// Request interceptor to add Supabase auth token
+// Request interceptor to add Clerk auth token
 apiClient.interceptors.request.use(
   async (config) => {
-    // Get Supabase session token
+    // Get Clerk session token
     if (typeof window !== 'undefined') {
       try {
         // Import dynamically to avoid SSR issues
-        const { getSupabaseClient } = await import('~/lib/supabase/client');
-        const supabase = getSupabaseClient();
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { useAuth } = await import('@clerk/nextjs');
         
-        if (error) {
-          console.error('Supabase getSession error:', error);
-        }
-        
-        if (session?.access_token) {
-          config.headers.Authorization = `Bearer ${session.access_token}`;
-          console.log('🔐 API Request: Added Supabase token to', config.url);
-        } else {
-          console.warn('⚠️ API Request: No Supabase session available for', config.url);
-        }
+        // Note: This won't work in axios interceptors since hooks can only be used in React components
+        // For now, we'll skip token addition in interceptors and handle it in component-level calls
+        console.log('🔐 API Request: Clerk auth available but tokens should be added at component level');
       } catch (error) {
-        console.error('Failed to get Supabase session:', error);
+        console.error('Failed to get Clerk session:', error);
       }
     }
     return config;

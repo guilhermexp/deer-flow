@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 
 from src.database.base import get_db, engine
 from src.server.cache import cache
-from src.server.supabase_client import get_supabase_client
 
 
 class HealthChecker:
@@ -20,47 +19,66 @@ class HealthChecker:
     
     @staticmethod
     async def check_database() -> Dict[str, Any]:
-        """Check database connectivity and performance"""
+        """Check database connectivity and performance
+
+        Uses generic SQL (SELECT 1) compatible with both SQLite and PostgreSQL.
+        Database-specific statistics are only collected when using PostgreSQL.
+        """
         start_time = time.time()
         status = "healthy"
         details = {}
-        
+
         try:
-            # Test database connection
+            # Test database connection with generic SQL compatible with SQLite and PostgreSQL
             with next(get_db()) as db:
                 result = db.execute(text("SELECT 1")).scalar()
                 if result != 1:
                     raise Exception("Database query returned unexpected result")
-                
-                # Get database statistics
-                db_stats = db.execute(text("""
-                    SELECT 
-                        count(*) as connection_count,
-                        state,
-                        wait_event_type
-                    FROM pg_stat_activity
-                    WHERE datname = current_database()
-                    GROUP BY state, wait_event_type
-                """)).fetchall()
-                
-                details["connections"] = {
-                    "active": sum(row.connection_count for row in db_stats if row.state == 'active'),
-                    "idle": sum(row.connection_count for row in db_stats if row.state == 'idle'),
-                    "total": sum(row.connection_count for row in db_stats)
-                }
-                
-                # Check table counts
+
+                # Detect database type
+                db_name = db.bind.dialect.name
+                details["database_type"] = db_name
+
+                # Get database-specific statistics only for PostgreSQL
+                if db_name == "postgresql":
+                    try:
+                        db_stats = db.execute(text("""
+                            SELECT
+                                count(*) as connection_count,
+                                state,
+                                wait_event_type
+                            FROM pg_stat_activity
+                            WHERE datname = current_database()
+                            GROUP BY state, wait_event_type
+                        """)).fetchall()
+
+                        details["connections"] = {
+                            "active": sum(row.connection_count for row in db_stats if row.state == 'active'),
+                            "idle": sum(row.connection_count for row in db_stats if row.state == 'idle'),
+                            "total": sum(row.connection_count for row in db_stats)
+                        }
+                    except Exception as pg_error:
+                        # PostgreSQL stats are optional - don't fail the health check
+                        details["connections"] = {"error": f"Could not fetch PostgreSQL stats: {str(pg_error)}"}
+                else:
+                    details["connections"] = {"message": f"Connection statistics not available for {db_name}"}
+
+                # Check table counts using generic SQL
                 tables = ['users', 'conversations', 'messages', 'tasks', 'notes']
                 for table in tables:
-                    count = db.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
-                    details[f"{table}_count"] = count
-                    
+                    try:
+                        count = db.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
+                        details[f"{table}_count"] = count
+                    except Exception as table_error:
+                        # Table might not exist - continue with other tables
+                        details[f"{table}_count"] = f"Error: {str(table_error)}"
+
         except Exception as e:
             status = "unhealthy"
             details["error"] = str(e)
-        
+
         response_time = (time.time() - start_time) * 1000  # Convert to ms
-        
+
         return {
             "service": "database",
             "status": status,
@@ -117,36 +135,6 @@ class HealthChecker:
             "details": details
         }
     
-    @staticmethod
-    async def check_supabase() -> Dict[str, Any]:
-        """Check Supabase connectivity"""
-        start_time = time.time()
-        status = "healthy"
-        details = {}
-        
-        try:
-            supabase_client = get_supabase_client()
-            if not supabase_client:
-                status = "disabled"
-                details["message"] = "Supabase is not configured"
-            else:
-                # Test Supabase connection by fetching user count
-                result = supabase_client.client.table("user_profiles").select("id", count="exact").execute()
-                details["user_profiles_count"] = result.count if hasattr(result, 'count') else 0
-                details["supabase_url"] = os.getenv("SUPABASE_URL", "").split("//")[1] if os.getenv("SUPABASE_URL") else "not configured"
-                
-        except Exception as e:
-            status = "unhealthy"
-            details["error"] = str(e)
-        
-        response_time = (time.time() - start_time) * 1000
-        
-        return {
-            "service": "supabase",
-            "status": status,
-            "response_time_ms": round(response_time, 2),
-            "details": details
-        }
     
     @staticmethod
     async def check_external_apis() -> Dict[str, Any]:
@@ -210,7 +198,6 @@ class HealthChecker:
         checks = {
             "database": await cls.check_database(),
             "redis": await cls.check_redis(),
-            "supabase": await cls.check_supabase(),
             "external_apis": await cls.check_external_apis(),
         }
         

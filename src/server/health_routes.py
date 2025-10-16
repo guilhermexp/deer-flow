@@ -29,8 +29,6 @@ async def health_check_service(service: str):
         return await HealthChecker.check_database()
     elif service == "redis":
         return await HealthChecker.check_redis()
-    elif service == "supabase":
-        return await HealthChecker.check_supabase()
     elif service == "external_apis":
         return await HealthChecker.check_external_apis()
     else:

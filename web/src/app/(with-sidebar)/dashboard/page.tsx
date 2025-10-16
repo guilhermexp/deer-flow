@@ -38,17 +38,19 @@ export default function DashboardPage() {
   return (
     <AnimatedPageWrapperOptimized className="min-h-full">
       <Suspense fallback={
-        <div className="w-full space-y-6 lg:space-y-8">
-          <div className="h-8 bg-white/[0.05] rounded-xl w-48 animate-pulse"></div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="w-full space-y-4 lg:space-y-6 flex justify-center">
+          <div className="h-6 bg-white/[0.05] rounded-xl w-32 animate-pulse"></div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-6xl w-full">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="rounded-xl border border-white/10 bg-white/[0.05] backdrop-blur-sm h-32 animate-pulse" />
+              <div key={i} className="rounded-xl border border-white/10 bg-white/[0.05] backdrop-blur-sm h-24 animate-pulse" />
             ))}
           </div>
         </div>
       }>
-        <div className="w-full space-y-6 lg:space-y-8">
-          <DashboardStatsOptimized />
+        <div className="w-full space-y-4 lg:space-y-6 flex justify-center">
+          <div className="max-w-7xl w-full">
+            <DashboardStatsOptimized />
+          </div>
         </div>
       </Suspense>
     </AnimatedPageWrapperOptimized>

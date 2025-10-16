@@ -1,40 +1,109 @@
 # [!NOTE]
-# Read the `docs/configuration_guide.md` carefully, and update the
-# configurations to match your specific settings and requirements.
-# - Replace `api_key` with your own credentials.
-# - Replace `base_url` and `model` name if you want to use a custom model.
-# - Set `verify_ssl` to `false` if your LLM server uses self-signed certificates
-# - A restart is required every time you change the `config.yaml` file.
+# Copy this file to `conf.yaml` and adjust each section to match your
+# deployment. All keys are optional unless otherwise noted.
 
-BASIC_MODEL:
-  base_url: https://ark.cn-beijing.volces.com/api/v3
-  model: "doubao-1-5-pro-32k-250115"
-  api_key: xxxx
-  # max_retries: 3 # Maximum number of retries for LLM calls
-  # verify_ssl: false  # Uncomment this line to disable SSL certificate verification for self-signed certificates
- 
-# Reasoning model is optional.
-# Uncomment the following settings if you want to use reasoning model
-# for planning.
+ENVIRONMENT:
+  name: development            # Required. One of: development, staging, test, production
+  debug: false                 # Enable verbose logging for local debugging
+  app_name: DeerFlow           # Application display name
+  app_version: 0.1.0           # Application version string
 
-# REASONING_MODEL:
-#   base_url: https://ark.cn-beijing.volces.com/api/v3
-#   model: "doubao-1-5-thinking-pro-m-250428"
-#   api_key: xxxx
-#   max_retries: 3 # Maximum number of retries for LLM calls
+SERVICES:
+  SERVER:
+    host: 0.0.0.0             # Bind address for FastAPI server (do not change in Docker)
+    port: 8005                # API port (fixed by project requirements)
 
+  DATABASE:
+    url: postgresql://username:password@hostname/database?sslmode=require
+    pool_size: 20
+    max_overflow: 10
+    pool_timeout: 30
+    pool_recycle: 3600
 
-# OTHER SETTINGS:
-# Search engine configuration (Only supports Tavily currently)
-# SEARCH_ENGINE:
-#   engine: tavily
-#   # Only include results from these domains
-#   include_domains:
-#     - example.com
-#     - trusted-news.com
-#     - reliable-source.org
-#     - gov.cn
-#     - edu.cn
-#   # Exclude results from these domains
-#   exclude_domains:
-#     - example.com
+  AUTH:
+    jwt_secret_key: "your-secure-random-key-here"   # Required, >= 32 chars
+    jwt_algorithm: HS256
+    access_token_expire_minutes: 30
+    refresh_token_expire_days: 7
+    cors_allowed_origins:
+      - http://localhost:4000
+      - http://localhost:3000
+
+  REDIS:
+    enabled: false
+    url: redis://localhost:6379/0
+    max_connections: 50
+    socket_timeout: 5
+    socket_connect_timeout: 5
+    decode_responses: true
+
+  CLERK:
+    publishable_key: null
+    secret_key: null
+
+  SUPABASE:
+    url: null
+    key: null
+
+  SEARCH:
+    tavily_api_key: null
+    brave_search_api_key: null
+    firecrawl_api_key: null
+    include_domains:
+      -
+    exclude_domains:
+      -
+
+  RAG:
+    ragflow_api_url: null
+    ragflow_api_key: null
+
+  OBSERVABILITY:
+    langchain_tracing_v2: false
+    langsmith_api_key: null
+
+LLM:
+  BASIC_MODEL:
+    provider: volcengine
+    base_url: https://ark.cn-beijing.volces.com/api/v3
+    model: doubao-1-5-pro-32k-250115
+    api_key: ""
+    max_output_tokens: 4096
+    temperature: 0.2
+    max_retries: 3
+    verify_ssl: true
+
+  REASONING_MODEL:
+    enabled: false
+    provider: volcengine
+    base_url: https://ark.cn-beijing.volces.com/api/v3
+    model: doubao-1-5-thinking-pro-m-250428
+    api_key: ""
+    max_output_tokens: 8192
+    temperature: 0.1
+    max_retries: 3
+
+  FALLBACK_MODEL:
+    enabled: false
+    provider: openrouter
+    base_url: https://openrouter.ai/api/v1
+    model: openrouter/google/palm-2-chat-bison
+    api_key: ""
+    max_retries: 2
+
+  OLLAMA_MODEL:
+    enabled: false
+    base_url: http://localhost:11434/v1
+    model: mistral-small:latest
+    api_key: "whatever"
+
+FEATURES:
+  enable_deep_research: true
+  enable_plan_refinement: true
+  enable_multimodal_tools: false
+  max_plan_steps: 4
+  max_parallel_tasks: 2
+  auto_retry_failed_tasks: true
+
+# Copy any secret values to environment variables where possible. The
+# application loads `.env` first, then overrides with `conf.yaml`.

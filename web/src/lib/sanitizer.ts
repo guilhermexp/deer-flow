@@ -8,7 +8,7 @@ import DOMPurify from 'dompurify';
  */
 export function createSanitizer() {
   // Configure DOMPurify to be extra strict
-  const config: DOMPurify.Config = {
+  const config: any = {
     ALLOWED_TAGS: [
       'p', 'br', 'span', 'div', 'a', 'b', 'i', 'u', 'strong', 'em',
       'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
@@ -38,7 +38,7 @@ export function createSanitizer() {
      * Sanitizes HTML string for safe rendering
      */
     sanitizeHTML(dirty: string): string {
-      return DOMPurify.sanitize(dirty, config);
+      return DOMPurify.sanitize(dirty, config) as unknown as string;
     },
 
     /**
@@ -50,7 +50,7 @@ export function createSanitizer() {
         ALLOWED_TAGS: [],
         KEEP_CONTENT: true
       });
-      return cleaned;
+      return cleaned as unknown as string;
     },
 
     /**
@@ -65,7 +65,7 @@ export function createSanitizer() {
         ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|data):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
       });
       
-      return sanitized;
+      return sanitized as unknown as string;
     },
 
     /**

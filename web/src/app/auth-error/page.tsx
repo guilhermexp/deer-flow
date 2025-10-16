@@ -1,5 +1,6 @@
+import { AlertCircle } from 'lucide-react';
+
 import Link from 'next/link';
-import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 import { Button } from '~/components/ui/button';
 
@@ -20,18 +21,7 @@ export default function AuthErrorPage() {
           
           <div className="space-y-3">
             <Button asChild className="w-full">
-              <Link href="/test-auth">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Testar Conexão
-              </Link>
-            </Button>
-            
-            <Button asChild variant="outline" className="w-full">
               <Link href="/login">Tentar Login</Link>
-            </Button>
-            
-            <Button asChild variant="outline" className="w-full">
-              <Link href="/debug-supabase">Diagnóstico Completo</Link>
             </Button>
           </div>
         </div>

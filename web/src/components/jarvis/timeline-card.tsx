@@ -68,8 +68,8 @@ export default function TimelineCard() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <LiquidGlassCard className="h-full rounded-xl pb-4 pt-6 px-6 relative z-10">
-        <h3 className="flex items-center gap-3 text-xl font-semibold text-white">
+      <LiquidGlassCard className="h-full rounded-xl pb-3 pt-4 px-4 relative z-10">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
           <motion.div
             whileHover={{
               scale: 1.1,
@@ -78,11 +78,11 @@ export default function TimelineCard() {
             animate={{ rotate: [0, 5, -5, 0] }}
             transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 3 }}
           >
-            <Clock className="h-5 w-5 text-gray-400" />
+            <Clock className="h-4 w-4 text-gray-400" />
           </motion.div>
-          Timeline do Dia
+          Timeline
         </h3>
-        <VerticalTimeline entries={timelineData} className="px-4 pb-4 sm:px-5 sm:pb-5" />
+        <VerticalTimeline entries={timelineData} className="px-3 pb-3 sm:px-4 sm:pb-4" />
       </LiquidGlassCard>
     </motion.div>
   )

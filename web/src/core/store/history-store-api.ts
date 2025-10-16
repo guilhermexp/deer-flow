@@ -106,7 +106,7 @@ export const useHistoryStoreApi = create<HistoryState>((set, get) => ({
 
       // Update via API
       await conversationsApi.updateConversation(threadId, {
-        messages: messagesToSave,
+        messages: messagesToSave as any,
       });
 
       // Update local state

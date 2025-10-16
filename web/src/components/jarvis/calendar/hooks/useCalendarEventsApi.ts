@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 "use client"
-import { useState, useEffect, useCallback } from "react"
-import { useCalendarSupabase } from "~/hooks/use-calendar-supabase"
+import { useState, useEffect, useCallback, useMemo } from "react"
+import { createCalendarApiService } from "~/services/api/calendar"
+import { useAuthenticatedApi } from "~/hooks/use-authenticated-api"
 import type { CalendarEvent, NewEventFormData } from "../lib/types"
+import type { CalendarEvent as ApiCalendarEvent } from "~/services/api/calendar"
 
 // Helper para formatar a hora
 const formatHourForDisplay = (hour: number): string => {
@@ -14,42 +16,121 @@ const formatHourForDisplay = (hour: number): string => {
   return `${hour} AM`
 }
 
+// Converter API Event para Component Event
+const apiEventToComponentEvent = (apiEvent: ApiCalendarEvent): CalendarEvent => {
+  const date = new Date(apiEvent.date)
+  const endDate = apiEvent.end_date ? new Date(apiEvent.end_date) : new Date(date.getTime() + 60 * 60 * 1000)
+  const duration = (endDate.getTime() - date.getTime()) / (1000 * 60 * 60) // duration in hours
+  
+  return {
+    id: apiEvent.id.toString(),
+    title: apiEvent.title,
+    subtitle: apiEvent.description || undefined,
+    time: formatHourForDisplay(date.getHours()),
+    duration: duration,
+    color: (apiEvent.color as CalendarEvent["color"]) || "blue",
+    category: (apiEvent.category as CalendarEvent["category"]) || "all",
+    day: date.getDay(),
+    startHour: date.getHours(),
+    date: apiEvent.date
+  }
+}
+
+// Converter Component Event para API Event Create
+const componentEventToApiCreate = (formData: NewEventFormData) => {
+  const date = new Date(formData.eventDate)
+  date.setHours(formData.startHour, 0, 0, 0)
+  
+  const endDate = new Date(date)
+  endDate.setHours(date.getHours() + formData.duration)
+  
+  return {
+    title: formData.title,
+    description: formData.subtitle || null,
+    date: date.toISOString(),
+    end_date: endDate.toISOString(),
+    category: formData.category,
+    color: formData.color,
+    location: null,
+    is_all_day: false
+  }
+}
 
 export const useCalendarEventsApi = () => {
-  // Usar o hook do Supabase diretamente
-  const {
-    events,
-    loading: isLoading,
-    error,
-    addEvent: addEventSupabase,
-    updateEvent: updateEventSupabase,
-    deleteEvent: deleteEventSupabase,
-    loadEvents
-  } = useCalendarSupabase()
+  const [events, setEvents] = useState<CalendarEvent[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Wrapper para manter a compatibilidade com a interface existente
-  const addEvent = useCallback(async (newEventData: NewEventFormData) => {
-    const result = await addEventSupabase(newEventData)
-    if (!result) {
-      throw new Error('Failed to add event')
+  // Use authenticated API client
+  const authApi = useAuthenticatedApi()
+  const calendarApiService = useMemo(() => createCalendarApiService(authApi), [authApi])
+
+  const loadEvents = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const data = await calendarApiService.list()
+      const convertedEvents = data.map(apiEventToComponentEvent)
+      setEvents(convertedEvents)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load events')
+      console.error('Error loading events:', err)
+    } finally {
+      setIsLoading(false)
     }
-    return result
-  }, [addEventSupabase])
+  }, [calendarApiService])
+
+  const addEvent = useCallback(async (newEventData: NewEventFormData) => {
+    try {
+      const apiData = componentEventToApiCreate(newEventData)
+      const result = await calendarApiService.create(apiData)
+      const convertedResult = apiEventToComponentEvent(result)
+      setEvents(prev => [...prev, convertedResult])
+      return convertedResult
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add event'
+      setError(errorMessage)
+      throw new Error(errorMessage)
+    }
+  }, [calendarApiService])
 
   const deleteEvent = useCallback(async (eventId: string) => {
-    const success = await deleteEventSupabase(eventId)
-    if (!success) {
-      throw new Error('Failed to delete event')
+    try {
+      await calendarApiService.delete(parseInt(eventId))
+      setEvents(prev => prev.filter(event => event.id !== eventId))
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete event'
+      setError(errorMessage)
+      throw new Error(errorMessage)
     }
-  }, [deleteEventSupabase])
+  }, [calendarApiService])
 
   const updateEvent = useCallback(async (eventId: string, updates: Partial<CalendarEvent>) => {
-    const result = await updateEventSupabase(eventId, updates)
-    if (!result) {
-      throw new Error('Failed to update event')
+    try {
+      // Para atualização, precisamos converter apenas os campos relevantes
+      const apiUpdates: any = {}
+      if (updates.title) apiUpdates.title = updates.title
+      if (updates.subtitle !== undefined) apiUpdates.description = updates.subtitle
+      if (updates.color) apiUpdates.color = updates.color
+      if (updates.category) apiUpdates.category = updates.category
+
+      const result = await calendarApiService.update(parseInt(eventId), apiUpdates)
+      const convertedResult = apiEventToComponentEvent(result)
+      setEvents(prev => prev.map(event =>
+        event.id === eventId ? convertedResult : event
+      ))
+      return convertedResult
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update event'
+      setError(errorMessage)
+      throw new Error(errorMessage)
     }
-    return result
-  }, [updateEventSupabase])
+  }, [calendarApiService])
+
+  // Load events on mount
+  useEffect(() => {
+    loadEvents()
+  }, [loadEvents])
 
   return { 
     events, 
@@ -57,7 +138,7 @@ export const useCalendarEventsApi = () => {
     deleteEvent, 
     updateEvent,
     isLoading,
-    error: error || null,
+    error,
     reloadEvents: loadEvents 
   }
 }

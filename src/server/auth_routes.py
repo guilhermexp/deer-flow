@@ -2,25 +2,14 @@
 # SPDX-License-Identifier: MIT
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from src.database.base import get_db
 from src.database.models import User
 from src.server.auth import get_current_active_user
+from src.server.schemas import UserResponse
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
-
-
-class UserResponse(BaseModel):
-    id: int
-    username: str
-    email: str
-    is_active: bool
-    supabase_id: str
-
-    class Config:
-        from_attributes = True
 
 
 @router.get("/me", response_model=UserResponse)
@@ -29,9 +18,9 @@ async def get_current_user_info(
 ):
     """
     Get current authenticated user information.
-    Authentication is handled by Supabase.
+    Authentication is handled by Clerk.
     """
-    return UserResponse.from_orm(current_user)
+    return UserResponse.model_validate(current_user)
 
 
 @router.get("/validate")

@@ -11,7 +11,6 @@ import { GlobalCommandPalette } from "~/components/jarvis/global-command-palette
 import PageTitleProvider from "~/components/jarvis/page-title-provider";
 import { RouteWarmup } from "~/components/jarvis/route-warmup";
 import { ServiceWorkerRegister } from "~/components/jarvis/service-worker-register";
-import { MigrationBanner } from "~/components/migration-banner";
 import { Toaster } from "~/components/ui/sonner";
 
 interface SidebarLayoutProps {
@@ -59,7 +58,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
   }, [isLoading, isAuthenticated, router]);
 
   // Páginas que precisam de altura total
-  const fullHeightPages = ['/projects', '/chat', '/notes', '/health'];
+  const fullHeightPages = ['/projects', '/chat', '/notes', '/health', '/dashboard'];
   const isFullHeightPage = fullHeightPages.includes(pathname);
   
   // Mostrar loading enquanto verifica autenticação
@@ -85,7 +84,6 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
       <ServiceWorkerRegister />
       <AppSidebar isMobileOpen={isMobileSidebarOpen} toggleMobileSidebar={toggleMobileSidebar} />
       <div className={`h-screen flex flex-col lg:pl-12 overflow-hidden bg-[#0a0a0a]`}>
-        <MigrationBanner />
         {pathname !== '/chat' && pathname !== '/dashboard' && pathname !== '/calendar' && pathname !== '/projects' && pathname !== '/notes' && pathname !== '/health' && (
           <AppHeader
             userName={user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ?? user?.firstName ?? "User"}

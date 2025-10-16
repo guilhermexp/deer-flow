@@ -10,81 +10,22 @@ import { Button } from "~/components/ui/button"
 import LiquidGlassCard from "~/components/ui/liquid-glass-card"
 
 export default function TodayTasksCard() {
-  const { tasksByDay, setTasksByDay, currentDay, isLoading } = useTasksApi()
+  const { tasks, loading } = useTasksApi()
   const [activeTimers, setActiveTimers] = useState<Record<string, number>>({})
 
   const todayTasks = useMemo(
-    () => tasksByDay.filter((task) => task.day === currentDay),
-    [tasksByDay, currentDay]
+    () => tasks, // For now, use all tasks since we don't have day filtering
+    [tasks]
   )
   const taskCount = todayTasks.length
 
-  // Only update timers for running tasks
-  const runningTaskIds = useMemo(
-    () => todayTasks.filter(task => task.isRunning).map(task => task.id),
-    [todayTasks]
-  )
-
-  useEffect(() => {
-    if (runningTaskIds.length === 0) return
-
-    // Update timer every 5 seconds instead of every second for better performance
-    const UPDATE_INTERVAL = 5000; // 5 seconds
-    const interval = setInterval(() => {
-      setActiveTimers((prev) => {
-        const updated = { ...prev }
-        runningTaskIds.forEach((taskId) => {
-          // Add 5 seconds each time
-          updated[taskId] = (updated[taskId] || 0) + 5
-        })
-        return updated
-      })
-    }, UPDATE_INTERVAL)
-    return () => clearInterval(interval)
-  }, [runningTaskIds])
-
-  const handleToggleTimer = useCallback((taskId: string) => {
-    setTasksByDay((prevTasks) =>
-      prevTasks.map((task) => {
-        if (task.id === taskId) {
-          if (task.isRunning) {
-            const timeToAdd = activeTimers[taskId] || 0
-            setActiveTimers((prev) => {
-              const newActiveTimers = { ...prev }
-              delete newActiveTimers[taskId]
-              return newActiveTimers
-            })
-            return {
-              ...task,
-              isRunning: false,
-              timeSpent: (task.timeSpent || 0) + timeToAdd,
-            }
-          } else {
-            setActiveTimers((prev) => ({ ...prev, [taskId]: 0 }))
-            return { ...task, isRunning: true }
-          }
-        }
-        return task
-      }),
-    )
-  }, [activeTimers, setTasksByDay])
-
   const handleToggleFavorite = useCallback((taskId: string) => {
-    setTasksByDay((prev) => prev.map((task) => (task.id === taskId ? { ...task, isFavorite: !task.isFavorite } : task)))
-  }, [setTasksByDay])
+    // Placeholder for future implementation
+    console.log('Toggle favorite for task:', taskId)
+  }, [])
 
-  const activeTasksCount = useMemo(
-    () => todayTasks.filter((task) => task.isRunning).length,
-    [todayTasks]
-  )
-  
-  const totalTrackedTime = useMemo(
-    () => todayTasks.reduce((total, task) => {
-      const taskTime = (task.timeSpent || 0) + (task.isRunning ? activeTimers[task.id] || 0 : 0)
-      return total + taskTime
-    }, 0),
-    [todayTasks, activeTimers]
-  )
+  const activeTasksCount = 0
+  const totalTrackedTime = 0
 
   return (
     <motion.div
@@ -136,30 +77,7 @@ export default function TodayTasksCard() {
                             onClick={() => handleToggleFavorite(task.id)}
                             aria-label="Mark as favorite"
                           >
-                            <Star
-                              className={`h-4 w-4 transition-colors ${task.isFavorite ? 'fill-current text-accent-yellow' : ''}`}
-                            />
-                          </Button>
-                        </motion.div>
-
-                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className={`h-8 w-8 hover:bg-muted/40 ${task.isRunning ? 'text-red-400 hover:text-red-300' : 'text-green-400 hover:text-green-300'}`}
-                            onClick={() => handleToggleTimer(task.id)}
-                            aria-label={task.isRunning ? "Pause timer" : "Start timer"}
-                          >
-                            {task.isRunning ? (
-                              <motion.div
-                                animate={{ scale: [1, 1.2, 1] }}
-                                transition={{ repeat: Infinity, duration: 1.5 }}
-                              >
-                                <div className="w-4 h-4 bg-red-500 rounded-sm" />
-                              </motion.div>
-                            ) : (
-                              <Play className="h-4 w-4" />
-                            )}
+                            <Star className="h-4 w-4 transition-colors" />
                           </Button>
                         </motion.div>
                       </div>

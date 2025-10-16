@@ -14,9 +14,9 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Depends, Request
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Depends, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, StreamingResponse
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 from langchain_core.messages import AIMessageChunk, BaseMessage, ToolMessage
 from langgraph.types import Command
 
@@ -59,17 +59,113 @@ from src.server.notes_routes import router as notes_router
 from src.server.conversations_routes import router as conversations_router
 
 # Import database initialization
-from src.database.base import create_tables
+from src.database.base import SessionLocal, create_tables
 from src.database.models import User
-from src.server.auth import get_current_active_user
+
+DEFAULT_ENVIRONMENT = "production"
+if not os.getenv("ENVIRONMENT"):
+    os.environ.setdefault("ENVIRONMENT", DEFAULT_ENVIRONMENT)
+
+ENVIRONMENT = os.getenv("ENVIRONMENT", DEFAULT_ENVIRONMENT).lower()
+if not os.getenv("CORS_ALLOWED_ORIGINS"):
+    default_cors = "" if ENVIRONMENT in {"production", "prod"} else "http://localhost:4000,http://localhost:3000"
+    os.environ.setdefault("CORS_ALLOWED_ORIGINS", default_cors)
+
+IS_PRODUCTION = ENVIRONMENT in {"production", "prod"}
+IS_DEVELOPMENT = ENVIRONMENT in {"development", "dev", "local"}
+
+import src.server.auth as auth_module
 from src.server.auth_dev import get_current_active_user_dev
-from src.server.supabase_client import get_supabase_client
 from src.server.cache import cache
-from src.server.observability import observability
 
 logger = logging.getLogger(__name__)
 
+
+class _ObservabilityFallback:
+    def setup(self, app):
+        logger.warning("Observability is disabled; exporter not configured")
+
+    def record_request(self, **kwargs):  # pragma: no cover - noop
+        return None
+
+
+try:
+    from src.server.observability import observability as _observability
+
+    observability = _observability
+except Exception as exc:  # pragma: no cover - fallback path
+    logger.warning("Failed to initialize observability module: %s", exc)
+    observability = _ObservabilityFallback()
+
 INTERNAL_SERVER_ERROR_DETAIL = "Internal Server Error"
+
+PROTECTED_PATH_PREFIXES = ("/api/",)
+UNPROTECTED_PATHS = {
+    "/",
+    "/health",
+    "/openapi.json",
+    "/docs",
+    "/redoc",
+}
+UNPROTECTED_PREFIXES = ("/docs/", "/static/")
+PUBLIC_AUTH_ENDPOINTS = {
+    "/api/auth/login",
+    "/api/auth/logout",
+    "/api/auth/callback",
+    "/api/auth/refresh",
+}
+
+
+def _normalize_path(path: str) -> str:
+    if path != "/" and path.endswith("/"):
+        return path.rstrip("/")
+    return path
+
+
+def _is_unprotected_path(path: str) -> bool:
+    if path in UNPROTECTED_PATHS or path in PUBLIC_AUTH_ENDPOINTS:
+        return True
+    return any(path.startswith(prefix) for prefix in UNPROTECTED_PREFIXES)
+
+
+def _should_protect_path(path: str) -> bool:
+    if _is_unprotected_path(path):
+        return False
+    return any(path.startswith(prefix) for prefix in PROTECTED_PATH_PREFIXES)
+
+
+def _safe_error_message(exc: Exception, fallback: str = INTERNAL_SERVER_ERROR_DETAIL) -> str:
+    return fallback if IS_PRODUCTION else str(exc)
+
+
+async def _authenticate_request(request: Request):
+    authorization = request.headers.get("Authorization")
+    db = SessionLocal()
+    try:
+        user = await auth_module.get_current_user(authorization=authorization, token=None, db=db)
+        return await auth_module.get_current_active_user(user)
+    finally:
+        db.close()
+
+
+async def _get_authenticated_user(request: Request) -> User:
+    user = getattr(request.state, "user", None)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+        )
+    return user
+
+
+async def _get_optional_authenticated_user(request: Request) -> Optional[User]:
+    user = getattr(request.state, "user", None)
+    if user is None and not IS_DEVELOPMENT:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+        )
+    return user
 
 app = FastAPI(
     title="DeerFlow API",
@@ -78,8 +174,15 @@ app = FastAPI(
 )
 
 # Add CORS middleware
-# Configure allowed origins from environment or use default secure settings
-allowed_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:4000,http://localhost:3000").split(",")
+# Configure allowed origins from validated configuration when available
+try:
+    from src.config import get_config as _get_config
+
+    allowed_origins = _get_config().auth.cors_allowed_origins
+except Exception as exc:
+    logger.warning("Falling back to raw CORS configuration: %s", exc)
+    raw_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
+    allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
 app.add_middleware(
     CORSMiddleware,
@@ -94,6 +197,34 @@ app.add_middleware(
 # Add rate limiting middleware
 from src.server.rate_limiter import rate_limit_middleware
 app.middleware("http")(rate_limit_middleware)
+
+
+@app.middleware("http")
+async def auth_enforcement_middleware(request: Request, call_next):
+    path = _normalize_path(request.url.path)
+    if request.method == "OPTIONS" or not _should_protect_path(path):
+        return await call_next(request)
+
+    try:
+        user = await _authenticate_request(request)
+        request.state.user = user
+    except HTTPException as exc:
+        detail = exc.detail
+        if IS_PRODUCTION and exc.status_code >= status.HTTP_500_INTERNAL_SERVER_ERROR:
+            detail = INTERNAL_SERVER_ERROR_DETAIL
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": detail},
+            headers=exc.headers or {},
+        )
+    except Exception as exc:
+        logger.exception("Authentication middleware failure: %s", exc)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": INTERNAL_SERVER_ERROR_DETAIL},
+        )
+
+    return await call_next(request)
 
 # Add security headers middleware
 @app.middleware("http")
@@ -166,7 +297,7 @@ async def startup_event():
         logger.info("✓ JWT secret validation passed")
 
         # SECURITY: Validate CORS configuration
-        if os.getenv("NODE_ENV") == "production":
+        if IS_PRODUCTION:
             cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
             if not cors_origins or "localhost" in cors_origins:
                 logger.warning("⚠️ WARNING: CORS allows localhost in production!")
@@ -220,8 +351,7 @@ async def health_check():
 async def chat_stream(
     request: ChatRequest,
     current_user: Optional[User] = Depends(
-        get_current_active_user_dev if os.getenv("NODE_ENV") == "development" 
-        else get_current_active_user
+        get_current_active_user_dev if IS_DEVELOPMENT else _get_optional_authenticated_user
     ),
 ):
     thread_id = request.thread_id
@@ -270,8 +400,6 @@ async def _astream_workflow_generator(
     current_user: Optional[User] = None,
 ):
     try:
-        # Obter cliente Supabase (pode ser None se não configurado)
-        supabase_client = get_supabase_client()
         input_ = {
             "messages": messages,
             "plan_iterations": 0,
@@ -289,22 +417,8 @@ async def _astream_workflow_generator(
                 resume_msg += f" {messages[-1]['content']}"
             input_ = Command(resume=resume_msg)
 
-        # Criar ou obter conversa no Supabase
-        if supabase_client and current_user:
-            try:
-                await supabase_client.get_or_create_conversation(
-                    thread_id, 
-                    current_user.id,
-                    messages[-1]["content"][:100] if messages else "Nova conversa"
-                )
-            except Exception as e:
-                logger.warning(f"Erro ao criar conversa no Supabase: {e}")
-        
         # Keep track of last event time for keep-alive
         last_event_time = asyncio.get_event_loop().time()
-        
-        # Keep track of messages for Supabase
-        message_cache = {}
 
         async for agent, _, event_data in graph.astream(
             input_,
@@ -404,34 +518,17 @@ async def _astream_workflow_generator(
                     if event_stream_message.get("content") or event_stream_message.get("reasoning_content") or event_stream_message.get("finish_reason"):
                         yield _make_event("message_chunk", event_stream_message)
                 
-                # Salvar no Supabase quando a mensagem estiver completa
-                if supabase_client and current_user and event_stream_message.get("finish_reason"):
-                    try:
-                        msg_data = message_cache[message_id]
-                        await supabase_client.save_message(
-                            conversation_id=thread_id,
-                            message_id=message_id,
-                            role=msg_data["role"],
-                            content=msg_data["content"],
-                            agent=msg_data.get("agent"),
-                            finish_reason=msg_data.get("finish_reason"),
-                            reasoning_content=msg_data.get("reasoning_content") or None,
-                            tool_calls=msg_data.get("tool_calls") or None,
-                        )
-                        # Clear from cache after successful save to prevent memory leak
-                        del message_cache[message_id]
-                    except Exception as e:
-                        logger.warning(f"Erro ao salvar mensagem no Supabase: {e}")
-                        # Still clear from cache even if save failed to prevent memory leak
-                        if message_id in message_cache:
-                            del message_cache[message_id]
+                # Clear from cache when message is complete to prevent memory leak
+                if event_stream_message.get("finish_reason") and message_id in message_cache:
+                    del message_cache[message_id]
 
             # Update last event time
             last_event_time = asyncio.get_event_loop().time()
 
     except Exception as e:
-        logger.error(f"Error in SSE stream: {str(e)}")
-        yield _make_event("error", {"error": str(e), "thread_id": thread_id})
+        safe_message = _safe_error_message(e)
+        logger.error("Error in SSE stream: %s", safe_message)
+        yield _make_event("error", {"error": safe_message, "thread_id": thread_id})
 
 
 def _make_event(event_type: str, data: dict[str, any]):
@@ -444,7 +541,7 @@ def _make_event(event_type: str, data: dict[str, any]):
 @app.post("/api/tts")
 async def text_to_speech(
     request: TTSRequest,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(_get_authenticated_user),
 ):
     """Convert text to speech using volcengine TTS API."""
     app_id = os.getenv("VOLCENGINE_TTS_APPID", "")
@@ -496,14 +593,14 @@ async def text_to_speech(
         )
 
     except Exception as e:
-        logger.exception(f"Error in TTS endpoint: {str(e)}")
+        logger.exception("Error in TTS endpoint: %s", _safe_error_message(e))
         raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR_DETAIL)
 
 
 @app.post("/api/podcast/generate")
 async def generate_podcast(
     request: GeneratePodcastRequest,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(_get_authenticated_user),
 ):
     try:
         report_content = request.content
@@ -530,16 +627,18 @@ async def generate_podcast(
         logger.info(f"Generated audio bytes: {len(audio_bytes)} bytes")
         return Response(content=audio_bytes, media_type="audio/mp3")
     except Exception as e:
-        logger.exception(f"Error occurred during podcast generation: {str(e)}")
+        safe_message = _safe_error_message(e)
+        logger.exception("Error occurred during podcast generation: %s", safe_message)
         raise HTTPException(
-            status_code=500, detail=str(e)
-        )  # Return actual error for debugging
+            status_code=500,
+            detail=safe_message,
+        )
 
 
 @app.post("/api/podcast/generate-stream")
 async def generate_podcast_stream(
     request: GeneratePodcastRequest,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(_get_authenticated_user),
 ):
     """Generate podcast with streaming progress updates"""
 
@@ -625,8 +724,9 @@ async def generate_podcast_stream(
             )
 
         except Exception as e:
-            logger.exception(f"Error in podcast stream: {str(e)}")
-            yield _make_event("error", {"error": str(e)})
+            safe_message = _safe_error_message(e)
+            logger.exception("Error in podcast stream: %s", safe_message)
+            yield _make_event("error", {"error": safe_message})
 
     return StreamingResponse(
         podcast_stream_generator(),
@@ -642,7 +742,7 @@ async def generate_podcast_stream(
 @app.post("/api/ppt/generate")
 async def generate_ppt(
     request: GeneratePPTRequest,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(_get_authenticated_user),
 ):
     try:
         report_content = request.content
@@ -657,14 +757,14 @@ async def generate_ppt(
             media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
         )
     except Exception as e:
-        logger.exception(f"Error occurred during ppt generation: {str(e)}")
+        logger.exception("Error occurred during ppt generation: %s", _safe_error_message(e))
         raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR_DETAIL)
 
 
 @app.post("/api/prose/generate")
 async def generate_prose(
     request: GenerateProseRequest,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(_get_authenticated_user),
 ):
     try:
         sanitized_prompt = request.prompt.replace("\r\n", "").replace("\n", "")
@@ -684,14 +784,14 @@ async def generate_prose(
             media_type="text/event-stream",
         )
     except Exception as e:
-        logger.exception(f"Error occurred during prose generation: {str(e)}")
+        logger.exception("Error occurred during prose generation: %s", _safe_error_message(e))
         raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR_DETAIL)
 
 
 @app.post("/api/prompt/enhance")
 async def enhance_prompt(
     request: EnhancePromptRequest,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(_get_authenticated_user),
 ):
     try:
         sanitized_prompt = request.prompt.replace("\r\n", "").replace("\n", "")
@@ -727,7 +827,7 @@ async def enhance_prompt(
         )
         return {"result": final_state["output"]}
     except Exception as e:
-        logger.exception(f"Error occurred during prompt enhancement: {str(e)}")
+        logger.exception("Error occurred during prompt enhancement: %s", _safe_error_message(e))
         raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR_DETAIL)
 
 
@@ -764,7 +864,7 @@ async def mcp_server_metadata(request: MCPServerMetadataRequest):
 
         return response
     except Exception as e:
-        logger.exception(f"Error in MCP server metadata endpoint: {str(e)}")
+        logger.exception("Error in MCP server metadata endpoint: %s", _safe_error_message(e))
         raise HTTPException(status_code=500, detail=INTERNAL_SERVER_ERROR_DETAIL)
 
 
@@ -835,10 +935,11 @@ async def rag_upload(
                 if not dataset_id:
                     raise Exception("Failed to get dataset ID from creation response")
             except Exception as e:
+                safe_message = _safe_error_message(e)
                 return RAGUploadResponse(
                     success=False,
                     dataset_id="",
-                    error=f"Failed to create dataset: {str(e)}",
+                    error=f"Failed to create dataset: {safe_message}",
                 )
 
         # Upload the document
@@ -878,16 +979,18 @@ async def rag_upload(
             )
 
         except Exception as e:
+            safe_message = _safe_error_message(e)
             return RAGUploadResponse(
                 success=False,
                 dataset_id=dataset_id,
-                error=f"Failed to upload document: {str(e)}",
+                error=f"Failed to upload document: {safe_message}",
             )
 
     except Exception as e:
-        logger.exception(f"Error in RAG upload: {str(e)}")
+        safe_message = _safe_error_message(e)
+        logger.exception("Error in RAG upload: %s", safe_message)
         return RAGUploadResponse(
-            success=False, dataset_id="", error=f"Internal error: {str(e)}"
+            success=False, dataset_id="", error=f"Internal error: {safe_message}"
         )
 
 

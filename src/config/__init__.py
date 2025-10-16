@@ -4,6 +4,19 @@
 from .loader import load_yaml_config
 from .tools import SELECTED_SEARCH_ENGINE, SearchEngine
 from .questions import BUILT_IN_QUESTIONS, BUILT_IN_QUESTIONS_ZH_CN
+from .settings import (
+    load_config,
+    get_config,
+    AppConfig,
+    DatabaseConfig,
+    RedisConfig,
+    AuthConfig,
+    ClerkConfig,
+    LLMConfig,
+    SearchConfig,
+    RAGConfig,
+    ObservabilityConfig,
+)
 
 from dotenv import load_dotenv
 
@@ -39,6 +52,18 @@ TEAM_MEMBER_CONFIGURATIONS = {
 TEAM_MEMBERS = list(TEAM_MEMBER_CONFIGURATIONS.keys())
 
 __all__ = [
+    # Settings and configuration
+    "load_config",
+    "get_config",
+    "AppConfig",
+    "DatabaseConfig",
+    "RedisConfig",
+    "AuthConfig",
+    "ClerkConfig",
+    "LLMConfig",
+    "SearchConfig",
+    "RAGConfig",
+    "ObservabilityConfig",
     # Other configurations
     "TEAM_MEMBERS",
     "TEAM_MEMBER_CONFIGURATIONS",
@@ -46,5 +71,5 @@ __all__ = [
     "SearchEngine",
     "BUILT_IN_QUESTIONS",
     "BUILT_IN_QUESTIONS_ZH_CN",
-    load_yaml_config,
+    "load_yaml_config",
 ]

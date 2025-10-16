@@ -66,6 +66,37 @@ export interface KanbanBoard {
   columns: KanbanColumn[];
 }
 
+// Adapter type for frontend compatibility
+export interface FrontendProject {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  isPriority?: boolean;
+}
+
+// Adapter function: API Project → Frontend Project
+function adaptProjectToFrontend(apiProject: Project): FrontendProject {
+  return {
+    id: String(apiProject.id), // Convert number to string
+    name: apiProject.name,
+    description: apiProject.description || undefined,
+    createdAt: apiProject.created_at,
+    isPriority: false
+  };
+}
+
+// Adapter function: Frontend Project → API Project Create
+function adaptFrontendProjectToAPI(frontendProject: Partial<FrontendProject>): ProjectCreate {
+  return {
+    name: frontendProject.name || '',
+    description: frontendProject.description || null,
+    color: '#3B82F6', // Default color
+    icon: 'folder',    // Default icon
+    status: 'active'   // Default status
+  };
+}
+
 export const projectsApiService = {
   /**
    * Listar todos os projetos do usuário
@@ -74,7 +105,7 @@ export const projectsApiService = {
     status?: string;
     limit?: number;
     offset?: number;
-  }): Promise<Project[]> {
+  }): Promise<FrontendProject[]> {
     try {
       const queryParams = new URLSearchParams();
       if (params?.status) queryParams.append('status', params.status);
@@ -84,7 +115,8 @@ export const projectsApiService = {
       const query = queryParams.toString();
       const endpoint = query ? `/projects?${query}` : '/projects';
 
-      return await api.get<Project[]>(endpoint);
+      const apiProjects = await api.get<Project[]>(endpoint);
+      return apiProjects.map(adaptProjectToFrontend);
     } catch (error) {
       console.error('Erro ao listar projetos:', error);
       return [];
@@ -94,10 +126,10 @@ export const projectsApiService = {
   /**
    * Buscar projeto por ID
    */
-  async get(id: number): Promise<Project | null> {
+  async get(id: number): Promise<FrontendProject | null> {
     try {
       const project = await api.get<Project>(`/projects/${id}`);
-      return project;
+      return adaptProjectToFrontend(project);
     } catch (error) {
       console.error('Erro ao buscar projeto:', error);
       return null;
@@ -107,15 +139,22 @@ export const projectsApiService = {
   /**
    * Criar novo projeto
    */
-  async create(data: ProjectCreate): Promise<Project> {
-    return await api.post<Project>('/projects', data);
+  async create(data: ProjectCreate | Partial<FrontendProject>): Promise<FrontendProject> {
+    // If data looks like FrontendProject, adapt it
+    const apiData = 'createdAt' in data || 'isPriority' in data
+      ? adaptFrontendProjectToAPI(data as Partial<FrontendProject>)
+      : data as ProjectCreate;
+
+    const created = await api.post<Project>('/projects', apiData);
+    return adaptProjectToFrontend(created);
   },
 
   /**
    * Atualizar projeto
    */
-  async update(id: number, data: ProjectUpdate): Promise<Project> {
-    return await api.put<Project>(`/projects/${id}`, data);
+  async update(id: number, data: ProjectUpdate): Promise<FrontendProject> {
+    const updated = await api.put<Project>(`/projects/${id}`, data);
+    return adaptProjectToFrontend(updated);
   },
 
   /**
@@ -151,29 +190,31 @@ export const projectsApiService = {
   /**
    * Alias para list() - compatibilidade
    */
-  async getProjects(params?: { status?: string; limit?: number; offset?: number }): Promise<Project[]> {
+  async getProjects(params?: { status?: string; limit?: number; offset?: number }): Promise<FrontendProject[]> {
     return this.list(params);
   },
 
   /**
    * Alias para create() - compatibilidade
    */
-  async createProject(data: ProjectCreate): Promise<Project> {
+  async createProject(data: ProjectCreate | Partial<FrontendProject>): Promise<FrontendProject> {
     return this.create(data);
   },
 
   /**
    * Alias para update() - compatibilidade
    */
-  async updateProject(id: number, data: ProjectUpdate): Promise<Project> {
-    return this.update(id, data);
+  async updateProject(id: number | string, data: ProjectUpdate): Promise<FrontendProject> {
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+    return this.update(numericId, data);
   },
 
   /**
    * Alias para delete() - compatibilidade
    */
-  async deleteProject(id: number): Promise<void> {
-    return this.delete(id);
+  async deleteProject(id: number | string): Promise<void> {
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+    return this.delete(numericId);
   },
 
   /**

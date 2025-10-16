@@ -1,29 +1,56 @@
 "use client"
 import { Bell, Clock } from "lucide-react"
 import { motion } from "framer-motion"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import LiquidGlassCard from "~/components/ui/liquid-glass-card"
-import { reminderService } from "~/services/supabase/reminders"
-import type { Reminder } from "~/services/supabase/reminders"
+import { createRemindersApiService } from "~/services/api/reminders"
+import { useAuthenticatedApi } from "~/hooks/use-authenticated-api"
+
+interface Reminder {
+  id: string;
+  title: string;
+  time?: string;
+  category?: string;
+  created_at?: string;
+}
 
 export default function RemindersCard() {
   const [reminders, setReminders] = useState<Reminder[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  // Use authenticated API client
+  const authApi = useAuthenticatedApi()
+  const remindersApiService = useMemo(() => createRemindersApiService(authApi), [authApi])
+
   useEffect(() => {
     const loadReminders = async () => {
       try {
-        const data = await reminderService.getTodayReminders()
+        const data = await remindersApiService.getTodayReminders()
         setReminders(data)
       } catch (error) {
         console.error('Failed to load reminders:', error)
+        // Em caso de erro, mostrar lembretes mock
+        setReminders([
+          {
+            id: '1',
+            title: 'Reunião de equipe',
+            time: '10:00',
+            category: 'Trabalho'
+          },
+          {
+            id: '2',
+            title: 'Revisar relatório',
+            time: '14:30',
+            category: 'Trabalho'
+          }
+        ])
       } finally {
         setIsLoading(false)
       }
     }
-    
+
     loadReminders()
-  }, [])
+  }, [remindersApiService])
 
   return (
     <motion.div

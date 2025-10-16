@@ -332,7 +332,7 @@ export const createNoteFromWebhook = (
   const newNote: Note = {
     id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     title: webhookResponse.title ?? webhookResponse.titulo ?? `Nova Nota - ${contextType}`,
-    description: webhookResponse.description ?? "Nota processada automaticamente via IA",
+    description: (webhookResponse as any).description ?? "Nota processada automaticamente via IA",
     source: getSourceFromType(contextType),
     date: new Date().toLocaleDateString('pt-BR'),
     tags: [contextType],
@@ -342,8 +342,8 @@ export const createNoteFromWebhook = (
     aiSummary,
     transcript,
     podcastContent: "",
-    duration: webhookResponse.duration,
-    fileSize: webhookResponse.fileSize,
+    duration: (webhookResponse as any).duration,
+    fileSize: (webhookResponse as any).fileSize,
     webhookData: {
       type: contextType,
       originalUrl: originalUrl ?? undefined,

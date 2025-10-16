@@ -14,10 +14,10 @@ const SleepDashboard = lazy(() => import("~/components/jarvis/sleep/sleep-dashbo
 
 // Ultra-lightweight loading skeleton
 const CardSkeleton = memo(() => (
-  <div className="rounded-xl border border-white/10 bg-white/[0.05] backdrop-blur-sm h-32">
-    <div className="p-6">
-      <div className="h-3 bg-white/10 rounded-xl w-1/3 mb-3"></div>
-      <div className="space-y-2">
+  <div className="rounded-xl border border-white/10 bg-white/[0.05] backdrop-blur-sm h-24">
+    <div className="p-4">
+      <div className="h-3 bg-white/10 rounded-xl w-1/3 mb-2"></div>
+      <div className="space-y-1">
         <div className="h-2 bg-white/[0.08] rounded-xl"></div>
         <div className="h-2 bg-white/[0.08] rounded-xl w-4/5"></div>
       </div>
@@ -86,28 +86,28 @@ const DashboardStatsOptimized = memo(function DashboardStatsOptimized() {
   };
 
   return (
-    <div className="w-full relative z-10">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold text-white">Dashboard Overview</h2>
-        <Button variant="ghost" size="icon" onClick={() => setIsSettingsModalOpen(true)} className="relative z-20 bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] text-gray-300">
-          <Settings className="h-5 w-5" />
+    <div className="w-full max-w-7xl mx-auto relative z-10">
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="text-lg font-semibold text-white">Dashboard</h2>
+        <Button variant="ghost" size="icon" onClick={() => setIsSettingsModalOpen(true)} className="relative z-20 bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] text-gray-300 h-8 w-8">
+          <Settings className="h-4 w-4" />
           <span className="sr-only">Dashboard Settings</span>
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 md:gap-6 lg:gap-8 xl:gap-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 md:gap-4 lg:gap-6">
         {/* Left Column - Timeline alone */}
-        <div className="md:col-span-2 lg:col-span-4 space-y-4 md:space-y-6 lg:space-y-8">
+        <div className="sm:col-span-2 md:col-span-2 lg:col-span-4 space-y-3 md:space-y-4 lg:space-y-6">
           {renderCard("timeline", TimelineCard)}
         </div>
 
         {/* Center Column */}
-        <div className="md:col-span-1 lg:col-span-4 space-y-4 md:space-y-6 lg:space-y-8">
+        <div className="sm:col-span-2 md:col-span-1 lg:col-span-4 space-y-3 md:space-y-4 lg:space-y-6">
           {renderCard("sleep", SleepDashboard)}
         </div>
 
         {/* Right Column - Priorities first, then Reminders */}
-        <div className="md:col-span-1 lg:col-span-4 space-y-4 md:space-y-6 lg:space-y-8">
+        <div className="sm:col-span-2 md:col-span-1 lg:col-span-4 space-y-3 md:space-y-4 lg:space-y-6">
           {renderCard("todayTasks", TodayTasksCard)}
           {renderCard("priorities", PrioritiesCard)}
           {renderCard("reminders", RemindersCard)}

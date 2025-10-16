@@ -27,8 +27,8 @@ export function ChatHeader({
         "bg-background/80 backdrop-blur-sm",
         className
       )}>
-        <div className="flex items-center gap-1.5">
-          <h1 className="text-sm font-semibold">DeerFlow Chat</h1>
+        <div className="flex items-center gap-1">
+          <h1 className="text-sm font-semibold text-center">DeerFlow Chat</h1>
         </div>
         
         <div className="flex items-center gap-1">
@@ -37,9 +37,9 @@ export function ChatHeader({
             variant="ghost"
             onClick={() => setSearchOpen(true)}
             title="Buscar conversas"
-            className="h-7 w-7"
+            className="h-6 w-6"
           >
-            <Search className="h-3.5 w-3.5" />
+            <Search className="h-3 w-3" />
           </Button>
           
           {showHistoryButton && onToggleHistory && (
@@ -48,9 +48,9 @@ export function ChatHeader({
               variant="ghost"
               onClick={onToggleHistory}
               title="Histórico"
-              className="h-7 w-7"
+              className="h-6 w-6"
             >
-              <History className="h-3.5 w-3.5" />
+              <History className="h-3 w-3" />
             </Button>
           )}
           
@@ -59,9 +59,9 @@ export function ChatHeader({
             variant="ghost"
             onClick={() => window.location.href = '/settings'}
             title="Configurações"
-            className="h-7 w-7"
+            className="h-6 w-6"
           >
-            <Settings className="h-3.5 w-3.5" />
+            <Settings className="h-3 w-3" />
           </Button>
         </div>
       </div>

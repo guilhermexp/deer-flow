@@ -2,143 +2,617 @@
 
 Thank you for your interest in contributing to DeerFlow! We welcome contributions of all kinds from the community.
 
-## Ways to Contribute
+🚀 **Important Note**: DeerFlow has been migrated to use **Neon PostgreSQL** + **Clerk Authentication**. Please ensure you're familiar with the new architecture before contributing.
+
+## 📋 Table of Contents
+
+- [Ways to Contribute](#ways-to-contribute)
+- [Development Setup](#development-setup)
+- [Architecture Overview](#architecture-overview)
+- [Development Process](#development-process)
+- [Pull Request Guidelines](#pull-request-guidelines)
+- [Code Style](#code-style)
+- [Testing](#testing)
+- [Code Quality](#code-quality)
+- [Documentation](#documentation)
+- [Community Guidelines](#community-guidelines)
+- [Need Help?](#need-help)
+
+## 🤝 Ways to Contribute
 
 There are many ways you can contribute to DeerFlow:
 
-- **Code Contributions**: Add new features, fix bugs, or improve performance
+### Code Contributions
+- **Backend**: Add new features, fix bugs, or improve performance in FastAPI
+- **Frontend**: Improve React/Next.js components and user experience
+- **Database**: Optimize database schemas and migrations
+- **AI/ML**: Enhance LLM integrations and agent workflows
+
+### Documentation
 - **Documentation**: Improve README, add code comments, or create examples
+- **Architecture Docs**: Document system design and decisions
+- **API Docs**: Improve OpenAPI documentation
+- **Tutorials**: Create step-by-step guides
+
+### Quality Assurance
 - **Bug Reports**: Submit detailed bug reports through issues
 - **Feature Requests**: Suggest new features or improvements
 - **Code Reviews**: Review pull requests from other contributors
-- **Community Support**: Help others in discussions and issues
+- **Testing**: Write and improve test coverage
 
-## Development Setup
+### Community Support
+- **Discussions**: Help others in GitHub discussions
+- **Issues**: Triage and respond to community issues
+- **Examples**: Share examples and use cases
 
-1. Fork the repository
-2. Clone your fork:
+## 🛠️ Development Setup
 
-   ```bash
-   git clone https://github.com/bytedance/deer-flow.git
-   cd deer-flow
-   ```
+### Prerequisites
 
-3. Set up your development environment:
+- **Python 3.12+**
+- **Node.js 22+**
+- **Neon Database Account**: [Create free account](https://console.neon.tech/)
+- **Clerk Account**: [Create free account](https://dashboard.clerk.com/)
 
-   ```bash
-   # Install dependencies, uv will take care of the python interpreter and venv creation
-   uv sync
+### 1. Fork and Clone
 
-   # For development, install additional dependencies
-   uv pip install -e ".[dev]"
-   uv pip install -e ".[test]"
-   ```
+```bash
+# Fork the repository on GitHub
+# Clone your fork
+git clone https://github.com/YOUR_USERNAME/deer-flow.git
+cd deer-flow
 
-4. Configure pre-commit hooks:
+# Add upstream remote
+git remote add upstream https://github.com/bytedance/deer-flow.git
+```
 
-   ```bash
-   chmod +x pre-commit
-   ln -s ../../pre-commit .git/hooks/pre-commit
-   ```
+### 2. Environment Setup
 
-## Development Process
+```bash
+# Install Python dependencies
+uv sync
 
-1. Create a new branch:
+# Install frontend dependencies
+cd web
+pnpm install
+cd ..
 
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
+# Copy environment files
+cp .env.example .env
+cp web/.env.example web/.env.local
+cp conf.yaml.example conf.yaml
+```
 
-2. Make your changes following our coding standards:
-   - Write clear, documented code
-   - Follow PEP 8 style guidelines
-   - Add tests for new features
-   - Update documentation as needed
+### 3. Configure Services
 
-3. Run tests and checks:
+#### Neon Database
+1. Create a new project in [Neon Console](https://console.neon.tech/)
+2. Create a development branch
+3. Copy the connection string to `.env`
 
-   ```bash
-   make test      # Run tests
-   make lint      # Run linting
-   make format    # Format code
-   make coverage  # Check test coverage
-   ```
+#### Clerk Authentication
+1. Create a new application in [Clerk Dashboard](https://dashboard.clerk.com/)
+2. Configure development environment
+3. Copy keys to environment files
 
-4. Commit your changes:
+#### LLM & Search APIs
+- Configure your preferred LLM in `conf.yaml`
+- Set up search API (Tavily recommended)
 
-   ```bash
-   git commit -m 'Add some amazing feature'
-   ```
+### 4. Database Setup
 
-5. Push to your fork:
+```bash
+# Run migrations
+uv run alembic upgrade head
 
-   ```bash
-   git push origin feature/amazing-feature
-   ```
+# Create a development branch (optional but recommended)
+# Use Neon Console to create a branch for development
+```
 
-6. Open a Pull Request
+### 5. Pre-commit Setup
 
-## Pull Request Guidelines
+```bash
+# Make pre-commit script executable
+chmod +x pre-commit
 
-- Fill in the pull request template completely
-- Include tests for new features
-- Update documentation as needed
-- Ensure all tests pass and there are no linting errors
-- Keep pull requests focused on a single feature or fix
-- Reference any related issues
+# Install pre-commit hooks
+ln -s ../../pre-commit .git/hooks/pre-commit
 
-## Code Style
+# Or use pre-commit framework (optional)
+pip install pre-commit
+pre-commit install
+```
 
-- Follow PEP 8 guidelines
-- Use type hints where possible
-- Write descriptive docstrings
-- Keep functions and methods focused and single-purpose
-- Comment complex logic
-- Python version requirement: >= 3.12
+## 🏗️ Architecture Overview
+
+### Current Stack
+
+```
+Frontend: Next.js 14 + TypeScript + Tailwind CSS + Clerk
+Backend:  FastAPI + SQLAlchemy + Alembic + Pydantic
+Database: Neon PostgreSQL (serverless)
+Auth:      Clerk (authentication & user management)
+AI:        LangChain + LiteLLM + Multiple LLM providers
+```
+
+### Key Components
+
+- **`src/server/`**: FastAPI application and API endpoints
+- **`src/database/`**: SQLAlchemy models and database logic
+- **`src/agents/`**: AI agents and workflow orchestration
+- **`web/src/`**: React components and frontend logic
+- **`src/config/`**: Configuration management
+- **`docs/`**: Documentation and guides
+
+### Database Schema
+
+- **Users**: Synced from Clerk
+- **Workflows**: Research workflows and steps
+- **Jarvis Features**: Health, calendar, notes, tasks
+- **System**: Audit logs, settings, API keys
+
+For detailed architecture, see [Architecture Documentation](docs/NEON_CLERK_ARCHITECTURE.md).
+
+## 🔄 Development Process
+
+### 1. Create a Branch
+
+```bash
+# Sync with upstream
+git fetch upstream
+git checkout main
+git merge upstream/main
+
+# Create feature branch
+git checkout -b feature/amazing-feature
+# or
+git checkout -b fix/issue-123-bug-fix
+```
+
+### 2. Make Changes
+
+#### Backend Changes
+```bash
+# After database model changes
+uv run alembic revision --autogenerate -m "Describe changes"
+uv run alembic upgrade head
+
+# Test changes
+uv run pytest tests/ -v
+```
+
+#### Frontend Changes
+```bash
+cd web
+
+# Test changes
+pnpm test
+pnpm lint
+pnpm type-check
+
+# Build to ensure no errors
+pnpm build
+```
+
+### 3. Run Quality Checks
+
+```bash
+# Backend
+make test      # Run tests
+make lint      # Run linting
+make format    # Format code
+make coverage  # Check test coverage
+
+# Frontend
+cd web
+pnpm test      # Run tests
+pnpm lint      # Run linting
+pnpm format    # Format code
+pnpm type-check # Type checking
+```
+
+### 4. Commit Changes
+
+```bash
+# Stage changes
+git add .
+
+# Commit with conventional commit message
+git commit -m 'feat: add amazing new feature'
+
+# or
+git commit -m 'fix: resolve authentication issue'
+
+# or
+git commit -m 'docs: update API documentation'
+```
+
+### 5. Submit Pull Request
+
+```bash
+# Push to your fork
+git push origin feature/amazing-feature
+
+# Open pull request on GitHub
+```
+
+## 📝 Pull Request Guidelines
+
+### Before Submitting
+
+- [ ] All tests pass (`make test`)
+- [ ] Code is formatted (`make format`)
+- [ ] No linting errors (`make lint`)
+- [ ] Documentation is updated
+- [ ] Tests are added for new features
+- [ ] Migration files are created for database changes
+
+### PR Template
+
+```markdown
+## Description
+Brief description of the change and why it's needed.
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
 
 ## Testing
+- [ ] Unit tests pass
+- [ ] Integration tests pass
+- [ ] Manual testing completed
+- [ ] Additional tests added
 
-Run the test suite:
+## Checklist
+- [ ] Code follows project style guidelines
+- [ ] Self-review completed
+- [ ] Documentation updated
+- [ ] Environment variables documented
+- [ ] Database migrations included
+
+## Related Issues
+Closes #123
+Related to #456
+```
+
+### Best Practices
+
+- **One PR per feature/fix**: Keep PRs focused
+- **Small, atomic changes**: Easier to review and merge
+- **Clear descriptions**: Explain what and why
+- **Test thoroughly**: Include unit and integration tests
+- **Update docs**: Keep documentation in sync
+
+## 📐 Code Style
+
+### Backend (Python)
+
+```python
+# Follow PEP 8
+# Use type hints
+def create_workflow(
+    workflow_data: WorkflowCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> Workflow:
+    """Create a new workflow for the current user."""
+    # Implementation
+    pass
+
+# Use async/await for database operations
+async def get_user_workflows(
+    user_id: str,
+    db: AsyncSession
+) -> List[Workflow]:
+    result = await db.execute(
+        select(Workflow).where(Workflow.user_id == user_id)
+    )
+    return result.scalars().all()
+```
+
+### Frontend (TypeScript/React)
+
+```typescript
+// Use proper TypeScript types
+interface UserProfile {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+// Use React Query for server state
+function useUserProfile() {
+  return useQuery({
+    queryKey: ['user', 'profile'],
+    queryFn: () => api.get('/api/user/profile'),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// Use proper component structure
+const UserProfile: React.FC = () => {
+  const { data: user, isLoading } = useUserProfile();
+  
+  if (isLoading) return <div>Loading...</div>;
+  
+  return <div>Welcome, {user?.firstName}</div>;
+};
+```
+
+### Naming Conventions
+
+- **Files**: `kebab-case` for most files, `PascalCase` for components
+- **Variables**: `snake_case` for Python, `camelCase` for TypeScript
+- **Functions**: Descriptive names, verbs for actions
+- **Constants**: `UPPER_SNAKE_CASE`
+- **Database**: `snake_case` for tables and columns
+
+## 🧪 Testing
+
+### Backend Testing
 
 ```bash
 # Run all tests
 make test
 
 # Run specific test file
-pytest tests/integration/test_workflow.py
+pytest tests/integration/test_workflow.py -v
 
 # Run with coverage
 make coverage
+
+# Run specific test category
+pytest tests/unit/ -v
+pytest tests/integration/ -v
 ```
 
-## Code Quality
+### Frontend Testing
 
 ```bash
+cd web
+
+# Run unit tests
+pnpm test
+
+# Run integration tests
+pnpm test:integration
+
+# Run E2E tests
+pnpm test:e2e
+
+# Run with coverage
+pnpm test:coverage
+```
+
+### Writing Tests
+
+#### Backend Tests
+
+```python
+import pytest
+from httpx import AsyncClient
+from src.server.app import app
+
+@pytest.mark.asyncio
+async def test_create_workflow():
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        response = await client.post(
+            "/api/workflows",
+            json={"query": "test query"},
+            headers={"Authorization": "Bearer test_token"}
+        )
+        assert response.status_code == 201
+        assert "id" in response.json()
+```
+
+#### Frontend Tests
+
+```typescript
+import { render, screen } from '@testing-library/react';
+import { UserProfile } from '@/components/user-profile';
+
+test('displays user information', () => {
+  const mockUser = { id: '1', firstName: 'John', email: 'john@example.com' };
+  
+  render(<UserProfile user={mockUser} />);
+  
+  expect(screen.getByText('Welcome, John')).toBeInTheDocument();
+});
+```
+
+## 🔍 Code Quality
+
+### Backend Quality Checks
+
+```bash
+# Format code
+make format
+
 # Run linting
 make lint
 
-# Format code
-make format
+# Type checking
+uv run mypy src/
+
+# Security check
+uv run bandit -r src/
+
+# Import sorting
+uv run isort src/
 ```
 
-## Community Guidelines
+### Frontend Quality Checks
+
+```bash
+cd web
+
+# Format code
+pnpm format
+
+# Run linting
+pnpm lint
+
+# Type checking
+pnpm type-check
+
+# Security audit
+pnpm audit
+
+# Import sorting
+pnpm lint:fix
+```
+
+### Pre-commit Hooks
+
+The project includes pre-commit hooks that run automatically:
+
+```bash
+# .git/hooks/pre-commit runs:
+# - Backend formatting and linting
+# - Frontend formatting and linting
+# - Type checking
+# - Basic tests
+```
+
+## 📚 Documentation
+
+### Types of Documentation
+
+1. **Code Documentation**
+   - Docstrings for all functions and classes
+   - Inline comments for complex logic
+   - Type hints for better IDE support
+
+2. **API Documentation**
+   - OpenAPI/Swagger auto-generated from FastAPI
+   - Request/response examples
+   - Error documentation
+
+3. **User Documentation**
+   - README updates for new features
+   - Configuration guides
+   - Installation instructions
+
+4. **Developer Documentation**
+   - Architecture decisions
+   - Development guides
+   - Troubleshooting guides
+
+### Writing Documentation
+
+```python
+def create_workflow(
+    workflow_data: WorkflowCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> Workflow:
+    """Create a new workflow for the current user.
+    
+    Args:
+        workflow_data: The workflow creation data
+        current_user: The authenticated user
+        db: Database session
+        
+    Returns:
+        The created workflow
+        
+    Raises:
+        HTTPException: If user is not authenticated
+        DatabaseError: If workflow creation fails
+    """
+    # Implementation
+```
+
+```typescript
+/**
+ * Component for displaying user profile information.
+ * 
+ * @param user - The user data to display
+ * @param onEdit - Callback when edit button is clicked
+ */
+const UserProfile: React.FC<UserProfileProps> = ({ user, onEdit }) => {
+  // Implementation
+};
+```
+
+## 🌍 Community Guidelines
+
+### Code of Conduct
 
 - Be respectful and inclusive
-- Follow our code of conduct
-- Help others learn and grow
-- Give constructive feedback
-- Stay focused on improving the project
+- Welcome newcomers and help them learn
+- Focus on constructive feedback
+- Assume good intentions
+- Stay professional and courteous
 
-## Need Help?
+### Communication
 
-If you need help with anything:
+- **GitHub Issues**: For bug reports and feature requests
+- **Discussions**: For questions and general discussion
+- **Pull Requests**: For code review and collaboration
+- **Documentation**: For improving guides and docs
 
-- Check existing issues and discussions
-- Join our community channels
-- Ask questions in discussions
+### Giving Feedback
 
-## License
+- Be specific and constructive
+- Explain the "why" behind suggestions
+- Acknowledge good work
+- Help find solutions, not just point out problems
 
-By contributing to DeerFlow, you agree that your contributions will be licensed under the MIT License.
+## ❓ Need Help?
 
-We appreciate your contributions to making DeerFlow better!
+### Getting Help
+
+1. **Documentation**
+   - [Installation Guide](docs/INSTALLATION_DEVELOPMENT_GUIDE.md)
+   - [Configuration Guide](docs/configuration_guide.md)
+   - [Architecture Documentation](docs/NEON_CLERK_ARCHITECTURE.md)
+
+2. **Community**
+   - [GitHub Issues](https://github.com/bytedance/deer-flow/issues)
+   - [GitHub Discussions](https://github.com/bytedance/deer-flow/discussions)
+   - [Official Website](https://deerflow.tech/)
+
+3. **Development Help**
+   - Check existing issues and discussions
+   - Ask questions in discussions
+   - Join development channels (if available)
+
+### Common Issues
+
+- **Database Connection**: Check Neon configuration and connection string
+- **Authentication**: Verify Clerk keys and webhook setup
+- **Environment Variables**: Ensure all required variables are set
+- **Dependencies**: Run `uv sync` and `pnpm install` to update
+
+### Reporting Issues
+
+When reporting bugs, please include:
+
+1. **Environment**: OS, Python/Node versions, browser
+2. **Steps to Reproduce**: Detailed reproduction steps
+3. **Expected vs Actual**: What you expected vs what happened
+4. **Error Messages**: Full error messages and stack traces
+5. **Configuration**: Relevant configuration (redact sensitive data)
+
+## 📄 License
+
+By contributing to DeerFlow, you agree that your contributions will be licensed under the [MIT License](LICENSE).
+
+## 🙏 Recognition
+
+We appreciate all contributions! Contributors will be recognized in:
+
+- README contributors section
+- Release notes
+- Community highlights
+- Annual contributor reports
+
+---
+
+Thank you for contributing to DeerFlow! Your contributions help make this project better for everyone. 🚀
+
+If you have any questions or need help getting started, don't hesitate to reach out in our discussions or issues.

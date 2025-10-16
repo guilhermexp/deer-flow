@@ -4,7 +4,7 @@ import dynamic from "next/dynamic"
 import * as React from "react"
 import { useState, useCallback } from "react"
 
-import { useNotesSupabase } from "~/hooks/use-notes-supabase"
+import { useNotesApi } from "~/hooks/use-notes-api"
 import {
   getSourceColor,
   getSourceIcon,
@@ -63,8 +63,8 @@ export default function NotesDashboardWithDetails() {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
   const [chatSessions, setChatSessions] = useState<Record<string, ChatSession>>({})
   
-  // Use Supabase hook for notes
-  const { notes, loading, addNote, isAuthenticated } = useNotesSupabase()
+  // Use API hook for notes
+  const { notes, loading, addNote, isAuthenticated } = useNotesApi()
 
   const handleNoteClick = useCallback(
     (note: Note) => {
