@@ -210,7 +210,6 @@ export async function sendMessage(
       max_search_results: settings.maxSearchResults,
       report_style: settings.reportStyle,
       mcp_settings: settings.mcpSettings,
-      model: settings.selectedModel,
     },
     options,
   );
