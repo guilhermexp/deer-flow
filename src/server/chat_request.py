@@ -6,8 +6,8 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field, field_validator
 
-from src.rag.retriever import Resource
 from src.config.report_style import ReportStyle
+from src.rag.retriever import Resource
 
 
 class ContentItem(BaseModel):
@@ -91,6 +91,14 @@ class ChatRequest(BaseModel):
     model: Optional[str] = Field(
         None,
         description="The model to use for the chat (e.g., 'google/gemini-2.5-pro', 'moonshotai/kimi-k2')",
+    )
+    enable_clarification: Optional[bool] = Field(
+        None,
+        description="Whether to enable multi-turn clarification (default: None, uses State default=False)",
+    )
+    max_clarification_rounds: Optional[int] = Field(
+        None,
+        description="Maximum number of clarification rounds (default: None, uses State default=3)",
     )
 
 

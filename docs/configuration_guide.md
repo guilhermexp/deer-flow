@@ -1,6 +1,6 @@
 # Configuration Guide
 
-## 🚀 Quick Setup
+## Quick Settings
 
 Copy the `conf.yaml.example` file to `conf.yaml` and modify the configurations to match your specific settings and requirements.
 
@@ -9,43 +9,21 @@ cd deer-flow
 cp conf.yaml.example conf.yaml
 ```
 
-## 🔐 Database & Authentication Setup
-
-### Neon Database Configuration
-
-1. **Create Neon Account**: Sign up at [https://console.neon.tech/](https://console.neon.tech/)
-2. **Create Project**: Create a new PostgreSQL project
-3. **Get Connection String**: Copy the connection string from the dashboard
-4. **Configure Environment**: Set `DATABASE_URL` in your `.env` file
-
-```bash
-# Example Neon Database URL
-DATABASE_URL=postgresql://username:password@ep-xxx.us-east-2.aws.neon.tech/dbname?sslmode=require
-```
-
-### Clerk Authentication Setup
-
-1. **Create Clerk Account**: Sign up at [https://dashboard.clerk.com/](https://dashboard.clerk.com/)
-2. **Create Application**: Create a new application in Clerk dashboard
-3. **Configure Settings**: Set up your application settings and providers
-4. **Get Keys**: Copy the publishable key and secret key
-5. **Configure Environment**: Set Clerk variables in your `.env` file
-
-```bash
-# Example Clerk Configuration
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
-CLERK_SECRET_KEY=sk_test_xxx
-```
-
-## 🤖 LLM Model Configuration
-
-### Which models does DeerFlow support?
+## Which models does DeerFlow support?
 
 In DeerFlow, we currently only support non-reasoning models. This means models like OpenAI's o1/o3 or DeepSeek's R1 are not supported yet, but we plan to add support for them in the future. Additionally, all Gemma-3 models are currently unsupported due to the lack of tool usage capabilities.
 
 ### Supported Models
 
-`doubao-1.5-pro-32k-250115`, `gpt-4o`, `qwen-max-latest`, `gemini-2.0-flash`, `deepseek-v3`, and theoretically any other non-reasoning chat models that implement the OpenAI API specification.
+`doubao-1.5-pro-32k-250115`, `gpt-4o`, `qwen-max-latest`,`qwen3-235b-a22b`,`qwen3-coder`, `gemini-2.0-flash`, `deepseek-v3`, and theoretically any other non-reasoning chat models that implement the OpenAI API specification.
+
+### Local Model Support
+
+DeerFlow supports local models through OpenAI-compatible APIs:
+
+- **Ollama**: `http://localhost:11434/v1` (tested and supported for local development)
+
+See the `conf.yaml.example` file for detailed configuration examples.
 
 > [!NOTE]
 > The Deep Research process requires the model to have a **longer context window**, which is not supported by all models.
@@ -86,6 +64,69 @@ BASIC_MODEL:
   base_url: "https://generativelanguage.googleapis.com/v1beta/openai/"
   model: "gemini-2.0-flash"
   api_key: YOUR_API_KEY
+```
+The following is a configuration example of `conf.yaml` for using best opensource OpenAI-Compatible models:
+```yaml
+# Use latest deepseek-v3 to handle basic tasks, the open source SOTA model for basic tasks
+BASIC_MODEL:
+  base_url: https://api.deepseek.com
+  model: "deepseek-v3"
+  api_key: YOUR_API_KEY
+  temperature: 0.6
+  top_p: 0.90
+# Use qwen3-235b-a22b to handle reasoning tasks, the open source SOTA model for reasoning
+REASONING_MODEL:
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model: "qwen3-235b-a22b-thinking-2507"
+  api_key: YOUR_API_KEY
+  temperature: 0.6
+  top_p: 0.90
+# Use qwen3-coder-480b-a35b-instruct to handle coding tasks, the open source SOTA model for coding
+CODE_MODEL:
+  base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+  model: "qwen3-coder-480b-a35b-instruct"
+  api_key: YOUR_API_KEY
+  temperature: 0.6
+  top_p: 0.90
+```
+In addition, you need to set the `AGENT_LLM_MAP` in `src/config/agents.py` to use the correct model for each agent. For example:
+
+```python
+# Define agent-LLM mapping
+AGENT_LLM_MAP: dict[str, LLMType] = {
+    "coordinator": "reasoning",
+    "planner": "reasoning",
+    "researcher": "reasoning",
+    "coder": "basic",
+    "reporter": "basic",
+    "podcast_script_writer": "basic",
+    "ppt_composer": "basic",
+    "prose_writer": "basic",
+    "prompt_enhancer": "basic",
+}
+
+
+### How to use Google AI Studio models?
+
+DeerFlow supports native integration with Google AI Studio (formerly Google Generative AI) API. This provides direct access to Google's Gemini models with their full feature set and optimized performance.
+
+To use Google AI Studio models, you need to:
+1. Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Set the `platform` field to `"google_aistudio"` in your configuration
+3. Configure your model and API key
+
+The following is a configuration example for using Google AI Studio models:
+
+```yaml
+# Google AI Studio native API (recommended for Google models)
+BASIC_MODEL:
+  platform: "google_aistudio"
+  model: "gemini-2.5-flash"  # or "gemini-1.5-pro" ,...
+  api_key: YOUR_GOOGLE_API_KEY # Get from https://aistudio.google.com/app/apikey
+
+```
+
+**Note:** The `platform: "google_aistudio"` field is required to distinguish from other providers that may offer Gemini models through OpenAI-compatible APIs.
 ```
 
 ### How to use models with self-signed SSL certificates?
@@ -135,6 +176,7 @@ BASIC_MODEL:
 
 Note: The available models and their exact names may change over time. Please verify the currently available models and their correct identifiers in [OpenRouter's official documentation](https://openrouter.ai/docs).
 
+
 ### How to use Azure OpenAI chat models?
 
 DeerFlow supports the integration of Azure OpenAI chat models. You can refer to [AzureChatOpenAI](https://python.langchain.com/api_reference/openai/chat_models/langchain_openai.chat_models.azure.AzureChatOpenAI.html). Configuration example of `conf.yaml`:
@@ -146,7 +188,21 @@ BASIC_MODEL:
   api_key: $AZURE_OPENAI_API_KEY
 ```
 
-## 🔍 Search Engine Configuration
+### How to configure context length for different models
+
+Different models have different context length limitations. DeerFlow provides a method to control the context length between different models. You can configure the context length between different models in the `conf.yaml` file. For example:
+```yaml
+BASIC_MODEL:
+  base_url: https://ark.cn-beijing.volces.com/api/v3
+  model: "doubao-1-5-pro-32k-250115"
+  api_key: ""
+  token_limit: 128000
+```
+This means that the context length limit using this model is 128k. 
+
+The context management doesn't work if the token_limit is not set.
+
+## About Search Engine
 
 ### How to control search domains for Tavily?
 
@@ -154,7 +210,7 @@ DeerFlow allows you to control which domains are included or excluded in Tavily 
 
 `Tips`: it only supports Tavily currently. 
 
-You can configure domain filtering in your `conf.yaml` file as follows:
+You can configure domain filtering and search results in your `conf.yaml` file as follows:
 
 ```yaml
 SEARCH_ENGINE:
@@ -168,248 +224,111 @@ SEARCH_ENGINE:
   exclude_domains:
     - unreliable-site.com
     - spam-domain.net
+  # Include images in search results, default: true
+  include_images: false
+  # Include image descriptions in search results, default: true
+  include_image_descriptions: false
+  # Include raw content in search results, default: true
+  include_raw_content: false
 ```
 
-### Supported Search Engines
+### How to post-process Tavily search results
 
-DeerFlow supports multiple search engines that can be configured in your `.env` file using the `SEARCH_API` variable:
+DeerFlow can post-process Tavily search results:
+* Remove duplicate content
+* Filter low-quality content: Filter out results with low relevance scores
+* Clear base64 encoded images
+* Length truncation: Truncate each search result according to the user-configured length
 
-- **Tavily** (default): A specialized search API for AI applications
-  - Requires `TAVILY_API_KEY` in your `.env` file
-  - Sign up at: https://app.tavily.com/home
+The filtering of low-quality content and length truncation depend on user configuration, providing two configurable parameters:
+* min_score_threshold: Minimum relevance score threshold, search results below this threshold will be filtered. If not set, no filtering will be performed;
+* max_content_length_per_page: Maximum length limit for each search result content, parts exceeding this length will be truncated. If not set, no truncation will be performed;
 
-- **DuckDuckGo**: Privacy-focused search engine
-  - No API key required
-
-- **Brave Search**: Privacy-focused search engine with advanced features
-  - Requires `BRAVE_SEARCH_API_KEY` in your `.env` file
-  - Sign up at: https://brave.com/search/api/
-
-- **Arxiv**: Scientific paper search for academic research
-  - No API key required
-  - Specialized for scientific and academic papers
-
-To configure your preferred search engine, set the `SEARCH_API` variable in your `.env` file:
-
-```bash
-# Choose one: tavily, duckduckgo, brave_search, arxiv
-SEARCH_API=tavily
-```
-
-## 📊 Private Knowledge Base Configuration
-
-### RAGFlow Integration
-
-DeerFlow supports private knowledge bases such as RAGFlow, allowing you to use your private documents to answer questions.
-
+These two parameters can be configured in `conf.yaml` as shown below:
 ```yaml
-# Example RAGFlow configuration in .env
-RAG_PROVIDER=ragflow
-RAGFLOW_API_URL="http://localhost:9388"
-RAGFLOW_API_KEY="ragflow-xxx"
-RAGFLOW_RETRIEVAL_SIZE=10
+SEARCH_ENGINE:
+  engine: tavily
+  include_images: true
+  min_score_threshold: 0.4
+  max_content_length_per_page: 5000
 ```
+That's meaning that the search results will be filtered based on the minimum relevance score threshold and truncated to the maximum length limit for each search result content.
 
-### VikingDB Integration
+## RAG (Retrieval-Augmented Generation) Configuration
 
-```yaml
-# Example VikingDB configuration in .env
-VIKINGDB_KNOWLEDGE_BASE_API_URL="https://api.vikingdb.com"
-VIKINGDB_KNOWLEDGE_BASE_API_AK="your-access-key"
-VIKINGDB_KNOWLEDGE_BASE_API_SK="your-secret-key"
-VIKINGDB_KNOWLEDGE_BASE_RETRIEVAL_SIZE=10
-```
+DeerFlow supports multiple RAG providers for document retrieval. Configure the RAG provider by setting environment variables.
 
-## 🎙️ Text-to-Speech Configuration
+### Supported RAG Providers
 
-### Google Gemini TTS for Podcast Generation
+- **RAGFlow**: Document retrieval using RAGFlow API
+- **VikingDB Knowledge Base**: ByteDance's VikingDB knowledge base service
+- **Milvus**: Open-source vector database for similarity search
 
-DeerFlow uses Google Gemini TTS for podcast generation with natural-sounding voices:
+### Milvus Configuration
+
+To use Milvus as your RAG provider, set the following environment variables:
 
 ```bash
-# Google Gemini TTS for podcast generation
-GOOGLE_API_KEY=your-google-api-key
-# Optional: Customize the model and default voice
-GOOGLE_TTS_MODEL=gemini-2.5-flash-preview-tts  # Default value
-GOOGLE_TTS_VOICE=kore  # Default value (female voice)
+# RAG_PROVIDER: milvus  (using free milvus instance on zilliz cloud: https://docs.zilliz.com/docs/quick-start )
+RAG_PROVIDER=milvus
+MILVUS_URI=<endpoint_of_self_hosted_milvus_or_zilliz_cloud>
+MILVUS_USER=<username_of_self_hosted_milvus_or_zilliz_cloud>
+MILVUS_PASSWORD=<password_of_self_hosted_milvus_or_zilliz_cloud>
+MILVUS_COLLECTION=documents
+MILVUS_EMBEDDING_PROVIDER=openai
+MILVUS_EMBEDDING_BASE_URL=
+MILVUS_EMBEDDING_MODEL=
+MILVUS_EMBEDDING_API_KEY=
+
+# RAG_PROVIDER: milvus  (using milvus lite on Mac or Linux)
+RAG_PROVIDER=milvus
+MILVUS_URI=./milvus_demo.db
+MILVUS_COLLECTION=documents
+MILVUS_EMBEDDING_PROVIDER=openai
+MILVUS_EMBEDDING_BASE_URL=
+MILVUS_EMBEDDING_MODEL=
+MILVUS_EMBEDDING_API_KEY=
 ```
 
-Available voices:
-- **orus**: Male voice
-- **kore**: Female voice
+---
 
-### Volcengine TTS for Standalone TTS
+## Multi-Turn Clarification (Optional)
 
-For standalone TTS functionality, configure volcengine TTS credentials:
+An optional feature that helps clarify vague research questions through conversation. **Disabled by default.**
+
+### Enable via Command Line
 
 ```bash
-# Volcengine TTS configuration
-VOLCENGINE_ACCESS_KEY=your-access-key
-VOLCENGINE_SECRET_KEY=your-secret-key
-VOLCENGINE_APP_ID=your-app-id
+# Enable clarification for vague questions
+uv run main.py "Research AI" --enable-clarification
+
+# Set custom maximum clarification rounds
+uv run main.py "Research AI" --enable-clarification --max-clarification-rounds 3
+
+# Interactive mode with clarification
+uv run main.py --interactive --enable-clarification --max-clarification-rounds 3
 ```
 
-## 🔧 Environment Variables Reference
+### Enable via API
 
-### 🔐 Authentication & Database
-
-| Variable | Description | Required | Default |
-| --- | --- | --- | --- |
-| `DATABASE_URL` | Neon PostgreSQL connection string with `sslmode`. | Yes | — |
-| `NEON_DATABASE_URL` | Alternative Neon database URL. | No | — |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key for frontend. | Yes | — |
-| `CLERK_SECRET_KEY` | Clerk backend secret key. | Yes | — |
-| `CLERK_WEBHOOK_SECRET` | Clerk webhook secret for sync events. | Recommended | — |
-| `NEXT_PUBLIC_API_URL` | Backend API URL for frontend. | Yes | `http://localhost:8000` |
-
-### 🚀 Application Settings
-
-| Variable | Description | Required | Default |
-| --- | --- | --- | --- |
-| `ENVIRONMENT` | Application environment (`development`, `staging`, `test`, `production`). | No | `production` |
-| `APP_NAME` | Displayed application name. | No | `DeerFlow` |
-| `APP_VERSION` | Application version string. | No | `0.1.0` |
-| `DEBUG` | Enable verbose backend logging. | No | `false` |
-| `HOST` | Backend bind address. | No | `0.0.0.0` |
-| `PORT` | Backend port (must remain 8005). | No | `8005` |
-
-### 🗄️ Database Configuration
-
-| Variable | Description | Required | Default |
-| --- | --- | --- | --- |
-| `DB_POOL_SIZE` | SQLAlchemy core pool size. | No | `20` |
-| `DB_MAX_OVERFLOW` | SQLAlchemy overflow connections. | No | `10` |
-| `DB_POOL_TIMEOUT` | Seconds to wait for DB connection. | No | `30` |
-| `DB_POOL_RECYCLE` | Seconds before connections recycle. | No | `3600` |
-
-### 🔒 Security & CORS
-
-| Variable | Description | Required | Default |
-| --- | --- | --- | --- |
-| `JWT_SECRET_KEY` | 32+ character HMAC secret for tokens. | Yes | — |
-| `JWT_ALGORITHM` | JWT signing algorithm. | No | `HS256` |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Minutes before access token expires. | No | `30` |
-| `REFRESH_TOKEN_EXPIRE_DAYS` | Days before refresh token expires. | No | `7` |
-| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed origins. | No | `http://localhost:4000,http://localhost:3000` |
-
-### 🤖 AI & LLM Integration
-
-| Variable | Description | Required | Default |
-| --- | --- | --- | --- |
-| `OPENAI_API_KEY` | OpenAI-compatible API key. | Conditional (OpenAI) | — |
-| `ANTHROPIC_API_KEY` | Anthropic Claude API key. | Conditional (Anthropic) | — |
-| `GOOGLE_API_KEY` | Google Generative AI / TTS API key. | Conditional (Google) | — |
-| `OPENROUTER_API_KEY` | OpenRouter API key. | Conditional (OpenRouter) | — |
-
-### 🔍 Search & Retrieval
-
-| Variable | Description | Required | Default |
-| --- | --- | --- | --- |
-| `TAVILY_API_KEY` | Tavily search API key. | Conditional (Tavily) | — |
-| `BRAVE_SEARCH_API_KEY` | Brave Search API key. | Conditional (Brave) | — |
-| `FIRECRAWL_API_KEY` | Firecrawl extraction API key. | Conditional (Firecrawl) | — |
-
-### 🎙️ Text-to-Speech
-
-| Variable | Description | Required | Default |
-| --- | --- | --- | --- |
-| `GOOGLE_TTS_MODEL` | Google TTS model identifier. | Conditional (Podcast) | `gemini-2.5-flash-preview-tts` |
-| `GOOGLE_TTS_VOICE` | Google TTS default voice. | Conditional (Podcast) | `kore` |
-
-### 📈 Monitoring & Debugging
-
-| Variable | Description | Required | Default |
-| --- | --- | --- | --- |
-| `LANGCHAIN_TRACING_V2` | Enable LangSmith tracing integration. | No | `false` |
-| `LANGSMITH_API_KEY` | LangSmith API key. | Conditional (LangSmith) | — |
-| `NODE_ENV` | Enables dev-mode auth bypass when `development`. | Conditional (Local dev) | — |
-
-## 🚀 Deployment Configuration
-
-### Production Environment
-
-For production deployment, ensure the following configurations:
-
-```bash
-# Environment
-ENVIRONMENT=production
-DEBUG=false
-
-# Security
-JWT_SECRET_KEY=your-very-secure-32-character-secret-key
-CORS_ALLOWED_ORIGINS=https://yourdomain.com
-
-# Database (use connection pooling)
-DB_POOL_SIZE=50
-DB_MAX_OVERFLOW=20
-DB_POOL_TIMEOUT=60
-DB_POOL_RECYCLE=7200
-
-# Clerk (production keys)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_xxx
-CLERK_SECRET_KEY=sk_live_xxx
+```json
+{
+  "messages": [{"role": "user", "content": "Research AI"}],
+  "enable_clarification": true,
+  "max_clarification_rounds": 3
+}
 ```
 
-### Development Environment
+### Enable via UI Settings
 
-For local development:
+1. Open DeerFlow web interface
+2. Navigate to **Settings** → **General** tab
+3. Find **"Enable Clarification"** toggle
+4. Turn it **ON** to enable multi-turn clarification. Clarification is **disabled** by default. You need to manually enable it through any of the above methods. When clarification is enabled, you'll see **"Max Clarification Rounds"** field appear below the toggle
+6. Set the maximum number of clarification rounds (default: 3, minimum: 1)
+7. Click **Save** to apply changes
 
-```bash
-# Environment
-ENVIRONMENT=development
-DEBUG=true
-NODE_ENV=development
+**When enabled**, the Coordinator will ask up to the specified number of clarifying questions for vague topics before starting research, improving report relevance and depth. The `max_clarification_rounds` parameter controls how many rounds of clarification are allowed.
 
-# Local database (if not using Neon)
-DATABASE_URL=postgresql://localhost/deerflow_dev
 
-# Clerk (development keys)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
-CLERK_SECRET_KEY=sk_test_xxx
-```
-
-## 🔍 Troubleshooting
-
-### Common Issues
-
-1. **Database Connection Issues**
-   - Ensure `DATABASE_URL` includes `sslmode=require` for Neon
-   - Check if the database is accessible from your network
-   - Verify connection string format
-
-2. **Authentication Issues**
-   - Verify Clerk keys are correct and match the environment
-   - Check if webhook URLs are properly configured in Clerk dashboard
-   - Ensure `NEXT_PUBLIC_API_URL` is accessible from frontend
-
-3. **LLM API Issues**
-   - Verify API keys are valid and have sufficient credits
-   - Check if `base_url` is accessible and correct
-   - Ensure model name matches the provider's format
-
-4. **Search Engine Issues**
-   - Verify search API keys are valid
-   - Check if `SEARCH_API` environment variable is set correctly
-   - Ensure search provider is supported
-
-### Debug Mode
-
-Enable debug mode for detailed logging:
-
-```bash
-DEBUG=true
-```
-
-This will provide:
-- Detailed SQL query logs
-- HTTP request/response logging
-- LLM API call details
-- Error stack traces
-
-## 📚 Additional Resources
-
-- [Neon Documentation](https://neon.tech/docs)
-- [Clerk Documentation](https://clerk.com/docs)
-- [LiteLLM Documentation](https://docs.litellm.ai/)
-- [LangChain Documentation](https://python.langchain.com/docs/)
-- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+**Note**: The `max_clarification_rounds` parameter only takes effect when `enable_clarification` is set to `true`. If clarification is disabled, this parameter is ignored.

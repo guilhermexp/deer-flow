@@ -135,6 +135,9 @@ uv run main.py
 # Windowsの場合
 bootstrap.bat -d
 ```
+> [!NOTE]
+> デフォルトでは、セキュリティ上の理由からバックエンドサーバーは 127.0.0.1 (localhost) にバインドされます。外部接続を許可する必要がある場合 (例: Linux サーバーにデプロイする場合) は、ブートストラップスクリプトでサーバーホストを 0.0.0.0 に変更できます (uv run server.py --host 0.0.0.0)。
+> サービスを外部ネットワークに公開する前に、環境が適切に保護されていることを確認してください。
 
 ブラウザを開き、[`http://localhost:3000`](http://localhost:3000)にアクセスして Web UI を探索してください。
 
@@ -158,6 +161,10 @@ DeerFlow は複数の検索エンジンをサポートしており、`.env`フ�
 - **Arxiv**：学術研究用の科学論文検索
   - APIキー不要
   - 科学・学術論文専用
+
+- **Searx/SearxNG**セルフホスト型メタ検索エンジン
+  - `.env`ファイルに`SEARX_HOST`が必要
+  - Searx または SearxNG に接続可能
 
 お好みの検索エンジンを設定するには、`.env`ファイルで`SEARCH_API`変数を設定します：
 
@@ -381,7 +388,8 @@ docker build -t deer-flow-api .
 
 ```bash
 # deer-flow-api-appを希望のコンテナ名に置き換えてください
-docker run -d -t -p 8000:8000 --env-file .env --name deer-flow-api-app deer-flow-api
+# サーバーを起動してlocalhost:8000にバインド
+docker run -d -t -p 127.0.0.1:8000:8000 --env-file .env --name deer-flow-api-app deer-flow-api
 
 # サーバーを停止
 docker stop deer-flow-api-app
@@ -398,6 +406,9 @@ docker compose build
 # サーバーを起動
 docker compose up
 ```
+
+> [!WARNING]
+> DeerFlow を本番環境にデプロイする場合は、ウェブサイトに認証を追加し、MCPServer と Python Repl のセキュリティチェックを評価してください。
 
 ## テキスト読み上げ統合
 

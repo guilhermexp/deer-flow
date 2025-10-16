@@ -21,7 +21,7 @@ export const MCPConfigSchema = z.object({
               message: "`env` must be an object of key-value pairs",
             })
             .optional(),
-        }).passthrough(), // Allow additional properties
+        }),
         z.object({
           url: z
             .string({
@@ -47,7 +47,12 @@ export const MCPConfigSchema = z.object({
               message: "`env` must be an object of key-value pairs",
             })
             .optional(),
-        }).passthrough(), // Allow additional properties
+          transport: z
+            .enum(["sse", "streamable_http"], {
+              message: "transport must be either sse or streamable_http"
+            })
+            .default("sse"),
+        }),
       ],
       {
         message: "Invalid server type",

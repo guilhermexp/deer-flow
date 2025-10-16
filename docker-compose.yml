@@ -4,8 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: deer-flow-backend
-    ports:
-      - "9090:9090"
+    # Remove the ports section to not expose to host
     env_file:
       - .env
     volumes:
@@ -22,7 +21,7 @@ services:
         - NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
     container_name: deer-flow-frontend
     ports:
-      - "4000:4000"
+      - "3000:3000"
     env_file:
       - .env
     depends_on:

@@ -15,15 +15,14 @@ import {
 } from "novel";
 import { Markdown } from "tiptap-markdown";
 import { useDebouncedCallback } from "use-debounce";
+import { useTranslations } from "next-intl";
 
 import "~/styles/prosemirror.css";
 import { resourceSuggestion } from "./resource-suggestion";
 import React, { forwardRef, useEffect, useMemo, useRef } from "react";
 import type { Resource } from "~/core/messages";
-import { useConfig } from "~/core/api/hooks";
 import { LoadingOutlined } from "@ant-design/icons";
 import type { DeerFlowConfig } from "~/core/config";
-import { sanitizer } from "~/lib/sanitizer";
 
 export interface MessageInputRef {
   focus: () => void;
@@ -83,6 +82,7 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
     { className, loading, config, onChange, onEnter }: MessageInputProps,
     ref,
   ) => {
+    const t = useTranslations("messageInput");
     const editorRef = useRef<Editor>(null);
     const handleEnterRef = useRef<
       ((message: string, resources: Array<Resource>) => void) | undefined
@@ -137,10 +137,7 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
         }),
         Placeholder.configure({
           showOnlyCurrent: false,
-          placeholder: config?.rag?.provider
-            ? `O que posso fazer por você? 
-Você pode se referir a recursos RAG usando @.`
-            : "O que posso fazer por você?",
+          placeholder: config?.rag.provider ? t("placeholderWithRag") : t("placeholder"),
           emptyEditorClass: "placeholder",
         }),
         Extension.create({
@@ -160,7 +157,7 @@ Você pode se referir a recursos RAG usando @.`
           },
         }),
       ];
-      if (config?.rag?.provider) {
+      if (config?.rag.provider) {
         extensions.push(
           Mention.configure({
             HTMLAttributes: {
@@ -187,11 +184,11 @@ Você pode se referir a recursos RAG usando @.`
           <EditorContent
             immediatelyRender={false}
             extensions={extensions}
-            className="h-full w-full overflow-auto"
+            className="border-muted h-full w-full overflow-auto break-words"
             editorProps={{
               attributes: {
                 class:
-                  "prose prose-base dark:prose-invert inline-editor font-default focus:outline-none max-w-full text-gray-100",
+                  "prose prose-base dark:prose-invert inline-editor font-default focus:outline-none max-w-full",
               },
               transformPastedHTML: transformPastedHTML,
             }}
@@ -210,11 +207,14 @@ Você pode se referir a recursos RAG usando @.`
 
 function transformPastedHTML(html: string) {
   try {
-    // Use DOMPurify to sanitize and extract text safely
-    const sanitizedText = sanitizer.sanitizeToText(html);
-    return sanitizedText.trim();
+    // Strip HTML from user-pasted content
+    const tempEl = document.createElement("div");
+    tempEl.innerHTML = html;
+
+    return tempEl.textContent || tempEl.innerText || "";
   } catch (error) {
     console.error("Error transforming pasted HTML", error);
+
     return "";
   }
 }

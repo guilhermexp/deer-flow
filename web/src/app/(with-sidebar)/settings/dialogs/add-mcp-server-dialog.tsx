@@ -94,7 +94,7 @@ export function AddMCPServerDialog({
         addingServers.push(metadata);
       } else if ("url" in server) {
         const metadata: SimpleSSEMCPServerMetadata = {
-          transport: "sse",
+          transport: server.transport,
           name: key,
           url: server.url,
         };

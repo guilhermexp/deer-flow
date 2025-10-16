@@ -1,24 +1,22 @@
 # Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
-from pathlib import Path
-from typing import Any, Dict
 import os
+from pathlib import Path
+from typing import Any, Dict, get_args
+
 import httpx
-import logging
-
 from langchain_core.language_models import BaseChatModel
-from langchain_openai import ChatOpenAI, AzureChatOpenAI
-
-logger = logging.getLogger(__name__)
 from langchain_deepseek import ChatDeepSeek
-from typing import get_args
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_openai import AzureChatOpenAI, ChatOpenAI
 
 from src.config import load_yaml_config
 from src.config.agents import LLMType
+from src.llms.providers.dashscope import ChatDashscope
 
 # Cache for LLM instances
-_llm_cache: dict[str, BaseChatModel] = {}
+_llm_cache: dict[LLMType, BaseChatModel] = {}
 
 
 def _get_config_file_path() -> str:
@@ -32,6 +30,7 @@ def _get_llm_type_config_keys() -> dict[str, str]:
         "reasoning": "REASONING_MODEL",
         "basic": "BASIC_MODEL",
         "vision": "VISION_MODEL",
+        "code": "CODE_MODEL",
     }
 
 
@@ -68,42 +67,16 @@ def _create_llm_use_conf(llm_type: LLMType, conf: Dict[str, Any]) -> BaseChatMod
     # Merge configurations, with environment variables taking precedence
     merged_conf = {**llm_conf, **env_conf}
 
+    # Remove unnecessary parameters when initializing the client
+    if "token_limit" in merged_conf:
+        merged_conf.pop("token_limit")
+
     if not merged_conf:
         raise ValueError(f"No configuration found for LLM type: {llm_type}")
 
     # Add max_retries to handle rate limit errors
     if "max_retries" not in merged_conf:
         merged_conf["max_retries"] = 3
-
-    # Check if this is OpenRouter
-    is_openrouter = "openrouter.ai" in merged_conf.get("base_url", "")
-
-    # Add OpenRouter specific headers if needed
-    if is_openrouter:
-        merged_conf["default_headers"] = {
-            "HTTP-Referer": "https://deerflow.ai",
-            "X-Title": "DeerFlow",
-        }
-
-        # Force Google provider for Gemini models
-        if "gemini" in merged_conf.get("model", "").lower():
-            merged_conf["model_kwargs"] = merged_conf.get("model_kwargs", {})
-            merged_conf["model_kwargs"]["extra_body"] = {
-                "provider": {"order": ["google"], "require_parameters": True}
-            }
-
-        # Force Groq provider for Kimi models
-        elif "kimi" in merged_conf.get("model", "").lower():
-            merged_conf["model_kwargs"] = merged_conf.get("model_kwargs", {})
-            merged_conf["model_kwargs"]["extra_body"] = {
-                "provider": {"order": ["groq"], "require_parameters": True}
-            }
-            # Kimi-specific settings for better tool calling
-            if "temperature" not in merged_conf:
-                merged_conf["temperature"] = 0.7
-            # Ensure we use a reasonable max_tokens for Kimi
-            if "max_tokens" not in merged_conf:
-                merged_conf["max_tokens"] = 8192
 
     # Handle SSL verification settings
     verify_ssl = merged_conf.pop("verify_ssl", True)
@@ -115,53 +88,56 @@ def _create_llm_use_conf(llm_type: LLMType, conf: Dict[str, Any]) -> BaseChatMod
         merged_conf["http_client"] = http_client
         merged_conf["http_async_client"] = http_async_client
 
-    # Check for Azure OpenAI
+    # Check if it's Google AI Studio platform based on configuration
+    platform = merged_conf.get("platform", "").lower()
+    is_google_aistudio = platform == "google_aistudio" or platform == "google-aistudio"
+
+    if is_google_aistudio:
+        # Handle Google AI Studio specific configuration
+        gemini_conf = merged_conf.copy()
+
+        # Map common keys to Google AI Studio specific keys
+        if "api_key" in gemini_conf:
+            gemini_conf["google_api_key"] = gemini_conf.pop("api_key")
+
+        # Remove base_url and platform since Google AI Studio doesn't use them
+        gemini_conf.pop("base_url", None)
+        gemini_conf.pop("platform", None)
+
+        # Remove unsupported parameters for Google AI Studio
+        gemini_conf.pop("http_client", None)
+        gemini_conf.pop("http_async_client", None)
+
+        return ChatGoogleGenerativeAI(**gemini_conf)
+
     if "azure_endpoint" in merged_conf or os.getenv("AZURE_OPENAI_ENDPOINT"):
         return AzureChatOpenAI(**merged_conf)
 
-    # Use ChatOpenAI for OpenRouter (OpenAI-compatible) or non-reasoning models
-    # Use ChatDeepSeek only for reasoning models with DeepSeek API
-    if is_openrouter or llm_type != "reasoning":
-        return ChatOpenAI(**merged_conf)
-    else:
+    # Check if base_url is dashscope endpoint
+    if "base_url" in merged_conf and "dashscope." in merged_conf["base_url"]:
+        if llm_type == "reasoning":
+            merged_conf["extra_body"] = {"enable_thinking": True}
+        else:
+            merged_conf["extra_body"] = {"enable_thinking": False}
+        return ChatDashscope(**merged_conf)
+
+    if llm_type == "reasoning":
         merged_conf["api_base"] = merged_conf.pop("base_url", None)
         return ChatDeepSeek(**merged_conf)
+    else:
+        return ChatOpenAI(**merged_conf)
 
 
-def get_llm_by_type(
-    llm_type: LLMType,
-    model_override: str = None,
-) -> BaseChatModel:
+def get_llm_by_type(llm_type: LLMType) -> BaseChatModel:
     """
     Get LLM instance by type. Returns cached instance if available.
-
-    Args:
-        llm_type: The type of LLM to get
-        model_override: Optional model name to use instead of the default
     """
-    # Create cache key that includes model override
-    cache_key = f"{llm_type}:{model_override}" if model_override else llm_type
-
-    if cache_key in _llm_cache:
-        return _llm_cache[cache_key]
+    if llm_type in _llm_cache:
+        return _llm_cache[llm_type]
 
     conf = load_yaml_config(_get_config_file_path())
-
-    # If model override is specified, check if it's in alternative models
-    if model_override and llm_type == "basic":
-        alt_models = conf.get("ALTERNATIVE_MODELS", {})
-        if "kimi-k2" in model_override.lower() and "kimi-k2" in alt_models:
-            # Override the basic model config with kimi-k2 config
-            conf["BASIC_MODEL"] = alt_models["kimi-k2"]
-        elif "grok-4" in model_override.lower() and "grok-4" in alt_models:
-            # Override the basic model config with grok-4 config
-            conf["BASIC_MODEL"] = alt_models["grok-4"]
-        elif "deepseek" in model_override.lower() and "deepseek-v3" in alt_models:
-            # Override the basic model config with deepseek-v3 config
-            conf["BASIC_MODEL"] = alt_models["deepseek-v3"]
-
     llm = _create_llm_use_conf(llm_type, conf)
-    _llm_cache[cache_key] = llm
+    _llm_cache[llm_type] = llm
     return llm
 
 
@@ -198,8 +174,27 @@ def get_configured_llm_models() -> dict[str, list[str]]:
 
     except Exception as e:
         # Log error and return empty dict to avoid breaking the application
-        logger.warning(f"Failed to load LLM configuration: {e}")
+        print(f"Warning: Failed to load LLM configuration: {e}")
         return {}
+
+
+def get_llm_token_limit_by_type(llm_type: str) -> int:
+    """
+    Get the maximum token limit for a given LLM type.
+
+    Args:
+        llm_type (str): The type of LLM.
+
+    Returns:
+        int: The maximum token limit for the specified LLM type.
+    """
+
+    llm_type_config_keys = _get_llm_type_config_keys()
+    config_key = llm_type_config_keys.get(llm_type)
+
+    conf = load_yaml_config(_get_config_file_path())
+    llm_max_token = conf.get(config_key, {}).get("token_limit")
+    return llm_max_token
 
 
 # In the future, we will use reasoning_llm and vl_llm for different purposes

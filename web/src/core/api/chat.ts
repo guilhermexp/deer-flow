@@ -18,13 +18,15 @@ export async function* chatStream(
     thread_id: string;
     resources?: Array<Resource>;
     auto_accepted_plan: boolean;
+    enable_clarification?: boolean;
+    max_clarification_rounds?: number;
     max_plan_iterations: number;
     max_step_num: number;
     max_search_results?: number;
     interrupt_feedback?: string;
     enable_deep_thinking?: boolean;
     enable_background_investigation: boolean;
-    report_style?: "academic" | "popular_science" | "news" | "social_media";
+    report_style?: "academic" | "popular_science" | "news" | "social_media" | "strategic_investment";
     mcp_settings?: {
       servers: Record<
         string,

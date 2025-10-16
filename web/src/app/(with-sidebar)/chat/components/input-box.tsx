@@ -3,24 +3,18 @@
 
 import { MagicWandIcon } from "@radix-ui/react-icons";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUp, Lightbulb, X, Paperclip } from "lucide-react";
+import { ArrowUp, Lightbulb, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useRef, useState } from "react";
 
-import { FileUpload } from "~/components/deer-flow/file-upload";
 import { Detective } from "~/components/deer-flow/icons/detective";
 import MessageInput, {
   type MessageInputRef,
 } from "~/components/deer-flow/message-input";
-import { ModelSelector } from "~/components/deer-flow/model-selector";
 import { ReportStyleDialog } from "~/components/deer-flow/report-style-dialog";
 import { Tooltip } from "~/components/deer-flow/tooltip";
 import { BorderBeam } from "~/components/magicui/border-beam";
 import { Button } from "~/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
 import { enhancePrompt } from "~/core/api";
 import { useConfig } from "~/core/api/hooks";
 import type { Option, Resource } from "~/core/messages";
@@ -28,7 +22,6 @@ import {
   setEnableDeepThinking,
   setEnableBackgroundInvestigation,
   useSettingsStore,
-  setSelectedModel,
 } from "~/core/store";
 import { cn } from "~/lib/utils";
 
@@ -54,14 +47,13 @@ export function InputBox({
   onCancel?: () => void;
   onRemoveFeedback?: () => void;
 }) {
+  const t = useTranslations("chat.inputBox");
+  const tCommon = useTranslations("common");
   const enableDeepThinking = useSettingsStore(
     (state) => state.general.enableDeepThinking,
   );
   const backgroundInvestigation = useSettingsStore(
     (state) => state.general.enableBackgroundInvestigation,
-  );
-  const selectedModel = useSettingsStore(
-    (state) => state.general.selectedModel,
   );
   const { config, loading } = useConfig();
   const reportStyle = useSettingsStore((state) => state.general.reportStyle);
@@ -73,11 +65,6 @@ export function InputBox({
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [isEnhanceAnimating, setIsEnhanceAnimating] = useState(false);
   const [currentPrompt, setCurrentPrompt] = useState("");
-  
-  // File upload state
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [fileResources, setFileResources] = useState<Resource[]>([]);
-  const [isFilePopoverOpen, setIsFilePopoverOpen] = useState(false);
 
   const handleSendMessage = useCallback(
     (message: string, resources: Array<Resource>) => {
@@ -88,21 +75,17 @@ export function InputBox({
           return;
         }
         if (onSend) {
-          // Combine resources from mentions and file uploads
-          const allResources = [...resources, ...fileResources];
           onSend(message, {
             interruptFeedback: feedback?.option.value,
-            resources: allResources,
+            resources,
           });
           onRemoveFeedback?.();
-          // Clear enhancement animation and files after sending
+          // Clear enhancement animation after sending
           setIsEnhanceAnimating(false);
-          setSelectedFiles([]);
-          setFileResources([]);
         }
       }
     },
-    [responding, onCancel, onSend, feedback, onRemoveFeedback, fileResources],
+    [responding, onCancel, onSend, feedback, onRemoveFeedback],
   );
 
   const handleEnhancePrompt = useCallback(async () => {
@@ -141,17 +124,10 @@ export function InputBox({
     }
   }, [currentPrompt, isEnhancing, reportStyle]);
 
-  const handleFilesSelect = useCallback((files: File[], resources: Resource[]) => {
-    setSelectedFiles(files);
-    setFileResources(resources);
-    setIsFilePopoverOpen(false);
-  }, []);
-
   return (
     <div
       className={cn(
-        "relative flex h-full w-full flex-col rounded-xl border border-white/10",
-        "bg-white/[0.05] backdrop-blur-md overflow-hidden",
+        "bg-card relative flex h-full w-full flex-col rounded-[24px] border",
         className,
       )}
       ref={containerRef}
@@ -161,17 +137,17 @@ export function InputBox({
           {feedback && (
             <motion.div
               ref={feedbackRef}
-              className="absolute top-0 left-0 mt-2 ml-4 flex items-center justify-center gap-1 rounded-xl border border-blue-500/50 bg-blue-500/10 px-2 py-0.5 backdrop-blur-sm"
+              className="bg-background border-brand absolute top-0 left-0 mt-2 ml-4 flex items-center justify-center gap-1 rounded-2xl border px-2 py-0.5"
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
             >
-              <div className="text-blue-400 flex h-full w-full items-center justify-center text-sm opacity-90">
+              <div className="text-brand flex h-full w-full items-center justify-center text-sm opacity-90">
                 {feedback.option.text}
               </div>
               <X
-                className="cursor-pointer opacity-60 text-blue-400"
+                className="cursor-pointer opacity-60"
                 size={16}
                 onClick={onRemoveFeedback}
               />
@@ -236,35 +212,37 @@ export function InputBox({
           onChange={setCurrentPrompt}
         />
       </div>
-      <div className="flex flex-col lg:flex-row items-start lg:items-center px-4 py-2 gap-2">
-        <div className="flex gap-2 min-w-0 flex-wrap lg:flex-nowrap">
-          {config?.models?.reasoning?.[0] && (
+      <div className="flex items-center px-4 py-2">
+        <div className="flex grow gap-2">
+          {config?.models.reasoning?.[0] && (
             <Tooltip
               className="max-w-60"
               title={
                 <div>
                   <h3 className="mb-2 font-bold">
-                    Modo de Pensamento Profundo: {enableDeepThinking ? "Ligado" : "Desligado"}
+                    {t("deepThinkingTooltip.title", {
+                      status: enableDeepThinking ? t("on") : t("off"),
+                    })}
                   </h3>
                   <p>
-                    Quando ativado, o DeerFlow usará o modelo de raciocínio (
-                    {config?.models?.reasoning?.[0]}) para gerar planos mais elaborados.
+                    {t("deepThinkingTooltip.description", {
+                      model: config.models.reasoning?.[0] ?? "",
+                    })}
                   </p>
                 </div>
               }
             >
               <Button
                 className={cn(
-                  "rounded-xl bg-white/[0.05] backdrop-blur-sm border-white/10 hover:bg-white/[0.08] text-gray-300 text-xs whitespace-nowrap flex-shrink-0",
-                  enableDeepThinking && "!border-blue-500/50 !text-blue-400 !bg-blue-500/10",
+                  "rounded-2xl",
+                  enableDeepThinking && "!border-brand !text-brand",
                 )}
                 variant="outline"
-                size="icon"
                 onClick={() => {
                   setEnableDeepThinking(!enableDeepThinking);
                 }}
               >
-                <Lightbulb className="h-4 w-4" />
+                <Lightbulb /> {t("deepThinking")}
               </Button>
             </Tooltip>
           )}
@@ -274,108 +252,63 @@ export function InputBox({
             title={
               <div>
                 <h3 className="mb-2 font-bold">
-                  Modo de Investigação: {backgroundInvestigation ? "Ligado" : "Desligado"}
+                  {t("investigationTooltip.title", {
+                    status: backgroundInvestigation ? t("on") : t("off"),
+                  })}
                 </h3>
-                <p>
-                  Quando ativado, o DeerFlow realizará uma busca rápida antes do
-                  planejamento. Isso é útil para pesquisas relacionadas a eventos e notícias
-                  em andamento.
-                </p>
+                <p>{t("investigationTooltip.description")}</p>
               </div>
             }
           >
             <Button
               className={cn(
-                "rounded-xl bg-white/[0.05] backdrop-blur-sm border-white/10 hover:bg-white/[0.08] text-gray-300 text-xs whitespace-nowrap flex-shrink-0",
-                backgroundInvestigation && "!border-blue-500/50 !text-blue-400 !bg-blue-500/10",
+                "rounded-2xl",
+                backgroundInvestigation && "!border-brand !text-brand",
               )}
               variant="outline"
-              size="icon"
               onClick={() =>
                 setEnableBackgroundInvestigation(!backgroundInvestigation)
               }
             >
-              <Detective className="h-4 w-4" />
+              <Detective /> {t("investigation")}
             </Button>
           </Tooltip>
           <ReportStyleDialog />
-          <ModelSelector
-            value={selectedModel}
-            onChange={setSelectedModel}
-            size="sm"
-            className="flex-shrink-0"
-          />
         </div>
-        <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
-          <Popover open={isFilePopoverOpen} onOpenChange={setIsFilePopoverOpen}>
-            <Tooltip title="Upload de arquivos">
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "h-8 w-8 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] flex-shrink-0 relative",
-                    selectedFiles.length > 0 && "!border-blue-500/50 !text-blue-400 !bg-blue-500/10"
-                  )}
-                >
-                  <Paperclip className="h-4 w-4" />
-                  {selectedFiles.length > 0 && (
-                    <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-blue-500 text-[10px] text-white flex items-center justify-center">
-                      {selectedFiles.length}
-                    </span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-            </Tooltip>
-            <PopoverContent className="w-80 p-4" align="end">
-              <div className="space-y-2">
-                <h3 className="font-medium text-sm">Upload de Arquivos</h3>
-                <p className="text-xs text-muted-foreground">
-                  Faça upload de arquivos para usar com RAG
-                </p>
-                <FileUpload
-                  onFilesSelect={handleFilesSelect}
-                  disabled={responding}
-                />
-              </div>
-            </PopoverContent>
-          </Popover>
-          <Tooltip title="Melhorar prompt com IA">
+        <div className="flex shrink-0 items-center gap-2">
+          <Tooltip title={t("enhancePrompt")}>
             <Button
               variant="ghost"
               size="icon"
               className={cn(
-                "h-8 w-8 rounded-lg bg-white/[0.05] border border-white/10 hover:bg-white/[0.08] flex-shrink-0",
+                "hover:bg-accent h-10 w-10",
                 isEnhancing && "animate-pulse",
               )}
               onClick={handleEnhancePrompt}
               disabled={isEnhancing || currentPrompt.trim() === ""}
             >
               {isEnhancing ? (
-                <div className="flex h-full w-full items-center justify-center">
-                  <div className="bg-blue-400 h-2 w-2 animate-bounce rounded-full opacity-70" />
+                <div className="flex h-10 w-10 items-center justify-center">
+                  <div className="bg-foreground h-3 w-3 animate-bounce rounded-full opacity-70" />
                 </div>
               ) : (
-                <MagicWandIcon className="text-blue-400 h-4 w-4" />
+                <MagicWandIcon className="text-brand" />
               )}
             </Button>
           </Tooltip>
-          <Tooltip title={responding ? "Parar" : "Enviar"}>
+          <Tooltip title={responding ? tCommon("stop") : tCommon("send")}>
             <Button
               variant="outline"
               size="icon"
-              className={cn(
-                "h-8 w-8 rounded-full bg-white/[0.05] border-white/10 hover:bg-white/[0.08] flex-shrink-0",
-                responding && "bg-red-500/10 border-red-500/50 hover:bg-red-500/20"
-              )}
+              className={cn("h-10 w-10 rounded-full")}
               onClick={() => inputRef.current?.submit()}
             >
               {responding ? (
-                <div className="flex h-full w-full items-center justify-center">
-                  <div className="bg-red-400 h-3 w-3 rounded-sm opacity-70" />
+                <div className="flex h-10 w-10 items-center justify-center">
+                  <div className="bg-foreground h-4 w-4 rounded-sm opacity-70" />
                 </div>
               ) : (
-                <ArrowUp className="text-gray-300 h-4 w-4" />
+                <ArrowUp />
               )}
             </Button>
           </Tooltip>

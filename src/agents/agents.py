@@ -3,9 +3,9 @@
 
 from langgraph.prebuilt import create_react_agent
 
-from src.prompts import apply_prompt_template
-from src.llms.llm import get_llm_by_type
 from src.config.agents import AGENT_LLM_MAP
+from src.llms.llm import get_llm_by_type
+from src.prompts import apply_prompt_template
 
 
 # Create agents using configured LLM types
@@ -15,6 +15,7 @@ def create_agent(
     tools: list,
     prompt_template: str,
     model_override: str = None,
+    pre_model_hook: callable = None,
 ):
     """Factory function to create agents with consistent configuration."""
     return create_react_agent(
@@ -22,4 +23,5 @@ def create_agent(
         model=get_llm_by_type(AGENT_LLM_MAP[agent_type], model_override),
         tools=tools,
         prompt=lambda state: apply_prompt_template(prompt_template, state),
+        pre_model_hook=pre_model_hook,
     )

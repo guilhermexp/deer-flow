@@ -36,6 +36,9 @@
     "general": {
       "title": "通用",
       "autoAcceptPlan": "允许自动接受计划",
+      "enableClarification": "允许澄清",
+      "maxClarificationRounds": "最大澄清回合数",
+      "maxClarificationRoundsDescription": "启用澄清时允许的最大澄清回合数，默认是3。",
       "maxPlanIterations": "最大计划迭代次数",
       "maxPlanIterationsDescription": "设置为 1 进行单步规划。设置为 2 或更多以启用重新规划。",
       "maxStepsOfPlan": "研究计划的最大步骤数",
@@ -66,7 +69,9 @@
       "news": "新闻",
       "newsDesc": "事实、简明、公正的新闻风格",
       "socialMedia": "社交媒体",
-      "socialMediaDesc": "简洁有趣，易于传播"
+      "socialMediaDesc": "简洁有趣，易于传播",
+      "strategicInvestment": "战略投资",
+      "strategicInvestmentDesc": "面向战略投资机构的深度综合分析，提供可执行的投资洞察"
     }
   },
   "footer": {

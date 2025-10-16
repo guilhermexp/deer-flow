@@ -134,6 +134,9 @@ uv run main.py
 # 在Windows上
 bootstrap.bat -d
 ```
+> [! 注意]
+> 出于安全考虑，后端服务器默认绑定到 127.0.0.1 (localhost)。如果您需要允许外部连接（例如，在Linux服务器上部署时），您可以修改启动脚本中的主机地址为 0.0.0.0。（uv run server.py --host 0.0.0.0）
+> 请注意，在将服务暴露给外部网络之前，请务必确保您的环境已经过适当的安全加固。
 
 打开浏览器并访问[`http://localhost:3000`](http://localhost:3000)探索 Web UI。
 
@@ -160,6 +163,10 @@ DeerFlow 支持多种搜索引擎，可以在`.env`文件中通过`SEARCH_API`�
   - 无需 API 密钥
   - 专为科学和学术论文设计
 
+- **Searx/SearxNG**：自托管的元搜索引擎
+  - 需要在`.env`文件中设置`SEARX_HOST`
+  - 支持对接Searx或SearxNG
+
 要配置您首选的搜索引擎，请在`.env`文件中设置`SEARCH_API`变量：
 
 ```bash
@@ -178,6 +185,16 @@ DeerFlow 支持基于私有域知识的检索，您可以将文档上传到多�
    RAGFLOW_API_URL="http://localhost:9388"
    RAGFLOW_API_KEY="ragflow-xxx"
    RAGFLOW_RETRIEVAL_SIZE=10
+   ```
+
+- **[MOI]**：AI 原生多模态数据智能平台
+   ```
+   # 参照示例进行配置 .env.example
+   RAG_PROVIDER=moi
+   MOI_API_URL="https://freetier-01.cn-hangzhou.cluster.matrixonecloud.cn"
+   MOI_API_KEY="xxx-xxx-xxx-xxx"
+   MOI_RETRIEVAL_SIZE=10
+   MOI_LIST_LIMIT=10
    ```
 
 - **[VikingDB 知识库](https://www.volcengine.com/docs/84313/1254457)**：火山引擎提供的公有云知识库引擎
@@ -218,6 +235,13 @@ DeerFlow 支持基于私有域知识的检索，您可以将文档上传到多�
   - 促进多样化研究工具和方法的集成
 
 ### 人机协作
+
+- 💬 **智能澄清功能**
+  - 多轮对话澄清模糊的研究主题
+  - 提高研究精准度和报告质量
+  - 减少无效搜索和 token 使用
+  - 可配置开关，灵活控制启用/禁用
+  - 详见 [配置指南 - 澄清功能](./docs/configuration_guide.md#multi-turn-clarification-feature)
 
 - 🧠 **人在环中**
   - 支持使用自然语言交互式修改研究计划
@@ -406,7 +430,8 @@ docker build -t deer-flow-api .
 
 ```bash
 # 将deer-flow-api-app替换为您首选的容器名称
-docker run -d -t -p 8000:8000 --env-file .env --name deer-flow-api-app deer-flow-api
+# 启动服务器并绑定到localhost:8000
+docker run -d -t -p 127.0.0.1:8000:8000 --env-file .env --name deer-flow-api-app deer-flow-api
 
 # 停止服务器
 docker stop deer-flow-api-app
@@ -423,6 +448,9 @@ docker compose build
 # 启动服务器
 docker compose up
 ```
+
+> [!WARNING]
+> 如果您想将 DeerFlow 部署到生产环境中，请为网站添加身份验证，并评估 MCPServer 和 Python Repl 的安全检查。
 
 ## 文本转语音集成
 

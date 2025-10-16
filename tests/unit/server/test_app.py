@@ -3,40 +3,20 @@
 
 import base64
 import os
-from unittest.mock import MagicMock, patch, mock_open, AsyncMock
+from unittest.mock import MagicMock, mock_open, patch
+
 import pytest
-from fastapi.testclient import TestClient
 from fastapi import HTTPException
-from src.server.app import app, _make_event, _astream_workflow_generator
-from src.config.report_style import ReportStyle
+from fastapi.testclient import TestClient
+from langchain_core.messages import AIMessageChunk, ToolMessage
 from langgraph.types import Command
-from langchain_core.messages import ToolMessage
-from langchain_core.messages import AIMessageChunk
-from src.database.models import User
+
+from src.config.report_style import ReportStyle
+from src.server.app import _astream_workflow_generator, _make_event, app
 
 
 @pytest.fixture
-def mock_user():
-    """Mock user for authentication."""
-    return User(
-        id=1,
-        username="testuser",
-        email="test@example.com",
-        is_active=True
-    )
-
-
-@pytest.fixture
-def client(mock_user):
-    """Test client with mocked authentication."""
-    with patch('src.server.auth.get_current_user', new_callable=AsyncMock) as mock_auth:
-        mock_auth.return_value = mock_user
-        yield TestClient(app)
-
-
-@pytest.fixture
-def client_no_auth():
-    """Test client without authentication for testing auth failures."""
+def client():
     return TestClient(app)
 
 
@@ -193,7 +173,7 @@ class TestPodcastEndpoint:
         response = client.post("/api/podcast/generate", json=request_data)
 
         assert response.status_code == 500
-        assert response.json()["detail"] == "Podcast generation failed"
+        assert response.json()["detail"] == "Internal Server Error"
 
 
 class TestPPTEndpoint:
@@ -354,7 +334,6 @@ class TestMCPEndpoint:
     def test_mcp_server_metadata_without_enable_configuration(
         self, mock_load_tools, client
     ):
-
         request_data = {
             "transport": "stdio",
             "command": "test_command",
@@ -364,8 +343,11 @@ class TestMCPEndpoint:
 
         response = client.post("/api/mcp/server/metadata", json=request_data)
 
-        assert response.status_code == 200
-        # Configuration check was removed, endpoint now works
+        assert response.status_code == 403
+        assert (
+            response.json()["detail"]
+            == "MCP server configuration is disabled. Set ENABLE_MCP_SERVER_CONFIGURATION=true to enable MCP features."
+        )
 
 
 class TestRAGEndpoints:
@@ -550,6 +532,8 @@ class TestAstreamWorkflowGenerator:
             enable_background_investigation=False,
             report_style=ReportStyle.ACADEMIC,
             enable_deep_thinking=False,
+            enable_clarification=False,
+            max_clarification_rounds=3,
         )
 
         events = []
@@ -565,7 +549,6 @@ class TestAstreamWorkflowGenerator:
     @pytest.mark.asyncio
     @patch("src.server.app.graph")
     async def test_astream_workflow_generator_with_interrupt_feedback(self, mock_graph):
-
         # Mock the async stream
         async def mock_astream(*args, **kwargs):
             # Verify that Command is passed as input when interrupt_feedback is provided
@@ -590,6 +573,8 @@ class TestAstreamWorkflowGenerator:
             enable_background_investigation=False,
             report_style=ReportStyle.ACADEMIC,
             enable_deep_thinking=False,
+            enable_clarification=False,
+            max_clarification_rounds=3,
         )
 
         events = []
@@ -624,6 +609,8 @@ class TestAstreamWorkflowGenerator:
             enable_background_investigation=False,
             report_style=ReportStyle.ACADEMIC,
             enable_deep_thinking=False,
+            enable_clarification=False,
+            max_clarification_rounds=3,
         )
 
         events = []
@@ -638,7 +625,6 @@ class TestAstreamWorkflowGenerator:
     @pytest.mark.asyncio
     @patch("src.server.app.graph")
     async def test_astream_workflow_generator_tool_message(self, mock_graph):
-
         # Mock tool message
         mock_tool_message = ToolMessage(content="Tool result", tool_call_id="tool_123")
         mock_tool_message.id = "msg_456"
@@ -661,6 +647,8 @@ class TestAstreamWorkflowGenerator:
             enable_background_investigation=False,
             report_style=ReportStyle.ACADEMIC,
             enable_deep_thinking=False,
+            enable_clarification=False,
+            max_clarification_rounds=3,
         )
 
         events = []
@@ -677,7 +665,6 @@ class TestAstreamWorkflowGenerator:
     async def test_astream_workflow_generator_ai_message_with_tool_calls(
         self, mock_graph
     ):
-
         # Mock AI message with tool calls
         mock_ai_message = AIMessageChunk(content="Making tool call")
         mock_ai_message.id = "msg_789"
@@ -703,6 +690,8 @@ class TestAstreamWorkflowGenerator:
             enable_background_investigation=False,
             report_style=ReportStyle.ACADEMIC,
             enable_deep_thinking=False,
+            enable_clarification=False,
+            max_clarification_rounds=3,
         )
 
         events = []
@@ -719,7 +708,6 @@ class TestAstreamWorkflowGenerator:
     async def test_astream_workflow_generator_ai_message_with_tool_call_chunks(
         self, mock_graph
     ):
-
         # Mock AI message with only tool call chunks
         mock_ai_message = AIMessageChunk(content="Streaming tool call")
         mock_ai_message.id = "msg_101"
@@ -745,6 +733,8 @@ class TestAstreamWorkflowGenerator:
             enable_background_investigation=False,
             report_style=ReportStyle.ACADEMIC,
             enable_deep_thinking=False,
+            enable_clarification=False,
+            max_clarification_rounds=3,
         )
 
         events = []
@@ -758,7 +748,6 @@ class TestAstreamWorkflowGenerator:
     @pytest.mark.asyncio
     @patch("src.server.app.graph")
     async def test_astream_workflow_generator_with_finish_reason(self, mock_graph):
-
         # Mock AI message with finish reason
         mock_ai_message = AIMessageChunk(content="Complete response")
         mock_ai_message.id = "msg_finish"
@@ -784,6 +773,8 @@ class TestAstreamWorkflowGenerator:
             enable_background_investigation=False,
             report_style=ReportStyle.ACADEMIC,
             enable_deep_thinking=False,
+            enable_clarification=False,
+            max_clarification_rounds=3,
         )
 
         events = []
@@ -798,7 +789,6 @@ class TestAstreamWorkflowGenerator:
     @pytest.mark.asyncio
     @patch("src.server.app.graph")
     async def test_astream_workflow_generator_config_passed_correctly(self, mock_graph):
-
         mock_ai_message = AIMessageChunk(content="Test")
         mock_ai_message.id = "test_id"
         mock_ai_message.response_metadata = {}

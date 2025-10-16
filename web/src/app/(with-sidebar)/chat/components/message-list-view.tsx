@@ -9,7 +9,9 @@ import {
   ChevronDown,
   ChevronRight,
   Lightbulb,
+  Wrench,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 
 import { LoadingAnimation } from "~/components/deer-flow/loading-animation";
@@ -34,7 +36,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "~/components/ui/collapsible";
-import { Progress } from "~/components/ui/progress";
 import type { Message, Option } from "~/core/messages";
 import {
   closeResearch,
@@ -94,9 +95,9 @@ export function MessageListView({
       ref={scrollContainerRef}
     >
       <ul className="flex flex-col">
-        {messageIds.map((messageId, index) => (
+        {messageIds.map((messageId) => (
           <MessageListItem
-            key={`message-${messageId}-${index}`}
+            key={messageId}
             messageId={messageId}
             waitForFeedback={waitingForFeedbackMessageId === messageId}
             interruptMessage={interruptMessage}
@@ -105,7 +106,7 @@ export function MessageListView({
             onToggleResearch={handleToggleResearch}
           />
         ))}
-        <li key="list-end-spacer" className="flex h-8 w-full shrink-0 list-none"></li>
+        <div className="flex h-8 w-full shrink-0"></div>
       </ul>
       {responding && (noOngoingResearch || !ongoingResearchIsOpen) && (
         <LoadingAnimation className="ml-4" />
@@ -185,16 +186,11 @@ function MessageListItem({
             )}
           >
             <MessageBubble message={message}>
-              <div className="flex w-full flex-col text-wrap break-words">
+              <div className="flex w-full flex-col break-words">
                 <Markdown
                   className={cn(
-                    "prose prose-invert max-w-none",
-                    "prose-headings:text-white prose-headings:font-semibold",
-                    "prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg",
-                    "prose-p:text-gray-300 prose-li:text-gray-300",
-                    "prose-strong:text-gray-100 prose-strong:font-semibold",
-                    "prose-code:text-blue-300 prose-code:bg-white/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded",
-                    message.role === "user" && "prose-p:text-gray-100 prose-li:text-gray-100",
+                    message.role === "user" &&
+                      "prose-invert not-dark:text-secondary dark:text-inherit",
                   )}
                 >
                   {message?.content}
@@ -208,6 +204,7 @@ function MessageListItem({
         return (
           <motion.li
             className="mt-10"
+            key={messageId}
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             style={{ transition: "all 0.2s ease-out" }}
@@ -221,9 +218,8 @@ function MessageListItem({
         );
       }
     }
+    return null;
   }
-  // Always return a li element to avoid React key warnings
-  return <li className="hidden" aria-hidden="true" style={{ display: 'none' }} />;
 }
 
 function MessageBubble({
@@ -238,11 +234,12 @@ function MessageBubble({
   return (
     <div
       className={cn(
-        `group flex w-fit max-w-[85%] flex-col rounded-xl px-4 py-3 text-nowrap border`,
-        message.role === "user" && "bg-blue-500/10 border-blue-500/30 rounded-ee-none text-gray-100",
-        message.role === "assistant" && "bg-white/[0.05] border-white/10 rounded-es-none text-gray-300 backdrop-blur-sm",
+        "group flex w-auto max-w-[90vw] flex-col rounded-2xl px-4 py-3 break-words",
+        message.role === "user" && "bg-brand rounded-ee-none",
+        message.role === "assistant" && "bg-card rounded-es-none",
         className,
       )}
+      style={{ wordBreak: "break-all" }}
     >
       {children}
     </div>
@@ -258,6 +255,7 @@ function ResearchCard({
   researchId: string;
   onToggleResearch?: () => void;
 }) {
+  const t = useTranslations("chat.research");
   const reportId = useStore((state) => state.researchReportIds.get(researchId));
   const hasReport = reportId !== undefined;
   const reportGenerating = useStore(
@@ -266,10 +264,10 @@ function ResearchCard({
   const openResearchId = useStore((state) => state.openResearchId);
   const state = useMemo(() => {
     if (hasReport) {
-      return reportGenerating ? "Generating report..." : "Report generated";
+      return reportGenerating ? t("generatingReport") : t("reportGenerated");
     }
-    return "Researching...";
-  }, [hasReport, reportGenerating]);
+    return t("researching");
+  }, [hasReport, reportGenerating, t]);
   const msg = useResearchMessage(researchId);
   const title = useMemo(() => {
     if (msg) {
@@ -286,28 +284,24 @@ function ResearchCard({
     onToggleResearch?.();
   }, [openResearchId, researchId, onToggleResearch]);
   return (
-    <Card className={cn("w-full bg-white/[0.05] backdrop-blur-sm border-white/10", className)}>
+    <Card className={cn("w-full", className)}>
       <CardHeader>
         <CardTitle>
-          <RainbowText animated={state !== "Report generated"}>
-            {title !== undefined && title !== "" ? title : "Deep Research"}
+          <RainbowText animated={state !== t("reportGenerated")}>
+            {title !== undefined && title !== "" ? title : t("deepResearch")}
           </RainbowText>
         </CardTitle>
       </CardHeader>
       <CardFooter>
         <div className="flex w-full">
-          <RollingText className="text-gray-400 flex-grow text-sm">
+          <RollingText className="text-muted-foreground flex-grow text-sm">
             {state}
           </RollingText>
           <Button
             variant={!openResearchId ? "default" : "outline"}
-            className={cn(
-              "bg-white/[0.05] border-white/10 hover:bg-white/[0.08]",
-              !openResearchId && "bg-blue-500/20 border-blue-500/50 hover:bg-blue-500/30"
-            )}
             onClick={handleOpen}
           >
-            {researchId !== openResearchId ? "Open" : "Close"}
+            {researchId !== openResearchId ? t("open") : t("close")}
           </Button>
         </div>
       </CardFooter>
@@ -320,12 +314,15 @@ function ThoughtBlock({
   content,
   isStreaming,
   hasMainContent,
+  contentChunks,
 }: {
   className?: string;
   content: string;
   isStreaming?: boolean;
   hasMainContent?: boolean;
+  contentChunks?: string[];
 }) {
+  const t = useTranslations("chat.research");
   const [isOpen, setIsOpen] = useState(true);
 
   const [hasAutoCollapsed, setHasAutoCollapsed] = useState(false);
@@ -341,6 +338,12 @@ function ThoughtBlock({
     return null;
   }
 
+  // Split content into static (previous chunks) and streaming (current chunk)
+  const chunks = contentChunks ?? [];
+  const staticContent = chunks.slice(0, -1).join("");
+  const streamingChunk = isStreaming && chunks.length > 0 ? (chunks[chunks.length - 1] ?? "") : "";
+  const hasStreamingContent = isStreaming && streamingChunk.length > 0;
+
   return (
     <div className={cn("mb-6 w-full", className)}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -349,10 +352,10 @@ function ThoughtBlock({
             variant="ghost"
             className={cn(
               "h-auto w-full justify-start rounded-xl border px-6 py-4 text-left transition-all duration-200",
-              "hover:bg-white/[0.08]",
+              "hover:bg-accent hover:text-accent-foreground",
               isStreaming
-                ? "border-blue-500/30 bg-blue-500/10 backdrop-blur-sm"
-                : "border-white/10 bg-white/[0.05] backdrop-blur-sm",
+                ? "border-primary/20 bg-primary/5 shadow-sm"
+                : "border-border bg-card",
             )}
           >
             <div className="flex w-full items-center gap-3">
@@ -360,28 +363,28 @@ function ThoughtBlock({
                 size={18}
                 className={cn(
                   "shrink-0 transition-colors duration-200",
-                  isStreaming ? "text-blue-400" : "text-gray-400",
+                  isStreaming ? "text-primary" : "text-muted-foreground",
                 )}
               />
               <span
                 className={cn(
                   "leading-none font-semibold transition-colors duration-200",
-                  isStreaming ? "text-blue-400" : "text-gray-300",
+                  isStreaming ? "text-primary" : "text-foreground",
                 )}
               >
-                Deep Thinking
+                {t("deepThinking")}
               </span>
               {isStreaming && <LoadingAnimation className="ml-2 scale-75" />}
               <div className="flex-grow" />
               {isOpen ? (
                 <ChevronDown
                   size={16}
-                  className="text-gray-400 transition-transform duration-200"
+                  className="text-muted-foreground transition-transform duration-200"
                 />
               ) : (
                 <ChevronRight
                   size={16}
-                  className="text-gray-400 transition-transform duration-200"
+                  className="text-muted-foreground transition-transform duration-200"
                 />
               )}
             </div>
@@ -390,8 +393,8 @@ function ThoughtBlock({
         <CollapsibleContent className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-up-2 data-[state=open]:slide-down-2 mt-3">
           <Card
             className={cn(
-              "transition-all duration-200 backdrop-blur-sm",
-              isStreaming ? "border-blue-500/30 bg-blue-500/10" : "border-white/10 bg-white/[0.05]",
+              "transition-all duration-200",
+              isStreaming ? "border-primary/20 bg-primary/5" : "border-border",
             )}
           >
             <CardContent>
@@ -404,18 +407,39 @@ function ThoughtBlock({
                   scrollShadow={false}
                   autoScrollToBottom
                 >
-                  <Markdown
-                    className={cn(
-                      "prose prose-invert max-w-none transition-colors duration-200",
-                      "prose-headings:text-white prose-headings:font-semibold",
-                      "prose-p:text-gray-400 prose-li:text-gray-400",
-                      "prose-strong:text-gray-200",
-                      isStreaming ? "prose-primary" : "opacity-80",
-                    )}
-                    animated={isStreaming}
-                  >
-                    {content}
-                  </Markdown>
+                  {staticContent && (
+                    <Markdown
+                      className={cn(
+                        "prose dark:prose-invert max-w-none transition-colors duration-200",
+                        "opacity-80",
+                      )}
+                      animated={false}
+                    >
+                      {staticContent}
+                    </Markdown>
+                  )}
+                  {hasStreamingContent && (
+                    <Markdown
+                      className={cn(
+                        "prose dark:prose-invert max-w-none transition-colors duration-200",
+                        "prose-primary",
+                      )}
+                      animated={true}
+                    >
+                      {streamingChunk}
+                    </Markdown>
+                  )}
+                  {!hasStreamingContent && (
+                    <Markdown
+                      className={cn(
+                        "prose dark:prose-invert max-w-none transition-colors duration-200",
+                        isStreaming ? "prose-primary" : "opacity-80",
+                      )}
+                      animated={false}
+                    >
+                      {content}
+                    </Markdown>
+                  )}
                 </ScrollContainer>
               </div>
             </CardContent>
@@ -445,10 +469,11 @@ function PlanCard({
   ) => void;
   waitForFeedback?: boolean;
 }) {
+  const t = useTranslations("chat.research");
   const plan = useMemo<{
     title?: string;
     thought?: string;
-    steps?: { title?: string; description?: string }[];
+    steps?: { title?: string; description?: string; tools?: string[] }[];
   }>(() => {
     return parseJSON(message.content ?? "", {});
   }, [message.content]);
@@ -480,6 +505,7 @@ function PlanCard({
           content={reasoningContent}
           isStreaming={isThinking}
           hasMainContent={hasMainContent}
+          contentChunks={message.reasoningContentChunks}
         />
       )}
       {shouldShowPlan && (
@@ -488,41 +514,59 @@ function PlanCard({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
-          <Card className="w-full bg-white/[0.05] backdrop-blur-sm border-white/10">
+          <Card className="w-full">
             <CardHeader>
               <CardTitle>
-                <div className="text-xl font-semibold text-white">
-                  {plan.title !== undefined && plan.title !== ""
-                    ? plan.title
-                    : "Deep Research"}
-                </div>
+                <Markdown animated={false}>
+                  {`### ${
+                    plan.title !== undefined && plan.title !== ""
+                      ? plan.title
+                      : t("deepResearch")
+                  }`}
+                </Markdown>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Markdown 
-                className="prose prose-invert max-w-none prose-p:text-gray-400 prose-li:text-gray-400 prose-headings:text-white" 
-                animated={message.isStreaming}
-              >
-                {plan.thought}
-              </Markdown>
-              {plan.steps && (
-                <ul className="my-2 flex list-decimal flex-col gap-4 border-l-[2px] pl-8">
-                  {plan.steps.map((step, i) => (
-                    <li key={`step-${i}`}>
-                      <h3 className="mb-2 text-lg font-semibold text-white">
-                        <Markdown animated={message.isStreaming}>
-                          {step.title}
-                        </Markdown>
-                      </h3>
-                      <div className="text-sm text-gray-400">
-                        <Markdown animated={message.isStreaming}>
-                          {step.description}
-                        </Markdown>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <div style={{ wordBreak: 'break-all', whiteSpace: 'normal' }}>
+                <Markdown className="opacity-80" animated={false}>
+                  {plan.thought}
+                </Markdown>
+                {plan.steps && (
+                  <ul className="my-2 flex list-decimal flex-col gap-4 border-l-[2px] pl-8">
+                    {plan.steps.map((step, i) => (
+                      <li key={`step-${i}`} style={{ wordBreak: 'break-all', whiteSpace: 'normal' }}>
+                        <div className="flex items-start gap-2">
+                          <div className="flex-1">
+                            <h3 className="mb flex items-center gap-2 text-lg font-medium">
+                              <Markdown animated={false}>
+                                {step.title}
+                              </Markdown>
+                              {step.tools && step.tools.length > 0 && (
+                                <Tooltip
+                                  title={`Uses ${step.tools.length} MCP tool${step.tools.length > 1 ? "s" : ""}`}
+                                >
+                                  <div className="flex items-center gap-1 rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
+                                    <Wrench size={12} />
+                                    <span>{step.tools.length}</span>
+                                  </div>
+                                </Tooltip>
+                              )}
+                            </h3>
+                            <div className="text-muted-foreground text-sm" style={{ wordBreak: 'break-all', whiteSpace: 'normal' }}>
+                              <Markdown animated={false}>
+                                {step.description}
+                              </Markdown>
+                            </div>
+                            {step.tools && step.tools.length > 0 && (
+                              <ToolsDisplay tools={step.tools} />
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             </CardContent>
             <CardFooter className="flex justify-end">
               {!message.isStreaming && interruptMessage?.options?.length && (
@@ -574,8 +618,6 @@ function PodcastCard({
   }, [message.content]);
   const title = useMemo<string | undefined>(() => data?.title, [data]);
   const audioUrl = useMemo<string | undefined>(() => data?.audioUrl, [data]);
-  const progress = useMemo(() => data?.progress, [data]);
-  const progressMessage = useMemo(() => data?.progressMessage, [data]);
   const isGenerating = useMemo(() => {
     return message.isStreaming;
   }, [message.isStreaming]);
@@ -592,7 +634,7 @@ function PodcastCard({
             {!hasError ? (
               <RainbowText animated={isGenerating}>
                 {isGenerating
-                  ? progressMessage ?? "Generating podcast..."
+                  ? "Generating podcast..."
                   : isPlaying
                     ? "Now playing podcast..."
                     : "Podcast"}
@@ -625,14 +667,7 @@ function PodcastCard({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isGenerating && progress !== undefined ? (
-          <div className="space-y-2">
-            <Progress value={progress} className="w-full" />
-            <p className="text-sm text-muted-foreground text-center">
-              {progressMessage ?? "Processing..."}
-            </p>
-          </div>
-        ) : audioUrl ? (
+        {audioUrl ? (
           <audio
             className="w-full"
             src={audioUrl}
@@ -645,5 +680,20 @@ function PodcastCard({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function ToolsDisplay({ tools }: { tools: string[] }) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-1">
+      {tools.map((tool, index) => (
+        <span
+          key={index}
+          className="rounded-md bg-muted px-2 py-1 text-xs font-mono text-muted-foreground"
+        >
+          {tool}
+        </span>
+      ))}
+    </div>
   );
 }

@@ -36,6 +36,9 @@
     "general": {
       "title": "General",
       "autoAcceptPlan": "Allow automatic acceptance of plans",
+      "enableClarification": "Allow clarification",
+      "maxClarificationRounds": "Max clarification rounds",
+      "maxClarificationRoundsDescription": "Maximum number of clarification rounds when clarification is enabled (default: 3).",
       "maxPlanIterations": "Max plan iterations",
       "maxPlanIterationsDescription": "Set to 1 for single-step planning. Set to 2 or more to enable re-planning.",
       "maxStepsOfPlan": "Max steps of a research plan",
@@ -66,7 +69,9 @@
       "news": "News",
       "newsDesc": "Factual, concise, and impartial journalistic style",
       "socialMedia": "Social Media",
-      "socialMediaDesc": "Concise, attention-grabbing, and shareable"
+      "socialMediaDesc": "Concise, attention-grabbing, and shareable",
+      "strategicInvestment": "Strategic Investment",
+      "strategicInvestmentDesc": "Deep, comprehensive analysis for strategic investment institutions with actionable insights"
     }
   },
   "footer": {
