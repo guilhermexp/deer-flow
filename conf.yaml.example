@@ -97,12 +97,6 @@ LLM:
     api_key: ""
     max_retries: 2
 
-  OLLAMA_MODEL:
-    enabled: false
-    base_url: http://localhost:11434/v1
-    model: mistral-small:latest
-    api_key: "whatever"
-
 FEATURES:
   enable_deep_research: true
   enable_plan_refinement: true
