@@ -19,7 +19,7 @@ export function useKanbanApi() {
   const { user, isLoaded } = useUser()
   const isAuthenticated = isLoaded && !!user
 
-  // Carregar projetos do Supabase
+  // Carregar projetos do banco de dados
   const loadProjects = useCallback(async (): Promise<Project[]> => {
     if (!isAuthenticated) {
       return []
@@ -28,11 +28,11 @@ export function useKanbanApi() {
     try {
       setLoading(true)
       setError(null)
-      console.log("🔄 Carregando projetos do Supabase...")
-      const supabaseProjects = await projectsService.getProjects()
-      console.log("✅ Projetos carregados:", supabaseProjects)
-      setProjects(supabaseProjects)
-      return supabaseProjects
+      console.log("🔄 Carregando projetos...")
+      const projects = await projectsService.getProjects()
+      console.log("✅ Projetos carregados:", projects)
+      setProjects(projects)
+      return projects
     } catch (err) {
       console.error("❌ Erro ao carregar projetos:", err)
       setError("Erro ao carregar projetos")

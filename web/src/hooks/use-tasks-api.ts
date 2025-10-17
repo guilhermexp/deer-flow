@@ -1,8 +1,9 @@
 "use client"
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { createTasksApiService } from "~/services/api/tasks"
+
 import { useAuthenticatedApi } from "~/hooks/use-authenticated-api"
-import { TaskStatus, TaskPriority, type KanbanTask } from "~/services/api/projects"
+import { TaskStatus, type TaskPriority, type KanbanTask } from "~/services/api/projects"
+import { createTasksApiService } from "~/services/api/tasks"
 
 export interface Task {
   id: string

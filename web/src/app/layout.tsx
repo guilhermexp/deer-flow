@@ -4,12 +4,12 @@
 import "~/styles/globals.css";
 import "~/styles/jarvis-globals.css";
 
+import { ClerkProvider } from "@clerk/nextjs";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import { ClerkProvider } from '@clerk/nextjs';
 
 import { ThemeProviderWrapper } from "~/components/deer-flow/theme-provider-wrapper";
 import { AnimationProvider } from "~/contexts/animation-context";

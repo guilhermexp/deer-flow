@@ -4,30 +4,24 @@
 import { z } from "zod";
 
 export const MCPConfigSchema = z.object({
-  mcpServers: z.record(
+  mcpServers: z.record(z.string(),
     z.union(
       [
         z.object({
-          command: z.string({
-            message: "`command` must be a string",
-          }),
+          command: z.string().describe("`command` must be a string"),
           args: z
-            .array(z.string(), {
-              message: "`args` must be an array of strings",
-            })
+            .array(z.string())
+            .describe("`args` must be an array of strings")
             .optional(),
           env: z
-            .record(z.string(), {
-              message: "`env` must be an object of key-value pairs",
-            })
+            .record(z.string(), z.string())
+            .describe("`env` must be an object of key-value pairs")
             .optional(),
         }),
         z.object({
           url: z
-            .string({
-              message:
-                "`url` must be a valid URL starting with http:// or https://",
-            })
+            .string()
+            .describe("`url` must be a valid URL starting with http:// or https://")
             .refine(
               (value) => {
                 try {
@@ -43,20 +37,15 @@ export const MCPConfigSchema = z.object({
               },
             ),
           env: z
-            .record(z.string(), {
-              message: "`env` must be an object of key-value pairs",
-            })
+            .record(z.string(), z.string())
+            .describe("`env` must be an object of key-value pairs")
             .optional(),
           transport: z
-            .enum(["sse", "streamable_http"], {
-              message: "transport must be either sse or streamable_http"
-            })
+            .enum(["sse", "streamable_http"])
+            .describe("transport must be either sse or streamable_http")
             .default("sse"),
         }),
-      ],
-      {
-        message: "Invalid server type",
-      },
-    ),
+      ]
+    ).describe("Invalid server type"),
   ),
 });

@@ -2,8 +2,9 @@
  * Serviço de dados de saúde usando REST API
  */
 
-import { api } from './http-client';
 import type { AuthenticatedApiClient } from '~/hooks/use-authenticated-api';
+
+import { api } from './http-client';
 
 export interface SleepPhases {
   deep: number;
@@ -169,7 +170,7 @@ export function createHealthApiService(apiClient: AuthenticatedApiClient) {
     /**
      * Buscar estatísticas de saúde
      */
-    async getStats(days: number = 30): Promise<HealthStats | null> {
+    async getStats(days = 30): Promise<HealthStats | null> {
       try {
         const queryParams = new URLSearchParams();
         queryParams.append('days', days.toString());
@@ -292,7 +293,7 @@ export const healthApiService = {
   /**
    * Buscar estatísticas de saúde
    */
-  async getStats(days: number = 30): Promise<HealthStats | null> {
+  async getStats(days = 30): Promise<HealthStats | null> {
     try {
       const queryParams = new URLSearchParams();
       queryParams.append('days', days.toString());

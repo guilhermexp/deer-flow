@@ -537,10 +537,10 @@ async def health_check():
 1. **Database Migration**
    ```bash
    # Export from Supabase
-   pg_dump $SUPABASE_URL > supabase_dump.sql
+   pg_dump $SUPABASE_URL > neon_dump.sql
    
    # Import to Neon
-   psql $NEON_DATABASE_URL < supabase_dump.sql
+   psql $NEON_DATABASE_URL < neon_dump.sql
    ```
 
 2. **Authentication Migration**

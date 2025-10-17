@@ -171,19 +171,37 @@ class AuthConfig(BaseModel):
             'dev-secret-key',
             'test-secret-key'
         ]
-        if v.lower() in weak_keys:
-            if environment == 'production':
-                raise ValueError(
-                    "JWT_SECRET_KEY is using a default/weak value in production. "
-                    "Generate a secure key with: openssl rand -hex 32"
+        normalized_secret = v.lower()
+        simplified = normalized_secret.replace("-", "").replace("_", "")
+        for weak in weak_keys:
+            weak_norm = weak.lower()
+            weak_simplified = weak_norm.replace("-", "").replace("_", "")
+
+            patterns = [
+                normalized_secret == weak_norm,
+                normalized_secret.startswith(f"{weak_norm}-"),
+                normalized_secret.startswith(f"{weak_norm}_"),
+                normalized_secret.endswith(f"-{weak_norm}"),
+                normalized_secret.endswith(f"_{weak_norm}"),
+                simplified == weak_simplified,
+                simplified.startswith(weak_simplified),
+                simplified.endswith(weak_simplified),
+            ]
+
+            if any(patterns):
+                if environment == 'production':
+                    raise ValueError(
+                        "JWT_SECRET_KEY is using a default/weak value in production. "
+                        "Generate a secure key with: openssl rand -hex 32"
+                    )
+                # Just warn in development (or other non-production)
+                import warnings
+
+                warnings.warn(
+                    f"JWT_SECRET_KEY is using a weak value in {environment} environment. "
+                    "This is acceptable for development but NEVER use in production."
                 )
-            # Just warn in development
-            import warnings
-            warnings.warn(
-                f"JWT_SECRET_KEY is using a weak value in {environment} environment. "
-                "This is acceptable for development but NEVER use in production."
-            )
-            return v
+                return v
 
         if len(v) < 32:
             raise ValueError("JWT_SECRET_KEY must be at least 32 characters long")

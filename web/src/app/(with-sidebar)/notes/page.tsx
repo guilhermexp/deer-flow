@@ -90,7 +90,7 @@ export default function NotesDashboardWithDetails() {
     const newNote = createNoteFromWebhook(contextType, webhookResponse)
     console.log('📝 Nova nota criada:', newNote)
 
-    // Add new note to list using Supabase
+    // Add new note to database
     await addNote(newNote)
     
     // Automatically select new note to show details

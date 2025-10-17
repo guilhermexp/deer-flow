@@ -4,6 +4,7 @@
  */
 
 import type { Message } from '~/core/messages';
+
 import { conversationsApiService } from './conversations';
 
 export const messagesApiService = {

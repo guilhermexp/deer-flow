@@ -7,7 +7,11 @@ from .retriever import get_retriever_tool
 from .search import get_web_search_tool
 from .tts import VolcengineTTS
 from .minimax_tts import MinimaxTTS
-from .google_gemini_tts import GoogleGeminiTTS
+
+try:
+    from .google_gemini_tts import GoogleGeminiTTS
+except ImportError:  # pragma: no cover - optional dependency
+    GoogleGeminiTTS = None  # type: ignore
 
 __all__ = [
     "crawl_tool",

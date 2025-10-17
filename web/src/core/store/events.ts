@@ -1,5 +1,5 @@
 /**
- * Sistema de eventos para sincronização entre store e Supabase
+ * Sistema de eventos para sincronização entre store e banco de dados
  */
 
 import type { Message } from "~/core/messages";

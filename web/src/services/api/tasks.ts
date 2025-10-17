@@ -2,8 +2,9 @@
  * Serviço de tarefas usando REST API
  */
 
-import { api } from './http-client';
 import type { AuthenticatedApiClient } from '~/hooks/use-authenticated-api';
+
+import { api } from './http-client';
 import type { TaskStatus, TaskPriority, KanbanTask } from './projects';
 
 export interface TaskCreate {
@@ -32,7 +33,7 @@ export function createTasksApiService(apiClient: AuthenticatedApiClient) {
     async create(
       projectId: number,
       data: TaskCreate,
-      columnId: string = 'backlog'
+      columnId = 'backlog'
     ): Promise<KanbanTask> {
       const queryParams = new URLSearchParams();
       queryParams.append('column_id', columnId);
@@ -76,7 +77,7 @@ export const tasksApiService = {
   async create(
     projectId: number,
     data: TaskCreate,
-    columnId: string = 'backlog'
+    columnId = 'backlog'
   ): Promise<KanbanTask> {
     const queryParams = new URLSearchParams();
     queryParams.append('column_id', columnId);

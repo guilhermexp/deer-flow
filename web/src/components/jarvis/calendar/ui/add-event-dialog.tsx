@@ -34,12 +34,12 @@ import { toast } from "sonner" // Adicionado toast
 const newEventFormSchema = z.object({
   title: z.string().min(2, { message: "Título deve ter pelo menos 2 caracteres." }),
   subtitle: z.string().optional(),
-  eventDate: z.date({ required_error: "Data do evento é obrigatória." }),
-  startHour: z.coerce.number().min(0, "Hora inválida").max(23, "Hora inválida"),
-  duration: z.coerce.number().min(0.5, "Duração mínima de 0.5 horas").max(24, "Duração máxima de 24 horas"),
-  color: z.enum(EVENT_COLOR_NAMES as [string, ...string[]], { required_error: "Cor é obrigatória." }),
+  eventDate: z.date({ message: "Data do evento é obrigatória." }),
+  startHour: z.number().min(0, "Hora inválida").max(23, "Hora inválida"),
+  duration: z.number().min(0.5, "Duração mínima de 0.5 horas").max(24, "Duração máxima de 24 horas"),
+  color: z.enum(EVENT_COLOR_NAMES as [string, ...string[]], { message: "Cor é obrigatória." }),
   category: z.enum(CALENDAR_FILTERS.filter((f) => f.value !== "all").map((f) => f.value) as [string, ...string[]], {
-    required_error: "Categoria é obrigatória.",
+    message: "Categoria é obrigatória.",
   }),
 })
 

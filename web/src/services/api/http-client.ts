@@ -47,7 +47,7 @@ export async function httpClient<T = any>(
 
   // Adicionar token de autenticação se fornecido
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
   // Construir URL completo

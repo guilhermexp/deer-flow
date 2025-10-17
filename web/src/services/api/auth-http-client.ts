@@ -106,7 +106,7 @@ export function useAuthApi() {
 
   // We need to return a lazy-evaluated API that gets the token on each call
   // Import useAuth dynamically
-  let getToken: (() => Promise<string | null>) | null = null;
+  const getToken: (() => Promise<string | null>) | null = null;
 
   try {
     // This needs to be imported and used at the component level

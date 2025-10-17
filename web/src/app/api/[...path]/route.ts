@@ -1,6 +1,6 @@
-import { NextRequest } from 'next/server';
+import { type NextRequest } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8005';
+const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:8005';
 const PROXY_DEBUG = /^(true|1)$/i.test(
   process.env.PROXY_DEBUG ?? process.env.DEBUG ?? ''
 );

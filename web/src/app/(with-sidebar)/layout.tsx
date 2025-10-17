@@ -1,9 +1,9 @@
 "use client";
 
+import { useUser } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 import type React from "react";
 import { useState, useCallback, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
 
 import AppHeader from "~/components/jarvis/app-header";
 import { AppSidebar } from "~/components/jarvis/app-sidebar-optimized";
@@ -34,9 +34,9 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const pageTitle = routeTitles[pathname] ?? "";
-  const { user, isLoaded: isLoaded } = useUser();
+  const { user, isLoaded } = useUser();
   const isLoading = !isLoaded;
-  const isAuthenticated = isLoaded && !!user;
+  const isAuthenticated = isLoaded && Boolean(user);
   
   const toggleMobileSidebar = useCallback(() => {
     setIsMobileSidebarOpen(prev => !prev);

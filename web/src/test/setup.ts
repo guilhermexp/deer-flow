@@ -17,9 +17,9 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/',
 }));
 
-// Mock Supabase client
-vi.mock('~/lib/supabase/client', () => ({
-  getSupabaseClient: () => ({
+// Mock database client
+vi.mock('~/lib/neon/client', () => ({
+  getDatabaseClient: () => ({
     auth: {
       getSession: () => Promise.resolve({ data: { session: null }, error: null }),
       onAuthStateChange: () => ({

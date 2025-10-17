@@ -21,10 +21,13 @@ class TestGetWebSearchTool:
         assert tool.include_image_descriptions is True
 
     @patch("src.tools.search.SELECTED_SEARCH_ENGINE", SearchEngine.DUCKDUCKGO.value)
-    def test_get_web_search_tool_duckduckgo(self):
-        tool = get_web_search_tool(max_search_results=3)
-        assert tool.name == "web_search"
-        assert tool.max_results == 3
+    @patch("src.tools.search.LoggedDuckDuckGoSearch")
+    def test_get_web_search_tool_duckduckgo(self, mock_logged_ddg):
+        get_web_search_tool(max_search_results=3)
+        mock_logged_ddg.assert_called_once_with(
+            name="web_search",
+            num_results=3,
+        )
 
     @patch("src.tools.search.SELECTED_SEARCH_ENGINE", SearchEngine.BRAVE_SEARCH.value)
     @patch.dict(os.environ, {"BRAVE_SEARCH_API_KEY": "test_api_key"})

@@ -183,6 +183,30 @@ async def delete_task(
 
 
 # Reminder endpoints
+@router.get("/reminders/today", response_model=List[ReminderResponse])
+async def get_today_reminders(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """Get today's reminders."""
+    now = datetime.utcnow()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+
+    reminders = (
+        db.query(Reminder)
+        .filter(
+            Reminder.user_id == current_user.id,
+            Reminder.date >= today_start,
+            Reminder.date < today_end,
+            Reminder.is_completed == False,
+        )
+        .order_by(Reminder.date)
+        .all()
+    )
+    return [ReminderResponse.from_orm(reminder) for reminder in reminders]
+
+
 @router.get("/reminders", response_model=List[ReminderResponse])
 async def get_reminders(
     date: Optional[datetime] = None,

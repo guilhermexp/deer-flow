@@ -3,27 +3,44 @@
 
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 
-import { Jumbotron } from "./landing/components/jumbotron";
 import { Ray } from "./landing/components/ray";
-import { CaseStudySection } from "./landing/sections/case-study-section";
-import { CoreFeatureSection } from "./landing/sections/core-features-section";
-import { JoinCommunitySection } from "./landing/sections/join-community-section";
-import { MultiAgentSection } from "./landing/sections/multi-agent-section";
 
 export default function RootPage() {
+  const router = useRouter();
+  const { isSignedIn, isLoaded } = useUser();
+
+  useEffect(() => {
+    if (isLoaded) {
+      if (isSignedIn) {
+        // Se usuário já está autenticado, redireciona para /chat
+        router.push("/chat");
+      } else {
+        // Se não está autenticado, redireciona para /sign-in
+        router.push("/sign-in");
+      }
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  // Mostrar tela de loading com background enquanto redireciona
   return (
-    <div className="flex flex-col items-center">
-      <main className="container flex flex-col items-center justify-center gap-32 md:gap-48 lg:gap-56 py-8">
-        <Jumbotron />
-        <CaseStudySection />
-        <MultiAgentSection />
-        <CoreFeatureSection />
-        <JoinCommunitySection />
-      </main>
-      <Footer />
+    <div className="flex min-h-screen flex-col items-center justify-center">
+      {/* Background customizado */}
       <Ray />
+
+      {/* Loading state */}
+      <main className="flex flex-1 items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

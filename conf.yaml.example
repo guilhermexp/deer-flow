@@ -47,10 +47,6 @@ SERVICES:
     publishable_key: null
     secret_key: null
 
-  SUPABASE:
-    url: null
-    key: null
-
   SEARCH:
     tavily_api_key: null
     brave_search_api_key: null

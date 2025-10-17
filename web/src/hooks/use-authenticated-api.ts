@@ -7,6 +7,7 @@
 
 import { useAuth } from '@clerk/nextjs';
 import { useMemo } from 'react';
+
 import { httpClient } from '~/services/api/http-client';
 
 export interface AuthenticatedApiClient {
@@ -50,7 +51,7 @@ export function useAuthenticatedApi(): AuthenticatedApiClient {
         const token = await getToken();
         return httpClient<T>(endpoint, {
           method: 'GET',
-          token: token || undefined,
+          token: token ?? undefined,
         });
       },
 
@@ -59,7 +60,7 @@ export function useAuthenticatedApi(): AuthenticatedApiClient {
         return httpClient<T>(endpoint, {
           method: 'POST',
           body,
-          token: token || undefined,
+          token: token ?? undefined,
         });
       },
 
@@ -68,7 +69,7 @@ export function useAuthenticatedApi(): AuthenticatedApiClient {
         return httpClient<T>(endpoint, {
           method: 'PUT',
           body,
-          token: token || undefined,
+          token: token ?? undefined,
         });
       },
 
@@ -77,7 +78,7 @@ export function useAuthenticatedApi(): AuthenticatedApiClient {
         return httpClient<T>(endpoint, {
           method: 'PATCH',
           body,
-          token: token || undefined,
+          token: token ?? undefined,
         });
       },
 
@@ -85,7 +86,7 @@ export function useAuthenticatedApi(): AuthenticatedApiClient {
         const token = await getToken();
         return httpClient<T>(endpoint, {
           method: 'DELETE',
-          token: token || undefined,
+          token: token ?? undefined,
         });
       },
     };

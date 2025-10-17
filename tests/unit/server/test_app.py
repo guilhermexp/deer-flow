@@ -233,19 +233,22 @@ class TestEnhancePromptEndpoint:
         mock_build_graph.return_value = mock_workflow
         mock_workflow.invoke.return_value = {"output": "Enhanced prompt"}
 
-        styles = [
+        valid_styles = [
             "ACADEMIC",
             "popular_science",
             "NEWS",
             "social_media",
-            "invalid_style",
         ]
 
-        for style in styles:
+        for style in valid_styles:
             request_data = {"prompt": "Test prompt", "report_style": style}
 
             response = client.post("/api/prompt/enhance", json=request_data)
             assert response.status_code == 200
+
+        invalid_request = {"prompt": "Test prompt", "report_style": "invalid_style"}
+        response = client.post("/api/prompt/enhance", json=invalid_request)
+        assert response.status_code == 422
 
     @patch("src.server.app.build_prompt_enhancer_graph")
     def test_enhance_prompt_error(self, mock_build_graph, client):

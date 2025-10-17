@@ -7,10 +7,19 @@ import uuid
 from datetime import datetime
 from typing import List, Optional, Tuple
 
-import psycopg
+try:
+    import psycopg
+    from psycopg.rows import dict_row
+except ImportError:  # pragma: no cover - optional dependency
+    psycopg = None  # type: ignore
+    dict_row = None  # type: ignore
+
 from langgraph.store.memory import InMemoryStore
-from psycopg.rows import dict_row
-from pymongo import MongoClient
+
+try:
+    from pymongo import MongoClient
+except ImportError:  # pragma: no cover - optional dependency
+    MongoClient = None  # type: ignore
 
 from src.config.loader import get_bool_env, get_str_env
 
@@ -53,12 +62,24 @@ class ChatStreamManager:
         self.postgres_conn = None
 
         if self.checkpoint_saver:
-            if self.db_uri.startswith("mongodb://"):
-                self._init_mongodb()
+            if not self.db_uri:
+                self.logger.warning("Checkpoint saver enabled but no DB URI provided")
+            elif self.db_uri.startswith("mongodb://"):
+                if MongoClient is None:
+                    self.logger.warning(
+                        "MongoClient not available; install pymongo to enable MongoDB checkpoints"
+                    )
+                else:
+                    self._init_mongodb()
             elif self.db_uri.startswith("postgresql://") or self.db_uri.startswith(
                 "postgres://"
             ):
-                self._init_postgresql()
+                if psycopg is None:
+                    self.logger.warning(
+                        "psycopg not available; install psycopg[binary] to enable PostgreSQL checkpoints"
+                    )
+                else:
+                    self._init_postgresql()
             else:
                 self.logger.warning(
                     f"Unsupported database URI scheme: {self.db_uri}. "
@@ -83,6 +104,9 @@ class ChatStreamManager:
         """Initialize PostgreSQL connection and create table if needed."""
 
         try:
+            if psycopg is None or dict_row is None:
+                raise ImportError("psycopg is required for PostgreSQL checkpointing")
+
             self.postgres_conn = psycopg.connect(self.db_uri, row_factory=dict_row)
             self.logger.info("Successfully connected to PostgreSQL")
             self._create_chat_streams_table()

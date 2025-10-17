@@ -8,8 +8,8 @@ import { vi } from 'vitest';
 
 import { AuthProvider } from '~/core/contexts/auth-context';
 
-// Mock Supabase client for tests
-const mockSupabaseClient = {
+// Mock database client for tests
+const mockDatabaseClient = {
   auth: {
     getSession: () => Promise.resolve({ data: { session: null }, error: null }),
     onAuthStateChange: () => ({
@@ -80,4 +80,4 @@ export * from '@testing-library/react';
 export { customRender as render };
 
 // Export mock client for specific test needs
-export { mockSupabaseClient };
+export { mockDatabaseClient };

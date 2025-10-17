@@ -73,7 +73,7 @@ Você pode selecionar o modelo desejado diretamente na interface do chat.
 
 Todas as configurações estão no arquivo `.env` na raiz do projeto:
 - APIs dos LLMs
-- Configurações do Supabase
+- Configurações do Neon PostgreSQL
 - URLs do backend/frontend
 
 ## 🚨 Problemas Comuns

@@ -1,6 +1,6 @@
 /**
  * Hook para real-time subscriptions de mensagens
- * NOTA: Desabilitado após migração para Neon PostgreSQL direto (sem Supabase)
+ * NOTA: Desabilitado após migração para Neon PostgreSQL direto (sem Neon PostgreSQL)
  */
 
 import { useEffect } from 'react';
@@ -21,7 +21,7 @@ export function useRealtimeMessages(conversationId: string | undefined) {
 
 /**
  * Hook para real-time de conversas do usuário
- * NOTA: Desabilitado após migração para Neon PostgreSQL direto (sem Supabase)
+ * NOTA: Desabilitado após migração para Neon PostgreSQL direto (sem Neon PostgreSQL)
  */
 export function useRealtimeConversations(userId: string | undefined) {
   useEffect(() => {

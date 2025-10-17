@@ -142,7 +142,7 @@ export const projectsApiService = {
   async create(data: ProjectCreate | Partial<FrontendProject>): Promise<FrontendProject> {
     // If data looks like FrontendProject, adapt it
     const apiData = 'createdAt' in data || 'isPriority' in data
-      ? adaptFrontendProjectToAPI(data as Partial<FrontendProject>)
+      ? adaptFrontendProjectToAPI(data)
       : data as ProjectCreate;
 
     const created = await api.post<Project>('/projects', apiData);

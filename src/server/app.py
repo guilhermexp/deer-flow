@@ -52,6 +52,13 @@ from src.server.rag_request import (
 from src.tools import VolcengineTTS
 from src.utils.json_utils import sanitize_args
 
+# Import routers
+from src.server.notes_routes import router as notes_router
+from src.server.calendar_routes import router as calendar_router
+from src.server.projects_routes import router as projects_router
+from src.server.dashboard_routes import router as dashboard_router
+from src.server.reminders_routes import router as reminders_router
+
 logger = logging.getLogger(__name__)
 
 # Configure Windows event loop policy for PostgreSQL compatibility
@@ -88,6 +95,13 @@ load_examples()
 
 in_memory_store = InMemoryStore()
 graph = build_graph_with_memory()
+
+# Register routers
+app.include_router(notes_router)
+app.include_router(calendar_router)
+app.include_router(projects_router)
+app.include_router(dashboard_router)
+app.include_router(reminders_router)
 
 
 @app.post("/api/chat/stream")

@@ -30,7 +30,7 @@ This document summarizes the comprehensive improvements implemented to enhance t
 **Monitored Services:**
 - Database connectivity and pool status
 - Redis cache availability
-- Supabase connection
+- Neon PostgreSQL connection
 - External API configurations
 - System resources (CPU, memory, disk)
 
@@ -53,7 +53,7 @@ This document summarizes the comprehensive improvements implemented to enhance t
 - `scripts/backup_cron.sh` - Cron job configuration
 
 **Features:**
-- Support for SQLite and Supabase PostgreSQL
+- Support for SQLite and Neon PostgreSQL PostgreSQL
 - Compression with gzip
 - S3 upload capability
 - Retention policies (local and remote)
@@ -95,14 +95,14 @@ This document summarizes the comprehensive improvements implemented to enhance t
 - Proper use of SQLAlchemy joins
 - Eager loading where appropriate
 
-### 9. Supabase Auth Migration
+### 9. Neon PostgreSQL Auth Migration
 **Files Modified:**
 - `src/server/auth.py` - Removed legacy JWT code
-- `src/server/auth_routes.py` - Simplified to Supabase-only
+- `src/server/auth_routes.py` - Simplified to Neon PostgreSQL-only
 
 **Changes:**
 - Removed local JWT token generation
-- Simplified to Supabase-only authentication
+- Simplified to Neon PostgreSQL-only authentication
 - Cleaned up unused dependencies
 
 ## 🚀 Performance Improvements
@@ -125,7 +125,7 @@ This document summarizes the comprehensive improvements implemented to enhance t
 ## 🔒 Security Improvements
 
 1. **Authentication Simplification**
-   - Single auth provider (Supabase) reduces attack surface
+   - Single auth provider (Neon PostgreSQL) reduces attack surface
    - No local password storage
    - Centralized user management
 

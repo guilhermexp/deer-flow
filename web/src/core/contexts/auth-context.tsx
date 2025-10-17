@@ -1,8 +1,9 @@
 'use client';
 
+import { useUser, useClerk } from '@clerk/nextjs';
+import type { UserResource } from '@clerk/types';
 import { useRouter } from 'next/navigation';
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useUser, useClerk } from '@clerk/nextjs';
 
 interface User {
   id: string;
@@ -35,16 +36,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { signOut } = useClerk();
 
   // Helper function to convert Clerk user to our User format
-  const setClerkUserData = useCallback((clerkUser: any) => {
-    if (!clerkUser) return null;
+  const setClerkUserData = useCallback((clerkUserData: UserResource | null | undefined) => {
+    if (!clerkUserData) return null;
     
     const userData: User = {
-      id: clerkUser.id,
-      email: clerkUser.emailAddresses[0]?.emailAddress || '',
-      firstName: clerkUser.firstName || undefined,
-      lastName: clerkUser.lastName || undefined,
-      fullName: clerkUser.fullName || undefined,
-      imageUrl: clerkUser.imageUrl || undefined,
+      id: clerkUserData.id,
+      email: clerkUserData.emailAddresses[0]?.emailAddress ?? '',
+      firstName: clerkUserData.firstName ?? undefined,
+      lastName: clerkUserData.lastName ?? undefined,
+      fullName: clerkUserData.fullName ?? undefined,
+      imageUrl: clerkUserData.imageUrl ?? undefined,
     };
     
     setUser(userData);
@@ -121,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextType = {
     user,
     isLoading: isLoading || !clerkLoaded,
-    isAuthenticated: !!user,
+    isAuthenticated: Boolean(user),
     login,
     register,
     logout,

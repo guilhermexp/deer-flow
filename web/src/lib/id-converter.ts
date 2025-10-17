@@ -5,7 +5,7 @@ const DEEPFLOW_NAMESPACE = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
 
 /**
  * Converts any string ID to a valid UUID v5
- * This ensures compatibility with Supabase UUID columns
+ * This ensures compatibility with PostgreSQL UUID columns
  */
 export function toUUID(id: string): string {
   // Check if already a valid UUID

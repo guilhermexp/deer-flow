@@ -118,7 +118,7 @@ The web UI uses Next.js 15 with React 19:
 Key features:
 - Real-time SSE streaming for research progress
 - MCP (Model Context Protocol) integration
-- Supabase authentication and data persistence
+- Neon PostgreSQL database and Clerk authentication
 - Report editing with AI-assisted refinements
 
 ## Development Guidelines
@@ -150,5 +150,5 @@ Key features:
 - The system requires models with longer context windows for deep research
 - Human-in-the-loop feedback is supported during planning phase
 - MCP integration allows extending capabilities with external services
-- Supabase is used for user management and data persistence
+- Neon PostgreSQL is used for data persistence and Clerk for user management
 - Docker Compose available for containerized deployment

@@ -37,20 +37,18 @@ setup_env() {
         echo "⚠️  web/.env not found!"
         echo "📄 Please configure your environment:"
         echo "   1. Copy the template: cp env.example web/.env"
-        echo "   2. Edit web/.env with your Supabase credentials"
+        echo "   2. Edit web/.env with your Neon/Clerk credentials"
         echo "   3. Run this script again"
         echo ""
         echo "🔒 For security, credentials are not hardcoded in scripts."
         exit 1
     else
         echo "✅ web/.env already exists"
-        
+
         # Validate required environment variables
-        if ! grep -q "NEXT_PUBLIC_SUPABASE_URL.*supabase.co" web/.env || \
-           ! grep -q "NEXT_PUBLIC_SUPABASE_ANON_KEY.*eyJ" web/.env; then
+        if ! grep -q "NEXT_PUBLIC_API_URL" web/.env; then
             echo "⚠️  web/.env seems incomplete. Please check:"
-            echo "   - NEXT_PUBLIC_SUPABASE_URL should be a valid Supabase URL"
-            echo "   - NEXT_PUBLIC_SUPABASE_ANON_KEY should be a valid JWT token"
+            echo "   - NEXT_PUBLIC_API_URL should be set (e.g., http://localhost:8005/api)"
             echo ""
             echo "📖 See env.example for template"
             exit 1
@@ -144,7 +142,7 @@ echo "✅ Both services are running!"
 echo "   Backend: http://localhost:8005"
 echo "   Frontend: http://localhost:4000"
 echo ""
-echo "📋 Test login with your Supabase credentials"
+echo "📋 Test login with your Clerk credentials"
 echo ""
 echo "Press Ctrl+C to stop both services"
 

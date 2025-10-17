@@ -31,7 +31,7 @@ export function AddMCPServerDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [validationError, setValidationError] = useState<string | null>("");
+  const [validationError, setValidationError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -55,17 +55,8 @@ export function AddMCPServerDialog({
     }
     const result = MCPConfigSchema.safeParse(JSON.parse(value));
     if (!result.success) {
-      if (result.error.errors[0]) {
-        const error = result.error.errors[0];
-        if (error.code === "invalid_union") {
-          if (error.unionErrors[0]?.errors[0]) {
-            setValidationError(error.unionErrors[0].errors[0].message);
-            return;
-          }
-        }
-      }
       const errorMessage =
-        result.error.errors[0]?.message ?? "Falha na validação";
+        result.error.issues[0]?.message ?? "Falha na validação";
       setValidationError(errorMessage);
       return;
     }
@@ -87,8 +78,8 @@ export function AddMCPServerDialog({
         const metadata: SimpleStdioMCPServerMetadata = {
           transport: "stdio",
           name: key,
-          command: server.command as string,
-          args: server.args as string[],
+          command: server.command,
+          args: server.args!,
           env: server.env,
         };
         addingServers.push(metadata);
@@ -130,11 +121,11 @@ export function AddMCPServerDialog({
     }
   }, [input, onAdd]);
 
-  const handleAbort = () => {
+  const handleAbort = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-  };
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

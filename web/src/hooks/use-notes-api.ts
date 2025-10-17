@@ -1,7 +1,8 @@
 "use client"
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { createNotesApiService } from "~/services/api/notes"
+
 import { useAuthenticatedApi } from "~/hooks/use-authenticated-api"
+import { createNotesApiService } from "~/services/api/notes"
 
 export interface Note {
   id: string
@@ -45,15 +46,15 @@ export const useNotesApi = () => {
       const convertedNotes = data.map(note => ({
         id: note.id.toString(),
         title: note.title,
-        description: note.content || '',
-        source: (note.source as Note["source"]) || "Arquivos",
+        description: note.content ?? '',
+        source: (note.source as Note["source"]) ?? "Arquivos",
         date: note.created_at,
         tags: [],
         mediaType: 'file' as const,
-        mediaUrl: note.source_url || '',
-        transcript: note.transcript || undefined,
-        aiSummary: note.summary || undefined,
-        webhookData: note.metadata && note.metadata.type && note.metadata.processedAt 
+        mediaUrl: note.source_url ?? '',
+        transcript: note.transcript ?? undefined,
+        aiSummary: note.summary ?? undefined,
+        webhookData: note.metadata?.type && note.metadata.processedAt 
           ? {
               type: note.metadata.type,
               originalUrl: note.metadata.originalUrl,
@@ -85,15 +86,15 @@ export const useNotesApi = () => {
       const convertedResult = {
         id: result.id.toString(),
         title: result.title,
-        description: result.content || '',
-        source: (result.source as Note["source"]) || "Arquivos",
+        description: result.content ?? '',
+        source: (result.source as Note["source"]) ?? "Arquivos",
         date: result.created_at,
         tags: [],
         mediaType: 'file' as const,
-        mediaUrl: result.source_url || '',
-        transcript: result.transcript || undefined,
-        aiSummary: result.summary || undefined,
-        webhookData: result.metadata && result.metadata.type && result.metadata.processedAt 
+        mediaUrl: result.source_url ?? '',
+        transcript: result.transcript ?? undefined,
+        aiSummary: result.summary ?? undefined,
+        webhookData: result.metadata?.type && result.metadata.processedAt 
           ? {
               type: result.metadata.type,
               originalUrl: result.metadata.originalUrl,
@@ -125,15 +126,15 @@ export const useNotesApi = () => {
       const convertedResult = {
         id: result.id.toString(),
         title: result.title,
-        description: result.content || '',
-        source: (result.source as Note["source"]) || "Arquivos",
+        description: result.content ?? '',
+        source: (result.source as Note["source"]) ?? "Arquivos",
         date: result.created_at,
         tags: [],
         mediaType: 'file' as const,
-        mediaUrl: result.source_url || '',
-        transcript: result.transcript || undefined,
-        aiSummary: result.summary || undefined,
-        webhookData: result.metadata && result.metadata.type && result.metadata.processedAt 
+        mediaUrl: result.source_url ?? '',
+        transcript: result.transcript ?? undefined,
+        aiSummary: result.summary ?? undefined,
+        webhookData: result.metadata?.type && result.metadata.processedAt 
           ? {
               type: result.metadata.type,
               originalUrl: result.metadata.originalUrl,

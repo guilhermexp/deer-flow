@@ -100,7 +100,7 @@ echo "   - Backend auto-reload on file changes"
 echo "   - Frontend hot-reload on file changes"
 echo "   - TypeScript type checking"
 echo ""
-echo "📋 Test login with your Supabase credentials"
+echo "📋 Test login with your Clerk credentials"
 echo ""
 echo "Press Ctrl+C to stop both services"
 

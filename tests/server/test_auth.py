@@ -1,34 +1,43 @@
-# Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
-# SPDX-License-Identifier: MIT
-
-"""
-Comprehensive test suite for authentication module.
-Tests cover:
-- AuthConfig validation (ENVIRONMENT, JWT_SECRET_KEY)
-- Clerk token verification with retry logic
-- UserResponse schema validation
-- DEV_MODE bypass security
-- get_current_user() with various scenarios
-"""
-
-import pytest
+import json
 import os
 import time
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
-from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
-from pydantic import ValidationError
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
 import jwt
-from jwt.algorithms import RSAAlgorithm
+import httpx
+import pytest
+from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.backends import default_backend
+from fastapi import HTTPException, status
+from pydantic import ValidationError
+from sqlalchemy.orm import Session
 
-from src.config.settings import AuthConfig, AppConfig, DatabaseConfig
-from src.server.auth import get_current_user, get_current_active_user, UserResponse
+from jwt.algorithms import RSAAlgorithm
+
+from src.config.settings import AppConfig, AuthConfig, DatabaseConfig
 from src.server.clerk_auth import ClerkAuthMiddleware
-from src.database.models import User
+
+
+@pytest.fixture(scope="function")
+def auth_module(monkeypatch):
+    monkeypatch.setenv("LANGGRAPH_CHECKPOINT_SAVER", "false")
+    monkeypatch.setenv("LANGGRAPH_CHECKPOINT_DB_URL", "")
+
+    clerk_patch = patch("src.server.clerk_auth.ClerkAuthMiddleware")
+    engine_patch = patch("src.database.base.create_engine")
+    clerk_patch.start()
+    engine_patch.start()
+
+    import importlib
+
+    module = importlib.import_module("src.server.auth")
+
+    yield module
+
+    clerk_patch.stop()
+    engine_patch.stop()
 
 
 class TestAuthConfig:
@@ -153,8 +162,8 @@ class TestClerkAuthMiddleware:
     def mock_jwks(self, rsa_keys):
         """Create mock JWKS response."""
         _, public_key, _ = rsa_keys
-        jwk = RSAAlgorithm.to_jwk(public_key)
-        jwk_dict = eval(jwk)  # Convert to dict
+        jwk_json = RSAAlgorithm.to_jwk(public_key)
+        jwk_dict = json.loads(jwk_json)
         jwk_dict['kid'] = 'test-key-id'
         jwk_dict['use'] = 'sig'
         jwk_dict['alg'] = 'RS256'
@@ -195,9 +204,10 @@ class TestClerkAuthMiddleware:
     async def test_fetch_jwks_retry_logic(self, clerk_auth):
         """Test JWKS fetch retry logic on failure."""
         with patch('httpx.Client') as mock_client:
+            http_error = httpx.HTTPError("Network error")
             mock_client.return_value.__enter__.return_value.get.side_effect = [
-                Exception("Network error"),
-                Exception("Network error"),
+                http_error,
+                http_error,
                 Mock(json=lambda: {"keys": []}, raise_for_status=lambda: None)
             ]
 
@@ -317,8 +327,9 @@ class TestClerkAuthMiddleware:
 class TestUserResponse:
     """Test UserResponse schema validation."""
 
-    def test_valid_user_response(self):
+    def test_valid_user_response(self, auth_module):
         """Test valid UserResponse creation."""
+        UserResponse = auth_module.UserResponse
         user_data = {
             "id": 1,
             "email": "test@example.com",
@@ -332,8 +343,10 @@ class TestUserResponse:
         assert response.email == "test@example.com"
         assert response.id == 1
 
-    def test_invalid_email_format(self):
+    def test_invalid_email_format(self, auth_module):
         """Test invalid email format raises error."""
+        UserResponse = auth_module.UserResponse
+
         with pytest.raises(ValidationError):
             UserResponse(
                 id=1,
@@ -344,17 +357,18 @@ class TestUserResponse:
                 updated_at=datetime.utcnow()
             )
 
-    def test_from_orm_user(self):
+    def test_from_orm_user(self, auth_module):
         """Test UserResponse creation from ORM User model."""
-        user = User(
-            id=1,
-            email="test@example.com",
-            username="testuser",
-            clerk_id="user_2xxxxx",
-            is_active=True,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
-        )
+        UserResponse = auth_module.UserResponse
+
+        user = MagicMock()
+        user.id = 1
+        user.email = "test@example.com"
+        user.username = "testuser"
+        user.clerk_id = "user_2xxxxx"
+        user.is_active = True
+        user.created_at = datetime.utcnow()
+        user.updated_at = datetime.utcnow()
         response = UserResponse.model_validate(user)
         assert response.email == user.email
         assert response.clerk_id == user.clerk_id
@@ -384,72 +398,83 @@ class TestGetCurrentUser:
         return config
 
     @pytest.mark.asyncio
-    async def test_dev_bypass_enabled(self, mock_db, mock_config_dev):
+    async def test_dev_bypass_enabled(self, mock_db, mock_config_dev, auth_module):
         """Test DEV_AUTH_BYPASS in development environment."""
-        with patch('src.server.auth.get_config', return_value=mock_config_dev):
-            with patch.dict(os.environ, {"DEV_AUTH_BYPASS": "true"}):
-                mock_db.query.return_value.filter.return_value.first.return_value = None
-                mock_db.add = Mock()
-                mock_db.commit = Mock()
-                mock_db.refresh = Mock(side_effect=lambda user: setattr(user, 'id', 1))
+        with patch.dict(
+            os.environ,
+            {
+                "ENVIRONMENT": "development",
+                "DEV_AUTH_BYPASS": "true",
+                "DEV_USER_EMAIL": "dev@localhost",
+            }
+        ):
+            mock_db.query.return_value.filter.return_value.first.return_value = None
+            mock_db.add = Mock()
+            mock_db.commit = Mock()
+            mock_db.refresh = Mock(side_effect=lambda user: setattr(user, 'id', 1))
 
-                user = await get_current_user(None, None, mock_db)
+            user = await auth_module.get_current_user(None, None, mock_db)
 
-                assert user is not None
-                assert user.email == "dev@localhost"
+            assert user is not None
+            assert user.email == "dev@localhost"
 
     @pytest.mark.asyncio
-    async def test_dev_bypass_disabled(self, mock_db, mock_config_dev):
+    async def test_dev_bypass_disabled(self, mock_db, mock_config_dev, auth_module):
         """Test authentication required when DEV_AUTH_BYPASS disabled."""
-        with patch('src.server.auth.get_config', return_value=mock_config_dev):
-            with patch.dict(os.environ, {"DEV_AUTH_BYPASS": "false"}):
-                with pytest.raises(HTTPException) as exc_info:
-                    await get_current_user(None, None, mock_db)
+        with patch.dict(
+            os.environ,
+            {
+                "ENVIRONMENT": "development",
+                "DEV_AUTH_BYPASS": "false",
+            }
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                await auth_module.get_current_user(None, None, mock_db)
 
-                assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
+            assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
 
     @pytest.mark.asyncio
-    async def test_no_token_provided(self, mock_db, mock_config_prod):
+    async def test_no_token_provided(self, mock_db, mock_config_prod, auth_module):
         """Test authentication fails with no token."""
-        with patch('src.server.auth.get_config', return_value=mock_config_prod):
+        with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
             with pytest.raises(HTTPException) as exc_info:
-                await get_current_user(None, None, mock_db)
+                await auth_module.get_current_user(None, None, mock_db)
 
             assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
             assert "Could not validate credentials" in exc_info.value.detail
 
     @pytest.mark.asyncio
-    async def test_clerk_not_configured(self, mock_db, mock_config_prod):
+    async def test_clerk_not_configured(self, mock_db, mock_config_prod, auth_module):
         """Test authentication fails when Clerk not configured."""
-        with patch('src.server.auth.get_config', return_value=mock_config_prod):
-            with patch('src.server.auth.clerk_auth') as mock_clerk:
+        with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
+            with patch.object(auth_module, 'clerk_auth') as mock_clerk:
                 mock_clerk.clerk_publishable_key = None
                 mock_clerk.extract_token_from_header.return_value = "test-token"
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await get_current_user("Bearer test-token", None, mock_db)
+                    await auth_module.get_current_user("Bearer test-token", None, mock_db)
 
                 assert exc_info.value.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
 
     @pytest.mark.asyncio
-    async def test_invalid_token(self, mock_db, mock_config_prod):
+    async def test_invalid_token(self, mock_db, mock_config_prod, auth_module):
         """Test authentication fails with invalid token."""
-        with patch('src.server.auth.get_config', return_value=mock_config_prod):
-            with patch('src.server.auth.clerk_auth') as mock_clerk:
+        with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
+            with patch.object(auth_module, 'clerk_auth') as mock_clerk:
                 mock_clerk.clerk_publishable_key = "pk_test_xxxxx"
                 mock_clerk.extract_token_from_header.return_value = "invalid-token"
                 mock_clerk.verify_token = AsyncMock(return_value=None)
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await get_current_user("Bearer invalid-token", None, mock_db)
+                    await auth_module.get_current_user("Bearer invalid-token", None, mock_db)
 
                 assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
 
     @pytest.mark.asyncio
-    async def test_inactive_user(self, mock_db, mock_config_prod):
+    async def test_inactive_user(self, mock_db, mock_config_prod, auth_module):
         """Test authentication fails for inactive user."""
-        with patch('src.server.auth.get_config', return_value=mock_config_prod):
-            with patch('src.server.auth.clerk_auth') as mock_clerk:
+        with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
+            with patch.object(auth_module, 'clerk_auth') as mock_clerk:
                 mock_clerk.clerk_publishable_key = "pk_test_xxxxx"
                 mock_clerk.extract_token_from_header.return_value = "valid-token"
                 mock_clerk.verify_token = AsyncMock(return_value={
@@ -457,28 +482,21 @@ class TestGetCurrentUser:
                     "email": "test@example.com"
                 })
 
-                inactive_user = User(
-                    id=1,
-                    email="test@example.com",
-                    username="testuser",
-                    clerk_id="user_123",
-                    is_active=False,
-                    created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow()
-                )
+                inactive_user = MagicMock()
+                inactive_user.is_active = False
                 mock_clerk.get_or_create_local_user = AsyncMock(return_value=inactive_user)
 
                 with pytest.raises(HTTPException) as exc_info:
-                    await get_current_user("Bearer valid-token", None, mock_db)
+                    await auth_module.get_current_user("Bearer valid-token", None, mock_db)
 
                 assert exc_info.value.status_code == status.HTTP_403_FORBIDDEN
                 assert "inactive" in exc_info.value.detail.lower()
 
     @pytest.mark.asyncio
-    async def test_successful_authentication(self, mock_db, mock_config_prod):
+    async def test_successful_authentication(self, mock_db, mock_config_prod, auth_module):
         """Test successful authentication flow."""
-        with patch('src.server.auth.get_config', return_value=mock_config_prod):
-            with patch('src.server.auth.clerk_auth') as mock_clerk:
+        with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
+            with patch.object(auth_module, 'clerk_auth') as mock_clerk:
                 mock_clerk.clerk_publishable_key = "pk_test_xxxxx"
                 mock_clerk.extract_token_from_header.return_value = "valid-token"
                 mock_clerk.verify_token = AsyncMock(return_value={
@@ -486,18 +504,13 @@ class TestGetCurrentUser:
                     "email": "test@example.com"
                 })
 
-                active_user = User(
-                    id=1,
-                    email="test@example.com",
-                    username="testuser",
-                    clerk_id="user_123",
-                    is_active=True,
-                    created_at=datetime.utcnow(),
-                    updated_at=datetime.utcnow()
-                )
+                active_user = MagicMock()
+                active_user.email = "test@example.com"
+                active_user.clerk_id = "user_123"
+                active_user.is_active = True
                 mock_clerk.get_or_create_local_user = AsyncMock(return_value=active_user)
 
-                user = await get_current_user("Bearer valid-token", None, mock_db)
+                user = await auth_module.get_current_user("Bearer valid-token", None, mock_db)
 
                 assert user is not None
                 assert user.email == "test@example.com"
@@ -508,36 +521,22 @@ class TestGetCurrentActiveUser:
     """Test get_current_active_user() dependency."""
 
     @pytest.mark.asyncio
-    async def test_active_user(self):
+    async def test_active_user(self, auth_module):
         """Test returns active user."""
-        active_user = User(
-            id=1,
-            email="test@example.com",
-            username="testuser",
-            clerk_id="user_123",
-            is_active=True,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
-        )
+        active_user = MagicMock()
+        active_user.is_active = True
 
-        result = await get_current_active_user(active_user)
+        result = await auth_module.get_current_active_user(active_user)
         assert result == active_user
 
     @pytest.mark.asyncio
-    async def test_inactive_user(self):
+    async def test_inactive_user(self, auth_module):
         """Test raises exception for inactive user."""
-        inactive_user = User(
-            id=1,
-            email="test@example.com",
-            username="testuser",
-            clerk_id="user_123",
-            is_active=False,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
-        )
+        inactive_user = MagicMock()
+        inactive_user.is_active = False
 
         with pytest.raises(HTTPException) as exc_info:
-            await get_current_active_user(inactive_user)
+            await auth_module.get_current_active_user(inactive_user)
 
         assert exc_info.value.status_code == 400
         assert "Inactive user" in exc_info.value.detail

@@ -137,7 +137,7 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
         }),
         Placeholder.configure({
           showOnlyCurrent: false,
-          placeholder: config?.rag.provider ? t("placeholderWithRag") : t("placeholder"),
+          placeholder: config?.rag?.provider ? t("placeholderWithRag") : t("placeholder"),
           emptyEditorClass: "placeholder",
         }),
         Extension.create({
@@ -157,7 +157,7 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
           },
         }),
       ];
-      if (config?.rag.provider) {
+      if (config?.rag?.provider) {
         extensions.push(
           Mention.configure({
             HTMLAttributes: {

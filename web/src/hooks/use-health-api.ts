@@ -1,7 +1,8 @@
 "use client"
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { createHealthApiService, type HealthData, type HealthStats, type HealthDataCreate, type HealthDataUpdate } from "~/services/api/health"
+
 import { useAuthenticatedApi } from "~/hooks/use-authenticated-api"
+import { createHealthApiService, type HealthData, type HealthStats, type HealthDataCreate, type HealthDataUpdate } from "~/services/api/health"
 
 export const useHealthApi = () => {
   const [healthData, setHealthData] = useState<HealthData[]>([])
@@ -45,7 +46,7 @@ export const useHealthApi = () => {
     }
   }, [healthApiService])
 
-  const loadStats = useCallback(async (days: number = 30) => {
+  const loadStats = useCallback(async (days = 30) => {
     try {
       setError(null)
       const data = await healthApiService.getStats(days)
@@ -73,7 +74,7 @@ export const useHealthApi = () => {
     try {
       const result = await healthApiService.update(id, data)
       setHealthData(prev => prev.map(item => item.id === id ? result : item))
-      if (todayData && todayData.id === id) {
+      if (todayData?.id === id) {
         setTodayData(result)
       }
       return result
@@ -88,7 +89,7 @@ export const useHealthApi = () => {
     try {
       await healthApiService.delete(id)
       setHealthData(prev => prev.filter(item => item.id !== id))
-      if (todayData && todayData.id === id) {
+      if (todayData?.id === id) {
         setTodayData(null)
       }
     } catch (err) {

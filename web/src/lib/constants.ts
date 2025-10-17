@@ -14,8 +14,8 @@ export const TIMEOUTS = {
   
   // API call timeouts
   API_CALL: 10000,           // Standard API calls
-  SUPABASE_QUERY: 15000,     // Supabase database queries
-  
+  DATABASE_QUERY: 15000,     // Database queries (Neon PostgreSQL)
+
   // Connection and testing
   CONNECTION_TEST: 3000,      // Quick connection tests
   HEALTH_CHECK: 5000,        // Health check endpoints
@@ -32,8 +32,7 @@ export const TIMEOUTS = {
 
 // API endpoints
 export const API_ENDPOINTS = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8005/api',
-  SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8005/api',
 } as const;
 
 // Retry configuration

@@ -2,8 +2,9 @@
  * Serviço de eventos de calendário usando REST API
  */
 
-import { api } from './http-client';
 import type { AuthenticatedApiClient } from '~/hooks/use-authenticated-api';
+
+import { api } from './http-client';
 
 export interface CalendarEvent {
   id: number;
