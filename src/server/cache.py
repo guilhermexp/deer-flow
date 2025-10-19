@@ -6,7 +6,7 @@ import json
 import logging
 import os
 from functools import wraps
-from typing import Any
+from typing import Any, Callable
 
 import redis.asyncio as redis
 
@@ -215,7 +215,7 @@ def cache_key_from_args(*args, **kwargs) -> str:
 def cached(
     prefix: str,
     ttl: int | None = None,
-    key_func: callable | None = None
+    key_func: Callable | None = None
 ):
     """Decorator for caching function results"""
     def decorator(func):

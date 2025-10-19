@@ -34,6 +34,8 @@ from src.rag.builder import build_retriever
 from src.rag.milvus import load_examples
 from src.rag.retriever import Resource
 from src.server.calendar_routes import router as calendar_router
+from src.server.auth_routes import router as auth_router
+from src.server.health_routes import router as health_router
 from src.server.chat_request import (
     ChatRequest,
     EnhancePromptRequest,
@@ -102,6 +104,8 @@ app.include_router(calendar_router)
 app.include_router(projects_router)
 app.include_router(dashboard_router)
 app.include_router(reminders_router)
+app.include_router(health_router)
+app.include_router(auth_router)
 
 
 @app.get("/health")

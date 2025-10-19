@@ -4,6 +4,7 @@
 import logging
 import os
 import time
+import base64
 from datetime import datetime, timedelta
 from functools import lru_cache
 from typing import Any
@@ -25,14 +26,21 @@ class ClerkAuthMiddleware:
         self.clerk_publishable_key = os.getenv("NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", "")
         self.clerk_secret_key = os.getenv("CLERK_SECRET_KEY", "")
 
-        # Extract issuer from publishable key if available
-        # Clerk publishable keys format: pk_test_xxxxx or pk_live_xxxxx
+        # Resolve issuer (base URL) used to validate tokens and fetch JWKS
+        # Priority:
+        #   1) CLERK_ISSUER (full URL like https://<sub>.clerk.accounts.dev)
+        #   2) CLERK_DOMAIN (domain like <sub>.clerk.accounts.dev)
+        #   3) Derive from NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY when possible
+        issuer_env = os.getenv("CLERK_ISSUER")
+        domain_env = os.getenv("CLERK_DOMAIN")
+
         self.issuer = None
-        if self.clerk_publishable_key:
-            # Extract domain from publishable key or use default
-            # Format: https://<clerk-domain>
-            # For development, we might need to construct this differently
-            self.issuer = os.getenv("CLERK_ISSUER", f"https://clerk.{os.getenv('CLERK_DOMAIN', 'example.com')}")
+        if issuer_env:
+            self.issuer = issuer_env.rstrip("/")
+        elif domain_env:
+            self.issuer = f"https://{domain_env}".rstrip("/")
+        else:
+            self.issuer = self._derive_issuer_from_publishable(self.clerk_publishable_key)
 
         self.jwks_uri = f"{self.issuer}/.well-known/jwks.json" if self.issuer else None
         self._jwks_cache: dict[str, Any] | None = None
@@ -42,7 +50,36 @@ class ClerkAuthMiddleware:
         if not self.clerk_publishable_key:
             logger.warning("Clerk credentials not configured. Clerk auth will be disabled.")
         else:
-            logger.info("Clerk auth middleware initialized with JWKS support")
+            if self.issuer:
+                logger.info(f"Clerk auth initialized (issuer: {self.issuer})")
+            else:
+                logger.warning("Clerk publishable key present but issuer could not be resolved.")
+                logger.warning("Set CLERK_ISSUER or CLERK_DOMAIN to enable token verification.")
+
+    def _derive_issuer_from_publishable(self, pk: str) -> str | None:
+        """Best-effort derive Clerk issuer from publishable key.
+
+        Newer Clerk keys often encode the domain in base64 after the prefix
+        (e.g. pk_test_<base64(domain)>). We attempt to decode that.
+        Returns a full issuer URL like https://<domain> or None if not derivable.
+        """
+        try:
+            if not pk:
+                return None
+            # Support both test and live prefixes
+            for prefix in ("pk_test_", "pk_live_"):
+                if pk.startswith(prefix):
+                    b64 = pk[len(prefix):]
+                    # Add missing base64 padding if necessary
+                    padding = '=' * (-len(b64) % 4)
+                    decoded = base64.b64decode((b64 + padding).encode("utf-8"))
+                    domain = decoded.decode("utf-8").strip().strip("$")
+                    if domain:
+                        return f"https://{domain}".rstrip("/")
+            return None
+        except Exception as e:
+            logger.debug(f"Unable to derive issuer from publishable key: {e}")
+            return None
 
     @lru_cache(maxsize=128)
     def _get_jwk_for_kid(self, kid: str) -> dict[str, Any] | None:

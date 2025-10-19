@@ -555,6 +555,7 @@ dependencies = [
     { name = "mcp" },
     { name = "numpy" },
     { name = "pandas" },
+    { name = "psutil" },
     { name = "psycopg", extra = ["binary"] },
     { name = "psycopg2-binary" },
     { name = "pydantic", extra = ["email"] },
@@ -562,6 +563,7 @@ dependencies = [
     { name = "pymilvus" },
     { name = "python-dotenv" },
     { name = "readabilipy" },
+    { name = "redis" },
     { name = "socksio" },
     { name = "sse-starlette" },
     { name = "uvicorn" },
@@ -622,6 +624,7 @@ requires-dist = [
     { name = "mongomock", marker = "extra == 'test'", specifier = ">=4.3.0" },
     { name = "numpy", specifier = ">=2.2.3" },
     { name = "pandas", specifier = ">=2.2.3" },
+    { name = "psutil", specifier = ">=7.1.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2.9" },
     { name = "psycopg2-binary", specifier = ">=2.9.9" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.10.0" },
@@ -633,6 +636,7 @@ requires-dist = [
     { name = "pytest-postgresql", marker = "extra == 'test'", specifier = ">=7.0.2" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "readabilipy", specifier = ">=0.3.0" },
+    { name = "redis", specifier = ">=6.4.0" },
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "socksio", specifier = ">=1.0.0" },
     { name = "sse-starlette", specifier = ">=1.6.5" },
@@ -3093,6 +3097,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/b8/e4/260a202516886c2e0cc6e6ae96d1f491792d829098886d9529a2439fbe8e/readabilipy-0.3.0.tar.gz", hash = "sha256:e13313771216953935ac031db4234bdb9725413534bfb3c19dbd6caab0887ae0", size = 35491, upload-time = "2024-12-02T23:03:02.311Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/dd/46/8a640c6de1a6c6af971f858b2fb178ca5e1db91f223d8ba5f40efe1491e5/readabilipy-0.3.0-py3-none-any.whl", hash = "sha256:d106da0fad11d5fdfcde21f5c5385556bfa8ff0258483037d39ea6b1d6db3943", size = 22158, upload-time = "2024-12-02T23:03:00.438Z" },
+]
+
+[[package]]
+name = "redis"
+version = "6.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/0d/d6/e8b92798a5bd67d659d51a18170e91c16ac3b59738d91894651ee255ed49/redis-6.4.0.tar.gz", hash = "sha256:b01bc7282b8444e28ec36b261df5375183bb47a07eb9c603f284e89cbc5ef010", size = 4647399, upload-time = "2025-08-07T08:10:11.441Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e8/02/89e2ed7e85db6c93dfa9e8f691c5087df4e3551ab39081a4d7c6d1f90e05/redis-6.4.0-py3-none-any.whl", hash = "sha256:f0544fa9604264e9464cdf4814e7d4830f74b165d52f2a330a760a88dd248b7f", size = 279847, upload-time = "2025-08-07T08:10:09.84Z" },
 ]
 
 [[package]]

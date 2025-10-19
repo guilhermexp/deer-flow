@@ -45,6 +45,8 @@ dependencies = [
     "psycopg2-binary>=2.9.9",
     "pyjwt[crypto,test]>=2.9.0",
     "pydantic[email]>=2.10.0",
+    "psutil>=7.1.0",
+    "redis>=6.4.0",
 ]
 
 [project.optional-dependencies]
