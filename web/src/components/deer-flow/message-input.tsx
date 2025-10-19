@@ -80,7 +80,7 @@ function formatItem(item: JSONContent): {
 const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
   (
     { className, loading, config, onChange, onEnter }: MessageInputProps,
-    ref,
+    ref
   ) => {
     const t = useTranslations("messageInput");
     const editorRef = useRef<Editor>(null);
@@ -95,7 +95,7 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
           onChange(text);
         }
       },
-      200,
+      200
     );
 
     React.useImperativeHandle(ref, () => ({
@@ -105,7 +105,7 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
       submit: () => {
         if (onEnter) {
           const { text, resources } = formatMessage(
-            editorRef.current?.getJSON() ?? [],
+            editorRef.current?.getJSON() ?? []
           );
           onEnter(text, resources);
         }
@@ -137,7 +137,9 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
         }),
         Placeholder.configure({
           showOnlyCurrent: false,
-          placeholder: config?.rag?.provider ? t("placeholderWithRag") : t("placeholder"),
+          placeholder: config?.rag?.provider
+            ? t("placeholderWithRag")
+            : t("placeholder"),
           emptyEditorClass: "placeholder",
         }),
         Extension.create({
@@ -147,7 +149,7 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
               Enter: () => {
                 if (handleEnterRef.current) {
                   const { text, resources } = formatMessage(
-                    this.editor.getJSON() ?? [],
+                    this.editor.getJSON() ?? []
                   );
                   handleEnterRef.current(text, resources);
                 }
@@ -164,7 +166,7 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
               class: "mention",
             },
             suggestion: resourceSuggestion,
-          }) as Extension,
+          }) as Extension
         );
       }
       return extensions;
@@ -202,7 +204,7 @@ const MessageInput = forwardRef<MessageInputRef, MessageInputProps>(
         </EditorRoot>
       </div>
     );
-  },
+  }
 );
 
 function transformPastedHTML(html: string) {

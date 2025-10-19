@@ -6,8 +6,9 @@ Text-to-Speech module using Minimax TTS API.
 """
 
 import logging
+from typing import Any
+
 import requests
-from typing import Optional, Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +56,8 @@ class MinimaxTTS:
         format: str = "mp3",
         sample_rate: int = 32000,
         bitrate: int = 128000,
-        language_boost: Optional[str] = "Portuguese",
-    ) -> Dict[str, Any]:
+        language_boost: str | None = "Portuguese",
+    ) -> dict[str, Any]:
         """
         Convert text to speech using Minimax TTS API.
 

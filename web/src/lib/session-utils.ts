@@ -1,41 +1,41 @@
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from "uuid";
 
 export interface ChatSession {
-  id: string
-  noteId: string
-  createdAt: string
-  lastActivity: string
+  id: string;
+  noteId: string;
+  createdAt: string;
+  lastActivity: string;
   messages: Array<{
-    id: number
-    type: "assistant" | "user"
-    content: string
-    timestamp: string
-    sessionId: string
-  }>
+    id: number;
+    type: "assistant" | "user";
+    content: string;
+    timestamp: string;
+    sessionId: string;
+  }>;
 }
 
 export interface ChatMessage {
-  id: number
-  type: "assistant" | "user"
-  content: string
-  timestamp: string
-  sessionId: string
+  id: number;
+  type: "assistant" | "user";
+  content: string;
+  timestamp: string;
+  sessionId: string;
 }
 
 /**
  * Gera um ID único para uma nova sessão de chat
  */
 export function generateSessionId(): string {
-  return uuidv4()
+  return uuidv4();
 }
 
 /**
  * Cria uma nova sessão de chat para uma nota específica
  */
 export function createChatSession(noteId: string): ChatSession {
-  const sessionId = generateSessionId()
-  const now = new Date().toISOString()
-  
+  const sessionId = generateSessionId();
+  const now = new Date().toISOString();
+
   return {
     id: sessionId,
     noteId,
@@ -47,34 +47,34 @@ export function createChatSession(noteId: string): ChatSession {
         type: "assistant",
         content: "Olá! Como posso ajudar você com esta nota hoje?",
         timestamp: now,
-        sessionId
-      }
-    ]
-  }
+        sessionId,
+      },
+    ],
+  };
 }
 
 /**
  * Adiciona uma nova mensagem a uma sessão existente
  */
 export function addMessageToSession(
-  session: ChatSession, 
-  content: string, 
+  session: ChatSession,
+  content: string,
   type: "assistant" | "user"
 ): ChatSession {
-  const now = new Date().toISOString()
+  const now = new Date().toISOString();
   const newMessage: ChatMessage = {
     id: session.messages.length + 1,
     type,
     content,
     timestamp: now,
-    sessionId: session.id
-  }
+    sessionId: session.id,
+  };
 
   return {
     ...session,
     lastActivity: now,
-    messages: [...session.messages, newMessage]
-  }
+    messages: [...session.messages, newMessage],
+  };
 }
 
 /**
@@ -83,8 +83,8 @@ export function addMessageToSession(
 export function updateSessionActivity(session: ChatSession): ChatSession {
   return {
     ...session,
-    lastActivity: new Date().toISOString()
-  }
+    lastActivity: new Date().toISOString(),
+  };
 }
 
 /**
@@ -97,11 +97,11 @@ export function formatSessionForWebhook(session: ChatSession) {
     createdAt: session.createdAt,
     lastActivity: session.lastActivity,
     messageCount: session.messages.length,
-    conversation: session.messages.map(msg => ({
+    conversation: session.messages.map((msg) => ({
       id: msg.id,
       type: msg.type,
       content: msg.content,
-      timestamp: msg.timestamp
-    }))
-  }
-} 
+      timestamp: msg.timestamp,
+    })),
+  };
+}

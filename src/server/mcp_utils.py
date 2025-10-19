@@ -3,7 +3,7 @@
 
 import logging
 from datetime import timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from fastapi import HTTPException
 from mcp import ClientSession, StdioServerParameters
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 async def _get_tools_from_client_session(
     client_context_manager: Any, timeout_seconds: int = 10
-) -> List:
+) -> list:
     """
     Helper function to get tools from a client session.
 
@@ -48,13 +48,13 @@ async def _get_tools_from_client_session(
 
 async def load_mcp_tools(
     server_type: str,
-    command: Optional[str] = None,
-    args: Optional[List[str]] = None,
-    url: Optional[str] = None,
-    env: Optional[Dict[str, str]] = None,
-    headers: Optional[Dict[str, str]] = None,
+    command: str | None = None,
+    args: list[str] | None = None,
+    url: str | None = None,
+    env: dict[str, str] | None = None,
+    headers: dict[str, str] | None = None,
     timeout_seconds: int = 60,  # Longer default timeout for first-time executions
-) -> List:
+) -> list:
     """
     Load tools from an MCP server.
 

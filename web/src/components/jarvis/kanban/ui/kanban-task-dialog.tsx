@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { Button } from "~/components/ui/button"
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,35 +8,52 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "~/components/ui/dialog"
-import { Input } from "~/components/ui/input"
-import { Label } from "~/components/ui/label"
-import { Textarea } from "~/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-import { Slider } from "~/components/ui/slider"
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
-import { Plus, X, FileText, CalendarIcon, BarChart3, Users, Palette } from "lucide-react"
-import type { Task, TaskStatus, TaskWeekDay, Assignee } from "../lib/types"
+} from "~/components/ui/dialog";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import { Textarea } from "~/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Slider } from "~/components/ui/slider";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import {
+  Plus,
+  X,
+  FileText,
+  CalendarIcon,
+  BarChart3,
+  Users,
+  Palette,
+} from "lucide-react";
+import type { Task, TaskStatus, TaskWeekDay, Assignee } from "../lib/types";
 
 interface KanbanTaskDialogProps {
-  isOpen: boolean
-  onOpenChange: (isOpen: boolean) => void
-  editingTask: Task | null
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  editingTask: Task | null;
   formData: {
-    title: string
-    description: string
-    date: string
-    progress: number[]
-    assignees: Assignee[]
-    status: TaskStatus
-    weekDay?: TaskWeekDay
-  }
-  onFormChange: (field: keyof KanbanTaskDialogProps["formData"], value: string | TaskWeekDay | TaskStatus | Assignee[]) => void
-  onSliderChange: (value: number[]) => void
-  onSaveTask: () => void
-  onAddAssignee: () => void
-  onRemoveAssignee: (index: number) => void
-  isWeekBoardActive?: boolean
+    title: string;
+    description: string;
+    date: string;
+    progress: number[];
+    assignees: Assignee[];
+    status: TaskStatus;
+    weekDay?: TaskWeekDay;
+  };
+  onFormChange: (
+    field: keyof KanbanTaskDialogProps["formData"],
+    value: string | TaskWeekDay | TaskStatus | Assignee[]
+  ) => void;
+  onSliderChange: (value: number[]) => void;
+  onSaveTask: () => void;
+  onAddAssignee: () => void;
+  onRemoveAssignee: (index: number) => void;
+  isWeekBoardActive?: boolean;
 }
 
 export default function KanbanTaskDialog({
@@ -53,17 +70,21 @@ export default function KanbanTaskDialog({
 }: KanbanTaskDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-card border-border text-foreground sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-card border-border text-foreground max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{editingTask ? "Editar Tarefa" : "Adicionar Nova Tarefa"}</DialogTitle>
+          <DialogTitle>
+            {editingTask ? "Editar Tarefa" : "Adicionar Nova Tarefa"}
+          </DialogTitle>
           <DialogDescription>
-            {editingTask ? "Atualize os detalhes da tarefa." : "Preencha os detalhes da nova tarefa."}
+            {editingTask
+              ? "Atualize os detalhes da tarefa."
+              : "Preencha os detalhes da nova tarefa."}
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-6 py-4 px-2">
+        <div className="grid gap-6 px-2 py-4">
           <div className="grid gap-2">
             <Label htmlFor="title" className="text-muted-foreground">
-              <FileText className="inline mr-2 h-4 w-4" /> Título
+              <FileText className="mr-2 inline h-4 w-4" /> Título
             </Label>
             <Input
               id="title"
@@ -85,10 +106,10 @@ export default function KanbanTaskDialog({
               className="bg-background border-border focus:border-primary min-h-[100px]"
             />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="date" className="text-muted-foreground">
-                <CalendarIcon className="inline mr-2 h-4 w-4" /> Data
+                <CalendarIcon className="mr-2 inline h-4 w-4" /> Data
               </Label>
               <Input
                 id="date"
@@ -101,51 +122,86 @@ export default function KanbanTaskDialog({
             {isWeekBoardActive ? (
               <div className="grid gap-2">
                 <Label htmlFor="weekDay" className="text-muted-foreground">
-                  <Palette className="inline mr-2 h-4 w-4" /> Dia da Semana
+                  <Palette className="mr-2 inline h-4 w-4" /> Dia da Semana
                 </Label>
                 <Select
                   value={formData.weekDay || "none"}
                   onValueChange={(value) =>
-                    onFormChange("weekDay", value === "none" ? undefined : (value as TaskWeekDay))
+                    onFormChange(
+                      "weekDay",
+                      value === "none" ? undefined : (value as TaskWeekDay)
+                    )
                   }
                 >
                   <SelectTrigger className="bg-background border-border focus:border-primary">
                     <SelectValue placeholder="Selecione o dia" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
-                    <SelectItem value="none" className="text-popover-foreground">
+                    <SelectItem
+                      value="none"
+                      className="text-popover-foreground"
+                    >
                       Nenhum
                     </SelectItem>
-                    {(["segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"] as TaskWeekDay[]).map(
-                      (day) => (
-                        <SelectItem key={day} value={day!} className="text-popover-foreground">
-                          {day!.charAt(0).toUpperCase() + day!.slice(1)}
-                        </SelectItem>
-                      ),
-                    )}
+                    {(
+                      [
+                        "segunda",
+                        "terca",
+                        "quarta",
+                        "quinta",
+                        "sexta",
+                        "sabado",
+                        "domingo",
+                      ] as TaskWeekDay[]
+                    ).map((day) => (
+                      <SelectItem
+                        key={day}
+                        value={day!}
+                        className="text-popover-foreground"
+                      >
+                        {day!.charAt(0).toUpperCase() + day!.slice(1)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             ) : (
               <div className="grid gap-2">
                 <Label htmlFor="status" className="text-muted-foreground">
-                  <Palette className="inline mr-2 h-4 w-4" /> Status
+                  <Palette className="mr-2 inline h-4 w-4" /> Status
                 </Label>
-                <Select value={formData.status} onValueChange={(value) => onFormChange("status", value as TaskStatus)}>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) =>
+                    onFormChange("status", value as TaskStatus)
+                  }
+                >
                   <SelectTrigger className="bg-background border-border focus:border-primary">
                     <SelectValue placeholder="Selecione o status" />
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border">
-                    <SelectItem value="not-started" className="text-popover-foreground">
+                    <SelectItem
+                      value="not-started"
+                      className="text-popover-foreground"
+                    >
                       Não iniciado
                     </SelectItem>
-                    <SelectItem value="paused" className="text-popover-foreground">
+                    <SelectItem
+                      value="paused"
+                      className="text-popover-foreground"
+                    >
                       Pausado
                     </SelectItem>
-                    <SelectItem value="in-progress" className="text-popover-foreground">
+                    <SelectItem
+                      value="in-progress"
+                      className="text-popover-foreground"
+                    >
                       Em progresso
                     </SelectItem>
-                    <SelectItem value="done" className="text-popover-foreground">
+                    <SelectItem
+                      value="done"
+                      className="text-popover-foreground"
+                    >
                       Concluído
                     </SelectItem>
                   </SelectContent>
@@ -155,14 +211,21 @@ export default function KanbanTaskDialog({
           </div>
           <div className="grid gap-2">
             <Label htmlFor="progress" className="text-muted-foreground">
-              <BarChart3 className="inline mr-2 h-4 w-4" /> Progresso: {formData.progress[0]}%
+              <BarChart3 className="mr-2 inline h-4 w-4" /> Progresso:{" "}
+              {formData.progress[0]}%
             </Label>
-            <Slider id="progress" value={formData.progress} onValueChange={onSliderChange} max={100} step={1} />
+            <Slider
+              id="progress"
+              value={formData.progress}
+              onValueChange={onSliderChange}
+              max={100}
+              step={1}
+            />
           </div>
           <div className="grid gap-2">
             <div className="flex items-center justify-between">
               <Label className="text-muted-foreground">
-                <Users className="inline mr-2 h-4 w-4" /> Responsáveis
+                <Users className="mr-2 inline h-4 w-4" /> Responsáveis
               </Label>
               <Button
                 type="button"
@@ -174,15 +237,20 @@ export default function KanbanTaskDialog({
                 <Plus className="mr-1 h-3 w-3" /> Adicionar
               </Button>
             </div>
-            <div className="flex flex-wrap gap-2 mt-1">
+            <div className="mt-1 flex flex-wrap gap-2">
               {formData.assignees.map((assignee, index) => (
-                <div key={index} className="flex items-center gap-2 bg-muted rounded-md px-2 py-1 text-sm">
+                <div
+                  key={index}
+                  className="bg-muted flex items-center gap-2 rounded-md px-2 py-1 text-sm"
+                >
                   <Avatar className="h-5 w-5">
                     <AvatarImage
                       src={assignee.avatar || ""}
                       alt={assignee.name}
                     />
-                    <AvatarFallback className="text-xs bg-muted text-muted-foreground"> {/* Padronizado */}
+                    <AvatarFallback className="bg-muted text-muted-foreground text-xs">
+                      {" "}
+                      {/* Padronizado */}
                       {assignee.initials}
                     </AvatarFallback>
                   </Avatar>
@@ -192,7 +260,7 @@ export default function KanbanTaskDialog({
                     variant="ghost"
                     size="icon"
                     onClick={() => onRemoveAssignee(index)}
-                    className="h-5 w-5 p-0 text-muted-foreground hover:text-destructive"
+                    className="text-muted-foreground hover:text-destructive h-5 w-5 p-0"
                   >
                     <X className="h-3 w-3" />
                   </Button>
@@ -219,5 +287,5 @@ export default function KanbanTaskDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

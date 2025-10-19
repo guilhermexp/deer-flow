@@ -24,10 +24,10 @@ export type SelectorItem = {
   name: string;
   icon: LucideIcon;
   command: (
-    editor: NonNullable<ReturnType<typeof useEditor>["editor"]>,
+    editor: NonNullable<ReturnType<typeof useEditor>["editor"]>
   ) => void;
   isActive: (
-    editor: NonNullable<ReturnType<typeof useEditor>["editor"]>,
+    editor: NonNullable<ReturnType<typeof useEditor>["editor"]>
   ) => boolean;
 };
 

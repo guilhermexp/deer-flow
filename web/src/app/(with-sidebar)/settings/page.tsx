@@ -3,7 +3,13 @@
 
 "use client";
 
-import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -25,17 +31,14 @@ function SettingsContent() {
   const [settings, setSettings] = useState(useSettingsStore.getState());
   const [changes, setChanges] = useState<Partial<SettingsState>>({});
 
-  const handleTabChange = useCallback(
-    (newChanges: Partial<SettingsState>) => {
-      setTimeout(() => {
-        setChanges((prev) => ({
-          ...prev,
-          ...newChanges,
-        }));
-      }, 0);
-    },
-    [],
-  );
+  const handleTabChange = useCallback((newChanges: Partial<SettingsState>) => {
+    setTimeout(() => {
+      setChanges((prev) => ({
+        ...prev,
+        ...newChanges,
+      }));
+    }, 0);
+  }, []);
 
   const handleSave = useCallback(() => {
     if (Object.keys(changes).length > 0) {
@@ -73,11 +76,11 @@ function SettingsContent() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="bg-background flex h-full flex-col">
       <div className="flex-1 overflow-auto">
-        <div className="container mx-auto p-6 max-w-4xl">
+        <div className="container mx-auto max-w-4xl p-6">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Configurações</h1>
+            <h1 className="mb-2 text-3xl font-bold">Configurações</h1>
             <p className="text-muted-foreground">
               Gerencie suas preferências do DeerFlow
             </p>
@@ -88,17 +91,17 @@ function SettingsContent() {
             onValueChange={setActiveTabId}
             className="w-full"
           >
-            <div className="flex gap-4 mb-6 border-b">
+            <div className="mb-6 flex gap-4 border-b">
               {SETTINGS_TABS.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTabId(tab.id)}
                   className={cn(
-                    "relative pb-3 px-1 text-sm font-medium transition-colors",
+                    "relative px-1 pb-3 text-sm font-medium transition-colors",
                     "hover:text-foreground",
                     activeTabId === tab.id
                       ? "text-foreground"
-                      : "text-muted-foreground",
+                      : "text-muted-foreground"
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -111,7 +114,7 @@ function SettingsContent() {
                     )}
                   </div>
                   {activeTabId === tab.id && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                    <div className="bg-primary absolute right-0 bottom-0 left-0 h-0.5" />
                   )}
                 </button>
               ))}
@@ -130,14 +133,12 @@ function SettingsContent() {
       </div>
 
       {hasChanges && (
-        <div className="sticky bottom-0 border-t bg-background/95 backdrop-blur-sm p-4">
-          <div className="container mx-auto max-w-4xl flex justify-end gap-2">
+        <div className="bg-background/95 sticky bottom-0 border-t p-4 backdrop-blur-sm">
+          <div className="container mx-auto flex max-w-4xl justify-end gap-2">
             <Button variant="outline" onClick={handleReset}>
               Cancelar
             </Button>
-            <Button onClick={handleSave}>
-              Salvar alterações
-            </Button>
+            <Button onClick={handleSave}>Salvar alterações</Button>
           </div>
         </div>
       )}
@@ -147,27 +148,29 @@ function SettingsContent() {
 
 export default function SettingsPage() {
   return (
-    <Suspense fallback={
-      <div className="h-full flex flex-col bg-background">
-        <div className="flex-1 overflow-auto">
-          <div className="container mx-auto p-6 max-w-4xl">
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold mb-2">Configurações</h1>
-              <p className="text-muted-foreground">
-                Gerencie suas preferências do DeerFlow
-              </p>
-            </div>
-            <div className="animate-pulse">
-              <div className="h-10 bg-muted rounded w-1/3 mb-6"></div>
-              <div className="space-y-4">
-                <div className="h-20 bg-muted rounded"></div>
-                <div className="h-20 bg-muted rounded"></div>
+    <Suspense
+      fallback={
+        <div className="bg-background flex h-full flex-col">
+          <div className="flex-1 overflow-auto">
+            <div className="container mx-auto max-w-4xl p-6">
+              <div className="mb-6">
+                <h1 className="mb-2 text-3xl font-bold">Configurações</h1>
+                <p className="text-muted-foreground">
+                  Gerencie suas preferências do DeerFlow
+                </p>
+              </div>
+              <div className="animate-pulse">
+                <div className="bg-muted mb-6 h-10 w-1/3 rounded"></div>
+                <div className="space-y-4">
+                  <div className="bg-muted h-20 rounded"></div>
+                  <div className="bg-muted h-20 rounded"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <SettingsContent />
     </Suspense>
   );

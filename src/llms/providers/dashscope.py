@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: MIT
 
 # Standard library imports
-from typing import Any, Dict, Iterator, List, Mapping, Optional, Type, Union, cast
+from collections.abc import Iterator, Mapping
+from typing import Any, cast
 
 # Third-party imports
 import openai
@@ -29,7 +30,7 @@ from langchain_openai.chat_models.base import (
 
 
 def _convert_delta_to_message_chunk(
-    delta_dict: Mapping[str, Any], default_class: Type[BaseMessageChunk]
+    delta_dict: Mapping[str, Any], default_class: type[BaseMessageChunk]
 ) -> BaseMessageChunk:
     """Convert a delta dictionary to a message chunk.
 
@@ -46,7 +47,7 @@ def _convert_delta_to_message_chunk(
     message_id = delta_dict.get("id")
     role = cast(str, delta_dict.get("role", ""))
     content = cast(str, delta_dict.get("content") or "")
-    additional_kwargs: Dict[str, Any] = {}
+    additional_kwargs: dict[str, Any] = {}
 
     # Handle function calls
     if function_call_data := delta_dict.get("function_call"):
@@ -108,10 +109,10 @@ def _convert_delta_to_message_chunk(
 
 
 def _convert_chunk_to_generation_chunk(
-    chunk: Dict[str, Any],
-    default_chunk_class: Type[BaseMessageChunk],
-    base_generation_info: Optional[Dict[str, Any]],
-) -> Optional[ChatGenerationChunk]:
+    chunk: dict[str, Any],
+    default_chunk_class: type[BaseMessageChunk],
+    base_generation_info: dict[str, Any] | None,
+) -> ChatGenerationChunk | None:
     """Convert a streaming chunk to a generation chunk.
 
     Args:
@@ -133,7 +134,7 @@ def _convert_chunk_to_generation_chunk(
         or chunk.get("chunk", {}).get("choices", [])
     )
 
-    usage_metadata: Optional[UsageMetadata] = (
+    usage_metadata: UsageMetadata | None = (
         _create_usage_metadata(token_usage) if token_usage else None
     )
 
@@ -185,8 +186,8 @@ class ChatDashscope(ChatOpenAI):
 
     def _create_chat_result(
         self,
-        response: Union[Dict[str, Any], openai.BaseModel],
-        generation_info: Optional[Dict[str, Any]] = None,
+        response: dict[str, Any] | openai.BaseModel,
+        generation_info: dict[str, Any] | None = None,
     ) -> ChatResult:
         """Create a chat result from the OpenAI response.
 
@@ -224,9 +225,9 @@ class ChatDashscope(ChatOpenAI):
 
     def _stream(
         self,
-        messages: List[BaseMessage],
-        stop: Optional[List[str]] = None,
-        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        messages: list[BaseMessage],
+        stop: list[str] | None = None,
+        run_manager: CallbackManagerForLLMRun | None = None,
         **kwargs: Any,
     ) -> Iterator[ChatGenerationChunk]:
         """Create a streaming generator for chat completions.
@@ -245,8 +246,8 @@ class ChatDashscope(ChatOpenAI):
         """
         kwargs["stream"] = True
         payload = self._get_request_payload(messages, stop=stop, **kwargs)
-        default_chunk_class: Type[BaseMessageChunk] = AIMessageChunk
-        base_generation_info: Dict[str, Any] = {}
+        default_chunk_class: type[BaseMessageChunk] = AIMessageChunk
+        base_generation_info: dict[str, Any] = {}
 
         # Handle response format for beta completions
         if "response_format" in payload:

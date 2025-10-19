@@ -1,13 +1,10 @@
 # Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
-import shutil
-import tempfile
 from pathlib import Path
-from typing import Any, Dict, Optional
-from unittest.mock import MagicMock, patch
+from typing import Any
+from unittest.mock import MagicMock
 
-import psycopg
 import pytest
 
 
@@ -16,9 +13,9 @@ class PostgreSQLMockInstance:
 
     def __init__(self, database_name: str = "test_db"):
         self.database_name = database_name
-        self.temp_dir: Optional[Path] = None
-        self.mock_connection: Optional[MagicMock] = None
-        self.mock_data: Dict[str, Any] = {}
+        self.temp_dir: Path | None = None
+        self.mock_connection: MagicMock | None = None
+        self.mock_data: dict[str, Any] = {}
         self._setup_mock_data()
 
     def _setup_mock_data(self):

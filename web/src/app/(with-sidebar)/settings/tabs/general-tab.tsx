@@ -42,7 +42,13 @@ const generalFormSchema = z.object({
   // Others
   enableBackgroundInvestigation: z.boolean(),
   enableDeepThinking: z.boolean(),
-  reportStyle: z.enum(["academic", "popular_science", "news", "social_media","strategic_investment"]),
+  reportStyle: z.enum([
+    "academic",
+    "popular_science",
+    "news",
+    "social_media",
+    "strategic_investment",
+  ]),
 });
 
 export const GeneralTab: Tab = ({
@@ -119,7 +125,8 @@ export const GeneralTab: Tab = ({
                         onCheckedChange={field.onChange}
                       />
                       <Label className="text-sm" htmlFor="enableClarification">
-                        {t("enableClarification")} {field.value ? "(On)" : "(Off)"}
+                        {t("enableClarification")}{" "}
+                        {field.value ? "(On)" : "(Off)"}
                       </Label>
                     </div>
                   </FormControl>

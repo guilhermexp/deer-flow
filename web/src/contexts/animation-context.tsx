@@ -14,7 +14,9 @@ interface AnimationContextValue {
   prefersReducedMotion: boolean;
 }
 
-const AnimationContext = createContext<AnimationContextValue | undefined>(undefined);
+const AnimationContext = createContext<AnimationContextValue | undefined>(
+  undefined
+);
 
 export function AnimationProvider({ children }: { children: React.ReactNode }) {
   const animationControl = useAnimationControl();
@@ -44,14 +46,14 @@ export function withAnimation<P extends object>(
 ) {
   const AnimatedComponent = React.forwardRef<unknown, P>((props, ref) => {
     const { shouldAnimate } = useAnimation();
-    const finalProps = shouldAnimate 
+    const finalProps = shouldAnimate
       ? { ...props, ...animatedProps }
       : { ...props, ...staticProps };
-    
-    return <Component {...finalProps as P} ref={ref} />;
+
+    return <Component {...(finalProps as P)} ref={ref} />;
   });
-  
-  AnimatedComponent.displayName = `withAnimation(${Component.displayName ?? Component.name ?? 'Component'})`;
-  
+
+  AnimatedComponent.displayName = `withAnimation(${Component.displayName ?? Component.name ?? "Component"})`;
+
   return AnimatedComponent;
 }

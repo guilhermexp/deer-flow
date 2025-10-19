@@ -35,7 +35,7 @@ export function ThemeToggle() {
           <Sun className="mr-2 h-4 w-4" />
           <span
             className={cn(
-              theme === "light" ? "font-bold" : "text-muted-foreground",
+              theme === "light" ? "font-bold" : "text-muted-foreground"
             )}
           >
             Light
@@ -45,7 +45,7 @@ export function ThemeToggle() {
           <Moon className="mr-2 h-4 w-4" />
           <span
             className={cn(
-              theme === "dark" ? "font-bold" : "text-muted-foreground",
+              theme === "dark" ? "font-bold" : "text-muted-foreground"
             )}
           >
             Dark
@@ -55,7 +55,7 @@ export function ThemeToggle() {
           <Monitor className="mr-2 h-4 w-4" />
           <span
             className={cn(
-              theme === "system" ? "font-bold" : "text-muted-foreground",
+              theme === "system" ? "font-bold" : "text-muted-foreground"
             )}
           >
             System

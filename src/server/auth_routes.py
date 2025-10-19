@@ -1,10 +1,8 @@
 # Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends
 
-from src.database.base import get_db
 from src.database.models import User
 from src.server.auth import get_current_active_user
 from src.server.schemas import UserResponse

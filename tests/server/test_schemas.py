@@ -8,13 +8,14 @@ Tests serialization, deserialization, validation, and OpenAPI documentation
 for all API schemas defined in src/server/schemas.py.
 """
 
+from datetime import UTC, datetime
+
 import pytest
-from datetime import datetime, timezone
 from pydantic import ValidationError
 
 from src.server.schemas import (
-    UserResponse,
     UserCreateRequest,
+    UserResponse,
     UserUpdateRequest,
 )
 
@@ -30,8 +31,8 @@ class TestUserResponseSchema:
             "username": "testuser",
             "clerk_id": "user_2abc123xyz",
             "is_active": True,
-            "created_at": datetime(2025, 1, 15, 10, 30, 0, tzinfo=timezone.utc),
-            "updated_at": datetime(2025, 1, 15, 10, 30, 0, tzinfo=timezone.utc),
+            "created_at": datetime(2025, 1, 15, 10, 30, 0, tzinfo=UTC),
+            "updated_at": datetime(2025, 1, 15, 10, 30, 0, tzinfo=UTC),
         }
 
         user = UserResponse(**user_data)
@@ -52,8 +53,8 @@ class TestUserResponseSchema:
             "username": "testuser",
             "clerk_id": "user_2abc123xyz",
             "is_active": True,
-            "created_at": datetime(2025, 1, 15, 10, 30, 0, tzinfo=timezone.utc),
-            "updated_at": datetime(2025, 1, 15, 10, 30, 0, tzinfo=timezone.utc),
+            "created_at": datetime(2025, 1, 15, 10, 30, 0, tzinfo=UTC),
+            "updated_at": datetime(2025, 1, 15, 10, 30, 0, tzinfo=UTC),
         }
 
         user = UserResponse(**user_data)
@@ -97,8 +98,8 @@ class TestUserResponseSchema:
             "username": "testuser",
             "clerk_id": "user_2abc123xyz",
             "is_active": True,
-            "created_at": datetime(2025, 1, 15, 10, 30, 0, tzinfo=timezone.utc),
-            "updated_at": datetime(2025, 1, 15, 10, 30, 0, tzinfo=timezone.utc),
+            "created_at": datetime(2025, 1, 15, 10, 30, 0, tzinfo=UTC),
+            "updated_at": datetime(2025, 1, 15, 10, 30, 0, tzinfo=UTC),
         }
 
         with pytest.raises(ValidationError) as exc_info:

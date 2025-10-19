@@ -2,9 +2,9 @@
  * Serviço de dados de saúde usando REST API
  */
 
-import type { AuthenticatedApiClient } from '~/hooks/use-authenticated-api';
+import type { AuthenticatedApiClient } from "~/hooks/use-authenticated-api";
 
-import { api } from './http-client';
+import { api } from "./http-client";
 
 export interface SleepPhases {
   deep: number;
@@ -107,17 +107,19 @@ export function createHealthApiService(apiClient: AuthenticatedApiClient) {
     }): Promise<HealthData[]> {
       try {
         const queryParams = new URLSearchParams();
-        if (params?.start_date) queryParams.append('start_date', params.start_date);
-        if (params?.end_date) queryParams.append('end_date', params.end_date);
-        if (params?.limit) queryParams.append('limit', params.limit.toString());
-        if (params?.offset) queryParams.append('offset', params.offset.toString());
+        if (params?.start_date)
+          queryParams.append("start_date", params.start_date);
+        if (params?.end_date) queryParams.append("end_date", params.end_date);
+        if (params?.limit) queryParams.append("limit", params.limit.toString());
+        if (params?.offset)
+          queryParams.append("offset", params.offset.toString());
 
         const query = queryParams.toString();
-        const endpoint = query ? `/health/data?${query}` : '/health/data';
+        const endpoint = query ? `/health/data?${query}` : "/health/data";
 
         return await apiClient.get<HealthData[]>(endpoint);
       } catch (error) {
-        console.error('Erro ao listar dados de saúde:', error);
+        console.error("Erro ao listar dados de saúde:", error);
         return [];
       }
     },
@@ -127,9 +129,9 @@ export function createHealthApiService(apiClient: AuthenticatedApiClient) {
      */
     async getToday(): Promise<HealthData | null> {
       try {
-        return await apiClient.get<HealthData>('/health/data/today');
+        return await apiClient.get<HealthData>("/health/data/today");
       } catch (error) {
-        console.error('Erro ao buscar dados de saúde de hoje:', error);
+        console.error("Erro ao buscar dados de saúde de hoje:", error);
         return null;
       }
     },
@@ -141,7 +143,7 @@ export function createHealthApiService(apiClient: AuthenticatedApiClient) {
       try {
         return await apiClient.get<HealthData>(`/health/data/${date}`);
       } catch (error) {
-        console.error('Erro ao buscar dados de saúde por data:', error);
+        console.error("Erro ao buscar dados de saúde por data:", error);
         return null;
       }
     },
@@ -150,7 +152,7 @@ export function createHealthApiService(apiClient: AuthenticatedApiClient) {
      * Criar ou atualizar dados de saúde
      */
     async create(data: HealthDataCreate): Promise<HealthData> {
-      return await apiClient.post<HealthData>('/health/data', data);
+      return await apiClient.post<HealthData>("/health/data", data);
     },
 
     /**
@@ -173,11 +175,13 @@ export function createHealthApiService(apiClient: AuthenticatedApiClient) {
     async getStats(days = 30): Promise<HealthStats | null> {
       try {
         const queryParams = new URLSearchParams();
-        queryParams.append('days', days.toString());
+        queryParams.append("days", days.toString());
 
-        return await apiClient.get<HealthStats>(`/health/stats?${queryParams.toString()}`);
+        return await apiClient.get<HealthStats>(
+          `/health/stats?${queryParams.toString()}`
+        );
       } catch (error) {
-        console.error('Erro ao buscar estatísticas de saúde:', error);
+        console.error("Erro ao buscar estatísticas de saúde:", error);
         return null;
       }
     },
@@ -187,9 +191,9 @@ export function createHealthApiService(apiClient: AuthenticatedApiClient) {
      */
     async checkSystemHealth(): Promise<HealthCheckResponse | null> {
       try {
-        return await apiClient.get<HealthCheckResponse>('/health/check');
+        return await apiClient.get<HealthCheckResponse>("/health/check");
       } catch (error) {
-        console.error('Erro ao verificar saúde do sistema:', error);
+        console.error("Erro ao verificar saúde do sistema:", error);
         return null;
       }
     },
@@ -212,7 +216,7 @@ export function createHealthApiService(apiClient: AuthenticatedApiClient) {
      */
     async checkHealthDataTableExists(): Promise<boolean> {
       return true;
-    }
+    },
   };
 }
 
@@ -230,17 +234,19 @@ export const healthApiService = {
   }): Promise<HealthData[]> {
     try {
       const queryParams = new URLSearchParams();
-      if (params?.start_date) queryParams.append('start_date', params.start_date);
-      if (params?.end_date) queryParams.append('end_date', params.end_date);
-      if (params?.limit) queryParams.append('limit', params.limit.toString());
-      if (params?.offset) queryParams.append('offset', params.offset.toString());
+      if (params?.start_date)
+        queryParams.append("start_date", params.start_date);
+      if (params?.end_date) queryParams.append("end_date", params.end_date);
+      if (params?.limit) queryParams.append("limit", params.limit.toString());
+      if (params?.offset)
+        queryParams.append("offset", params.offset.toString());
 
       const query = queryParams.toString();
-      const endpoint = query ? `/health/data?${query}` : '/health/data';
+      const endpoint = query ? `/health/data?${query}` : "/health/data";
 
       return await api.get<HealthData[]>(endpoint);
     } catch (error) {
-      console.error('Erro ao listar dados de saúde:', error);
+      console.error("Erro ao listar dados de saúde:", error);
       return [];
     }
   },
@@ -250,9 +256,9 @@ export const healthApiService = {
    */
   async getToday(): Promise<HealthData | null> {
     try {
-      return await api.get<HealthData>('/health/data/today');
+      return await api.get<HealthData>("/health/data/today");
     } catch (error) {
-      console.error('Erro ao buscar dados de saúde de hoje:', error);
+      console.error("Erro ao buscar dados de saúde de hoje:", error);
       return null;
     }
   },
@@ -264,7 +270,7 @@ export const healthApiService = {
     try {
       return await api.get<HealthData>(`/health/data/${date}`);
     } catch (error) {
-      console.error('Erro ao buscar dados de saúde por data:', error);
+      console.error("Erro ao buscar dados de saúde por data:", error);
       return null;
     }
   },
@@ -273,7 +279,7 @@ export const healthApiService = {
    * Criar ou atualizar dados de saúde
    */
   async create(data: HealthDataCreate): Promise<HealthData> {
-    return await api.post<HealthData>('/health/data', data);
+    return await api.post<HealthData>("/health/data", data);
   },
 
   /**
@@ -296,11 +302,13 @@ export const healthApiService = {
   async getStats(days = 30): Promise<HealthStats | null> {
     try {
       const queryParams = new URLSearchParams();
-      queryParams.append('days', days.toString());
+      queryParams.append("days", days.toString());
 
-      return await api.get<HealthStats>(`/health/stats?${queryParams.toString()}`);
+      return await api.get<HealthStats>(
+        `/health/stats?${queryParams.toString()}`
+      );
     } catch (error) {
-      console.error('Erro ao buscar estatísticas de saúde:', error);
+      console.error("Erro ao buscar estatísticas de saúde:", error);
       return null;
     }
   },
@@ -310,9 +318,9 @@ export const healthApiService = {
    */
   async checkSystemHealth(): Promise<HealthCheckResponse | null> {
     try {
-      return await api.get<HealthCheckResponse>('/health/check');
+      return await api.get<HealthCheckResponse>("/health/check");
     } catch (error) {
-      console.error('Erro ao verificar saúde do sistema:', error);
+      console.error("Erro ao verificar saúde do sistema:", error);
       return null;
     }
   },
@@ -335,5 +343,5 @@ export const healthApiService = {
    */
   async checkHealthDataTableExists(): Promise<boolean> {
     return true;
-  }
+  },
 };

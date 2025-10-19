@@ -3,7 +3,8 @@
 
 import functools
 import logging
-from typing import Any, Callable, Type, TypeVar
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +63,7 @@ class LoggedToolMixin:
         return result
 
 
-def create_logged_tool(base_tool_class: Type[T]) -> Type[T]:
+def create_logged_tool(base_tool_class: type[T]) -> type[T]:
     """
     Factory function to create a logged version of any tool class.
 

@@ -3,9 +3,9 @@
  * Nota: As mensagens são armazenadas no campo 'messages' da conversa
  */
 
-import type { Message } from '~/core/messages';
+import type { Message } from "~/core/messages";
 
-import { conversationsApiService } from './conversations';
+import { conversationsApiService } from "./conversations";
 
 export const messagesApiService = {
   /**
@@ -13,7 +13,8 @@ export const messagesApiService = {
    */
   async getConversationMessages(thread_id: string): Promise<Message[]> {
     try {
-      const conversation = await conversationsApiService.getByThreadId(thread_id);
+      const conversation =
+        await conversationsApiService.getByThreadId(thread_id);
       if (!conversation) {
         return [];
       }
@@ -21,7 +22,7 @@ export const messagesApiService = {
       // As mensagens estão armazenadas no campo messages da conversa
       return conversation.messages || [];
     } catch (error) {
-      console.error('Erro ao buscar mensagens da conversa:', error);
+      console.error("Erro ao buscar mensagens da conversa:", error);
       return [];
     }
   },
@@ -32,7 +33,9 @@ export const messagesApiService = {
   async createMessage(message: Message): Promise<Message> {
     try {
       // Buscar conversa existente
-      const conversation = await conversationsApiService.getByThreadId(message.threadId);
+      const conversation = await conversationsApiService.getByThreadId(
+        message.threadId
+      );
 
       if (conversation) {
         // Adicionar mensagem à lista existente
@@ -43,27 +46,28 @@ export const messagesApiService = {
 
         // Atualizar conversa
         await conversationsApiService.update(message.threadId, {
-          messages: limitedMessages
+          messages: limitedMessages,
         });
       } else {
         // Criar nova conversa com a mensagem
-        const title = message.role === 'user' && message.content.length > 50
-          ? message.content.substring(0, 50) + '...'
-          : 'Nova conversa';
+        const title =
+          message.role === "user" && message.content.length > 50
+            ? message.content.substring(0, 50) + "..."
+            : "Nova conversa";
 
-        const query = message.role === 'user' ? message.content : '';
+        const query = message.role === "user" ? message.content : "";
 
         await conversationsApiService.create({
           thread_id: message.threadId,
           title,
           query,
-          messages: [message]
+          messages: [message],
         });
       }
 
       return message;
     } catch (error) {
-      console.error('Erro ao criar mensagem:', error);
+      console.error("Erro ao criar mensagem:", error);
       throw error;
     }
   },
@@ -74,30 +78,34 @@ export const messagesApiService = {
   async updateMessage(messageId: string, message: Message): Promise<Message> {
     try {
       // Buscar conversa
-      const conversation = await conversationsApiService.getByThreadId(message.threadId);
+      const conversation = await conversationsApiService.getByThreadId(
+        message.threadId
+      );
 
       if (!conversation) {
-        throw new Error('Conversa não encontrada');
+        throw new Error("Conversa não encontrada");
       }
 
       // Encontrar e atualizar mensagem
       const messages = conversation.messages || [];
-      const messageIndex = messages.findIndex((m: Message) => m.id === messageId);
+      const messageIndex = messages.findIndex(
+        (m: Message) => m.id === messageId
+      );
 
       if (messageIndex === -1) {
-        throw new Error('Mensagem não encontrada');
+        throw new Error("Mensagem não encontrada");
       }
 
       messages[messageIndex] = message;
 
       // Atualizar conversa
       await conversationsApiService.update(message.threadId, {
-        messages
+        messages,
       });
 
       return message;
     } catch (error) {
-      console.error('Erro ao atualizar mensagem:', error);
+      console.error("Erro ao atualizar mensagem:", error);
       throw error;
     }
   },
@@ -108,21 +116,24 @@ export const messagesApiService = {
   async deleteMessage(thread_id: string, messageId: string): Promise<void> {
     try {
       // Buscar conversa
-      const conversation = await conversationsApiService.getByThreadId(thread_id);
+      const conversation =
+        await conversationsApiService.getByThreadId(thread_id);
 
       if (!conversation) {
-        throw new Error('Conversa não encontrada');
+        throw new Error("Conversa não encontrada");
       }
 
       // Filtrar mensagem
-      const messages = (conversation.messages || []).filter((m: Message) => m.id !== messageId);
+      const messages = (conversation.messages || []).filter(
+        (m: Message) => m.id !== messageId
+      );
 
       // Atualizar conversa
       await conversationsApiService.update(thread_id, {
-        messages
+        messages,
       });
     } catch (error) {
-      console.error('Erro ao deletar mensagem:', error);
+      console.error("Erro ao deletar mensagem:", error);
       throw error;
     }
   },
@@ -133,5 +144,5 @@ export const messagesApiService = {
    */
   async checkMessagesTableExists(): Promise<boolean> {
     return true;
-  }
+  },
 };

@@ -4,19 +4,18 @@ import time
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-import jwt
 import httpx
+import jwt
 import pytest
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import HTTPException, status
+from jwt.algorithms import RSAAlgorithm
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from jwt.algorithms import RSAAlgorithm
-
-from src.config.settings import AppConfig, AuthConfig, DatabaseConfig
+from src.config.settings import AuthConfig
 from src.server.clerk_auth import ClerkAuthMiddleware
 
 
@@ -545,15 +544,9 @@ class TestGetCurrentActiveUser:
 # Coverage helpers
 def test_module_imports():
     """Test all required imports are available."""
-    from src.server.auth import (
-        get_current_user,
-        get_current_active_user,
-        get_optional_current_user,
-        UserResponse,
-        oauth2_scheme
-    )
-    from src.server.clerk_auth import ClerkAuthMiddleware, clerk_auth
     from src.config.settings import AuthConfig
+    from src.server.auth import UserResponse, get_current_active_user, get_current_user
+    from src.server.clerk_auth import ClerkAuthMiddleware
 
     assert get_current_user is not None
     assert get_current_active_user is not None

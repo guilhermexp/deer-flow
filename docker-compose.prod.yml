@@ -1,0 +1,19 @@
+services:
+  backend:
+    env_file:
+      - .env.production
+    restart: unless-stopped
+
+  frontend:
+    env_file:
+      - web/.env.production
+    # Em produção, normalmente fica atrás de um proxy (Nginx/Caddy)
+    # Remova a publicação direta de porta se usar proxy reverso
+    # ports:
+    #   - "3000:3000"
+    restart: unless-stopped
+
+networks:
+  deer-flow-network:
+    driver: bridge
+

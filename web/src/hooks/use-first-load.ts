@@ -16,7 +16,7 @@ export function useFirstLoad() {
   useEffect(() => {
     // Check if user has completed first load in this session
     const hasLoadedBefore = sessionStorage.getItem(FIRST_LOAD_KEY);
-    
+
     if (hasLoadedBefore) {
       setIsFirstLoad(false);
       setAnimationsEnabled(true);

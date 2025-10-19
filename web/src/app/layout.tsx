@@ -17,7 +17,6 @@ import { env } from "~/env.js";
 
 import { Toaster } from "../components/deer-flow/toaster";
 
-
 export const metadata: Metadata = {
   title: "🦌 DeerFlow",
   description:
@@ -38,7 +37,11 @@ export default async function RootLayout({
 
   return (
     <ClerkProvider>
-      <html lang={locale} className={`${geist.variable}`} suppressHydrationWarning>
+      <html
+        lang={locale}
+        className={`${geist.variable}`}
+        suppressHydrationWarning
+      >
         <head>
           {/* Define a função isSpace globalmente para corrigir problemas do markdown-it com Next.js + Turbopack
             https://github.com/markdown-it/markdown-it/issues/1082#issuecomment-2749656365 */}
@@ -55,26 +58,24 @@ export default async function RootLayout({
         <body className="bg-app">
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ThemeProviderWrapper>
-              <AnimationProvider>
-                {children}
-              </AnimationProvider>
+              <AnimationProvider>{children}</AnimationProvider>
             </ThemeProviderWrapper>
           </NextIntlClientProvider>
           <Toaster />
-        {
-          // NENHUM RASTREAMENTO DE COMPORTAMENTO DO USUÁRIO OU COLETA DE DADOS PRIVADOS POR PADRÃO
-          //
-          // Quando `NEXT_PUBLIC_STATIC_WEBSITE_ONLY` for `true`, o script será injetado
-          // na página apenas quando `AMPLITUDE_API_KEY` for fornecido em `.env`
-        }
-        {env.NEXT_PUBLIC_STATIC_WEBSITE_ONLY && env.AMPLITUDE_API_KEY && (
-          <>
-            <Script src="https://cdn.amplitude.com/script/d2197dd1df3f2959f26295bb0e7e849f.js"></Script>
-            <Script id="amplitude-init" strategy="lazyOnload">
-              {`window.amplitude.init('${env.AMPLITUDE_API_KEY}', {"fetchRemoteConfig":true,"autocapture":true});`}
-            </Script>
-          </>
-        )}
+          {
+            // NENHUM RASTREAMENTO DE COMPORTAMENTO DO USUÁRIO OU COLETA DE DADOS PRIVADOS POR PADRÃO
+            //
+            // Quando `NEXT_PUBLIC_STATIC_WEBSITE_ONLY` for `true`, o script será injetado
+            // na página apenas quando `AMPLITUDE_API_KEY` for fornecido em `.env`
+          }
+          {env.NEXT_PUBLIC_STATIC_WEBSITE_ONLY && env.AMPLITUDE_API_KEY && (
+            <>
+              <Script src="https://cdn.amplitude.com/script/d2197dd1df3f2959f26295bb0e7e849f.js"></Script>
+              <Script id="amplitude-init" strategy="lazyOnload">
+                {`window.amplitude.init('${env.AMPLITUDE_API_KEY}', {"fetchRemoteConfig":true,"autocapture":true});`}
+              </Script>
+            </>
+          )}
         </body>
       </html>
     </ClerkProvider>

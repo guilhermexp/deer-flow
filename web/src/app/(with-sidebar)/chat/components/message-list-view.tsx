@@ -59,7 +59,7 @@ export function MessageListView({
   onFeedback?: (feedback: { option: Option }) => void;
   onSendMessage?: (
     message: string,
-    options?: { interruptFeedback?: string },
+    options?: { interruptFeedback?: string }
   ) => void;
 }) {
   const scrollContainerRef = useRef<ScrollContainerRef>(null);
@@ -68,10 +68,10 @@ export function MessageListView({
   const waitingForFeedbackMessageId = useLastFeedbackMessageId();
   const responding = useStore((state) => state.responding);
   const noOngoingResearch = useStore(
-    (state) => state.ongoingResearchId === null,
+    (state) => state.ongoingResearchId === null
   );
   const ongoingResearchIsOpen = useStore(
-    (state) => state.ongoingResearchId === state.openResearchId,
+    (state) => state.ongoingResearchId === state.openResearchId
   );
 
   const handleToggleResearch = useCallback(() => {
@@ -95,9 +95,9 @@ export function MessageListView({
       ref={scrollContainerRef}
     >
       <ul className="flex flex-col">
-        {messageIds.map((messageId) => (
+        {messageIds.map((messageId, index) => (
           <MessageListItem
-            key={messageId}
+            key={`${messageId}-${index}`}
             messageId={messageId}
             waitForFeedback={waitingForFeedbackMessageId === messageId}
             interruptMessage={interruptMessage}
@@ -106,7 +106,7 @@ export function MessageListView({
             onToggleResearch={handleToggleResearch}
           />
         ))}
-        <div className="flex h-8 w-full shrink-0"></div>
+        <li key="list-end-spacer" className="flex h-8 w-full shrink-0 list-none"></li>
       </ul>
       {responding && (noOngoingResearch || !ongoingResearchIsOpen) && (
         <LoadingAnimation className="ml-4" />
@@ -131,7 +131,7 @@ function MessageListItem({
   interruptMessage?: Message | null;
   onSendMessage?: (
     message: string,
-    options?: { interruptFeedback?: string },
+    options?: { interruptFeedback?: string }
   ) => void;
   onToggleResearch?: () => void;
 }) {
@@ -182,7 +182,7 @@ function MessageListItem({
             className={cn(
               "flex w-full px-4",
               message.role === "user" && "justify-end",
-              className,
+              className
             )}
           >
             <MessageBubble message={message}>
@@ -190,7 +190,7 @@ function MessageListItem({
                 <Markdown
                   className={cn(
                     message.role === "user" &&
-                      "prose-invert not-dark:text-secondary dark:text-inherit",
+                      "prose-invert not-dark:text-secondary dark:text-inherit"
                   )}
                 >
                   {message?.content}
@@ -204,7 +204,6 @@ function MessageListItem({
         return (
           <motion.li
             className="mt-10"
-            key={messageId}
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             style={{ transition: "all 0.2s ease-out" }}
@@ -237,7 +236,7 @@ function MessageBubble({
         "group flex w-auto max-w-[90vw] flex-col rounded-2xl px-4 py-3 break-words",
         message.role === "user" && "bg-brand rounded-ee-none",
         message.role === "assistant" && "bg-card rounded-es-none",
-        className,
+        className
       )}
       style={{ wordBreak: "break-all" }}
     >
@@ -259,7 +258,7 @@ function ResearchCard({
   const reportId = useStore((state) => state.researchReportIds.get(researchId));
   const hasReport = reportId !== undefined;
   const reportGenerating = useStore(
-    (state) => hasReport && state.messages.get(reportId)!.isStreaming,
+    (state) => hasReport && state.messages.get(reportId)!.isStreaming
   );
   const openResearchId = useStore((state) => state.openResearchId);
   const state = useMemo(() => {
@@ -341,7 +340,8 @@ function ThoughtBlock({
   // Split content into static (previous chunks) and streaming (current chunk)
   const chunks = contentChunks ?? [];
   const staticContent = chunks.slice(0, -1).join("");
-  const streamingChunk = isStreaming && chunks.length > 0 ? (chunks[chunks.length - 1] ?? "") : "";
+  const streamingChunk =
+    isStreaming && chunks.length > 0 ? (chunks[chunks.length - 1] ?? "") : "";
   const hasStreamingContent = isStreaming && streamingChunk.length > 0;
 
   return (
@@ -355,7 +355,7 @@ function ThoughtBlock({
               "hover:bg-accent hover:text-accent-foreground",
               isStreaming
                 ? "border-primary/20 bg-primary/5 shadow-sm"
-                : "border-border bg-card",
+                : "border-border bg-card"
             )}
           >
             <div className="flex w-full items-center gap-3">
@@ -363,13 +363,13 @@ function ThoughtBlock({
                 size={18}
                 className={cn(
                   "shrink-0 transition-colors duration-200",
-                  isStreaming ? "text-primary" : "text-muted-foreground",
+                  isStreaming ? "text-primary" : "text-muted-foreground"
                 )}
               />
               <span
                 className={cn(
                   "leading-none font-semibold transition-colors duration-200",
-                  isStreaming ? "text-primary" : "text-foreground",
+                  isStreaming ? "text-primary" : "text-foreground"
                 )}
               >
                 {t("deepThinking")}
@@ -394,7 +394,7 @@ function ThoughtBlock({
           <Card
             className={cn(
               "transition-all duration-200",
-              isStreaming ? "border-primary/20 bg-primary/5" : "border-border",
+              isStreaming ? "border-primary/20 bg-primary/5" : "border-border"
             )}
           >
             <CardContent>
@@ -402,7 +402,7 @@ function ThoughtBlock({
                 <ScrollContainer
                   className={cn(
                     "flex h-full w-full flex-col overflow-hidden",
-                    className,
+                    className
                   )}
                   scrollShadow={false}
                   autoScrollToBottom
@@ -411,7 +411,7 @@ function ThoughtBlock({
                     <Markdown
                       className={cn(
                         "prose dark:prose-invert max-w-none transition-colors duration-200",
-                        "opacity-80",
+                        "opacity-80"
                       )}
                       animated={false}
                     >
@@ -422,7 +422,7 @@ function ThoughtBlock({
                     <Markdown
                       className={cn(
                         "prose dark:prose-invert max-w-none transition-colors duration-200",
-                        "prose-primary",
+                        "prose-primary"
                       )}
                       animated={true}
                     >
@@ -433,7 +433,7 @@ function ThoughtBlock({
                     <Markdown
                       className={cn(
                         "prose dark:prose-invert max-w-none transition-colors duration-200",
-                        isStreaming ? "prose-primary" : "opacity-80",
+                        isStreaming ? "prose-primary" : "opacity-80"
                       )}
                       animated={false}
                     >
@@ -465,7 +465,7 @@ function PlanCard({
   onFeedback?: (feedback: { option: Option }) => void;
   onSendMessage?: (
     message: string,
-    options?: { interruptFeedback?: string },
+    options?: { interruptFeedback?: string }
   ) => void;
   waitForFeedback?: boolean;
 }) {
@@ -480,7 +480,7 @@ function PlanCard({
 
   const reasoningContent = message.reasoningContent;
   const hasMainContent = Boolean(
-    message.content && message.content.trim() !== "",
+    message.content && message.content.trim() !== ""
   );
 
   // 判断是否正在思考：有推理内容但还没有主要内容
@@ -494,7 +494,7 @@ function PlanCard({
         `${GREETINGS[Math.floor(Math.random() * GREETINGS.length)]}! ${Math.random() > 0.5 ? "Let's get started." : "Let's start."}`,
         {
           interruptFeedback: "accepted",
-        },
+        }
       );
     }
   }, [onSendMessage]);
@@ -527,20 +527,21 @@ function PlanCard({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div style={{ wordBreak: 'break-all', whiteSpace: 'normal' }}>
+              <div style={{ wordBreak: "break-all", whiteSpace: "normal" }}>
                 <Markdown className="opacity-80" animated={false}>
                   {plan.thought}
                 </Markdown>
                 {plan.steps && (
                   <ul className="my-2 flex list-decimal flex-col gap-4 border-l-[2px] pl-8">
                     {plan.steps.map((step, i) => (
-                      <li key={`step-${i}`} style={{ wordBreak: 'break-all', whiteSpace: 'normal' }}>
+                      <li
+                        key={`step-${step?.title ?? 'untitled'}-${i}`}
+                        style={{ wordBreak: "break-all", whiteSpace: "normal" }}
+                      >
                         <div className="flex items-start gap-2">
                           <div className="flex-1">
                             <h3 className="mb flex items-center gap-2 text-lg font-medium">
-                              <Markdown animated={false}>
-                                {step.title}
-                              </Markdown>
+                              <Markdown animated={false}>{step.title}</Markdown>
                               {step.tools && step.tools.length > 0 && (
                                 <Tooltip
                                   title={`Uses ${step.tools.length} MCP tool${step.tools.length > 1 ? "s" : ""}`}
@@ -552,7 +553,13 @@ function PlanCard({
                                 </Tooltip>
                               )}
                             </h3>
-                            <div className="text-muted-foreground text-sm" style={{ wordBreak: 'break-all', whiteSpace: 'normal' }}>
+                            <div
+                              className="text-muted-foreground text-sm"
+                              style={{
+                                wordBreak: "break-all",
+                                whiteSpace: "normal",
+                              }}
+                            >
                               <Markdown animated={false}>
                                 {step.description}
                               </Markdown>
@@ -688,8 +695,8 @@ function ToolsDisplay({ tools }: { tools: string[] }) {
     <div className="mt-2 flex flex-wrap gap-1">
       {tools.map((tool, index) => (
         <span
-          key={index}
-          className="rounded-md bg-muted px-2 py-1 text-xs font-mono text-muted-foreground"
+          key={`tool-${index}`}
+          className="bg-muted text-muted-foreground rounded-md px-2 py-1 font-mono text-xs"
         >
           {tool}
         </span>

@@ -17,7 +17,7 @@ export function LoadingAnimation({
       className={cn(
         styles.loadingAnimation,
         size === "sm" && styles.sm,
-        className,
+        className
       )}
     >
       <div></div>

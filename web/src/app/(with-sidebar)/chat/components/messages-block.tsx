@@ -3,7 +3,13 @@
 
 import { motion } from "framer-motion";
 import { FastForward, Play } from "lucide-react";
-import { useCallback, useRef, useState, forwardRef, useImperativeHandle } from "react";
+import {
+  useCallback,
+  useRef,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 
 import { RainbowText } from "~/components/deer-flow/rainbow-text";
 import { Button } from "~/components/ui/button";
@@ -44,16 +50,25 @@ const MessagesBlockComponent = forwardRef<
       options?: {
         interruptFeedback?: string;
         resources?: Array<Resource>;
-      },
+      }
     ) => {
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
-      
+
       // Adicionar ao histórico apenas se não for feedback ou mensagem de sistema
-      if (message.trim() && !options?.interruptFeedback && !message.includes("Let's get started") && !message.includes("Cool!") && !message.includes("Sounds great") && !message.includes("Looks good") && !message.includes("Great!") && !message.includes("Awesome!")) {
+      if (
+        message.trim() &&
+        !options?.interruptFeedback &&
+        !message.includes("Let's get started") &&
+        !message.includes("Cool!") &&
+        !message.includes("Sounds great") &&
+        !message.includes("Looks good") &&
+        !message.includes("Great!") &&
+        !message.includes("Awesome!")
+      ) {
         // addToHistory is now handled in sendMessage function in store.ts
       }
-      
+
       try {
         await sendMessage(
           message,
@@ -64,11 +79,11 @@ const MessagesBlockComponent = forwardRef<
           },
           {
             abortSignal: abortController.signal,
-          },
+          }
         );
       } catch {}
     },
-    [feedback],
+    [feedback]
   );
   const handleCancel = useCallback(() => {
     abortControllerRef.current?.abort();
@@ -78,7 +93,7 @@ const MessagesBlockComponent = forwardRef<
     (feedback: { option: Option }) => {
       setFeedback(feedback);
     },
-    [setFeedback],
+    [setFeedback]
   );
   const handleRemoveFeedback = useCallback(() => {
     setFeedback(null);
@@ -93,13 +108,17 @@ const MessagesBlockComponent = forwardRef<
     fastForwardReplay(!fastForwarding);
   }, [fastForwarding]);
 
-  useImperativeHandle(ref, () => ({
-    sendQuery: (query: string) => {
-      if (!responding) {
-        void handleSend(query);
-      }
-    },
-  }), [handleSend, responding]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      sendQuery: (query: string) => {
+        if (!responding) {
+          void handleSend(query);
+        }
+      },
+    }),
+    [handleSend, responding]
+  );
   return (
     <div className={cn("flex h-full flex-col", className)}>
       <MessageListView
@@ -129,7 +148,7 @@ const MessagesBlockComponent = forwardRef<
           <div
             className={cn(
               "fixed bottom-[calc(50vh+80px)] left-0 transition-all duration-500 ease-out",
-              replayStarted && "pointer-events-none scale-150 opacity-0",
+              replayStarted && "pointer-events-none scale-150 opacity-0"
             )}
           >
             <Welcome />
@@ -143,7 +162,7 @@ const MessagesBlockComponent = forwardRef<
             <Card
               className={cn(
                 "w-full transition-all duration-300",
-                !replayStarted && "translate-y-[-40vh]",
+                !replayStarted && "translate-y-[-40vh]"
               )}
             >
               <div className="flex items-center justify-between">
@@ -227,6 +246,6 @@ const MessagesBlockComponent = forwardRef<
   );
 });
 
-MessagesBlockComponent.displayName = 'MessagesBlock';
+MessagesBlockComponent.displayName = "MessagesBlock";
 
 export const MessagesBlock = MessagesBlockComponent;

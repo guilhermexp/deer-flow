@@ -9,37 +9,37 @@
 // Timeout constants (in milliseconds)
 export const TIMEOUTS = {
   // Authentication related timeouts
-  AUTH_CHECK: 5000,           // Auth session check
-  LOGIN_REQUEST: 8000,        // Login/register requests
-  
+  AUTH_CHECK: 5000, // Auth session check
+  LOGIN_REQUEST: 8000, // Login/register requests
+
   // API call timeouts
-  API_CALL: 10000,           // Standard API calls
-  DATABASE_QUERY: 15000,     // Database queries (Neon PostgreSQL)
+  API_CALL: 10000, // Standard API calls
+  DATABASE_QUERY: 15000, // Database queries (Neon PostgreSQL)
 
   // Connection and testing
-  CONNECTION_TEST: 3000,      // Quick connection tests
-  HEALTH_CHECK: 5000,        // Health check endpoints
-  
+  CONNECTION_TEST: 3000, // Quick connection tests
+  HEALTH_CHECK: 5000, // Health check endpoints
+
   // File operations
-  FILE_UPLOAD: 30000,        // File upload operations
-  
+  FILE_UPLOAD: 30000, // File upload operations
+
   // Realtime subscriptions
-  REALTIME_CONNECT: 8000,    // Realtime connection timeout
-  
+  REALTIME_CONNECT: 8000, // Realtime connection timeout
+
   // Debug and development
-  DEBUG_OPERATION: 5000,     // Debug operations timeout
+  DEBUG_OPERATION: 5000, // Debug operations timeout
 } as const;
 
 // API endpoints
 export const API_ENDPOINTS = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8005/api',
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8005/api",
 } as const;
 
 // Retry configuration
 export const RETRY_CONFIG = {
   MAX_RETRIES: 3,
-  INITIAL_DELAY: 1000,       // Initial retry delay (ms)
-  BACKOFF_MULTIPLIER: 2,     // Exponential backoff multiplier
+  INITIAL_DELAY: 1000, // Initial retry delay (ms)
+  BACKOFF_MULTIPLIER: 2, // Exponential backoff multiplier
 } as const;
 
 // Pagination defaults
@@ -51,23 +51,23 @@ export const PAGINATION = {
 
 // Cache durations (in milliseconds)
 export const CACHE_DURATION = {
-  USER_PROFILE: 5 * 60 * 1000,        // 5 minutes
-  CONVERSATIONS: 2 * 60 * 1000,       // 2 minutes
-  MESSAGES: 30 * 1000,                // 30 seconds
-  HEALTH_DATA: 1 * 60 * 1000,         // 1 minute
+  USER_PROFILE: 5 * 60 * 1000, // 5 minutes
+  CONVERSATIONS: 2 * 60 * 1000, // 2 minutes
+  MESSAGES: 30 * 1000, // 30 seconds
+  HEALTH_DATA: 1 * 60 * 1000, // 1 minute
 } as const;
 
 // UI constants
 export const UI_CONSTANTS = {
-  DEBOUNCE_DELAY: 300,        // Input debounce delay
-  ANIMATION_DURATION: 200,     // Standard animation duration
-  TOAST_DURATION: 5000,       // Toast notification duration
+  DEBOUNCE_DELAY: 300, // Input debounce delay
+  ANIMATION_DURATION: 200, // Standard animation duration
+  TOAST_DURATION: 5000, // Toast notification duration
 } as const;
 
 // Security constants
 export const SECURITY = {
-  SESSION_REFRESH_THRESHOLD: 5 * 60 * 1000,  // Refresh session if expires in 5 minutes
-  TOKEN_VALIDATION_INTERVAL: 60 * 1000,      // Check token validity every minute
+  SESSION_REFRESH_THRESHOLD: 5 * 60 * 1000, // Refresh session if expires in 5 minutes
+  TOKEN_VALIDATION_INTERVAL: 60 * 1000, // Check token validity every minute
 } as const;
 
 // Export all for convenience

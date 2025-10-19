@@ -9,9 +9,8 @@ This test validates RF-5 (SQLite support) and RF-2 (PostgreSQL support).
 """
 
 import pytest
-import asyncio
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 

@@ -4,11 +4,11 @@
 import logging
 import os
 from dataclasses import dataclass, field, fields
-from typing import Any, Optional
+from typing import Any
 
 from langchain_core.runnables import RunnableConfig
 
-from src.config.loader import get_bool_env, get_int_env, get_str_env
+from src.config.loader import get_int_env, get_str_env
 from src.config.report_style import ReportStyle
 from src.rag.retriever import Resource
 
@@ -55,7 +55,7 @@ class Configuration:
 
     @classmethod
     def from_runnable_config(
-        cls, config: Optional[RunnableConfig] = None
+        cls, config: RunnableConfig | None = None
     ) -> "Configuration":
         """Create a Configuration instance from a RunnableConfig."""
         configurable = (

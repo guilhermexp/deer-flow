@@ -26,7 +26,12 @@ export async function* chatStream(
     interrupt_feedback?: string;
     enable_deep_thinking?: boolean;
     enable_background_investigation: boolean;
-    report_style?: "academic" | "popular_science" | "news" | "social_media" | "strategic_investment";
+    report_style?:
+      | "academic"
+      | "popular_science"
+      | "news"
+      | "social_media"
+      | "strategic_investment";
     mcp_settings?: {
       servers: Record<
         string,
@@ -38,15 +43,15 @@ export async function* chatStream(
     };
     model?: string;
   },
-  options: { abortSignal?: AbortSignal } = {},
+  options: { abortSignal?: AbortSignal } = {}
 ) {
   if (
     env.NEXT_PUBLIC_STATIC_WEBSITE_ONLY ||
     location.search.includes("mock") ||
     location.search.includes("replay=")
-  ) 
+  )
     return yield* chatReplayStream(userMessage, params, options);
-  
+
   try {
     const stream = fetchStream(resolveServiceURL("chat/stream"), {
       body: JSON.stringify({
@@ -55,14 +60,14 @@ export async function* chatStream(
       }),
       signal: options.abortSignal,
     });
-    
+
     for await (const event of stream) {
       yield {
         type: event.event,
         data: JSON.parse(event.data),
       } as ChatEvent;
     }
-  } catch(e) {
+  } catch (e) {
     console.error("Chat stream error:", e);
     throw e; // Re-throw to let the store handle it
   }
@@ -85,7 +90,7 @@ async function* chatReplayStream(
     max_search_results: 3,
     interrupt_feedback: undefined,
   },
-  options: { abortSignal?: AbortSignal } = {},
+  options: { abortSignal?: AbortSignal } = {}
 ): AsyncIterable<ChatEvent> {
   const urlParams = new URLSearchParams(window.location.search);
   let replayFilePath = "";
@@ -150,7 +155,7 @@ async function* chatReplayStream(
 const replayCache = new Map<string, string>();
 export async function fetchReplay(
   url: string,
-  options: { abortSignal?: AbortSignal } = {},
+  options: { abortSignal?: AbortSignal } = {}
 ) {
   if (replayCache.has(url)) {
     return replayCache.get(url)!;
@@ -176,7 +181,7 @@ export async function fetchReplayTitle() {
       max_step_num: 1,
       max_search_results: 3,
     },
-    {},
+    {}
   );
   for await (const event of res) {
     if (event.type === "message_chunk") {

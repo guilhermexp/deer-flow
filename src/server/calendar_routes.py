@@ -2,11 +2,11 @@
 # SPDX-License-Identifier: MIT
 
 from datetime import datetime, timedelta
-from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
+from sqlalchemy.orm import Session
 
 from src.database.base import get_db
 from src.database.models import CalendarEvent, User
@@ -17,35 +17,35 @@ router = APIRouter(prefix="/api/calendar", tags=["calendar"])
 
 class EventCreate(BaseModel):
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     date: datetime
-    end_date: Optional[datetime] = None
-    category: Optional[str] = None
-    color: Optional[str] = "#3B82F6"  # Default blue color
-    location: Optional[str] = None
+    end_date: datetime | None = None
+    category: str | None = None
+    color: str | None = "#3B82F6"  # Default blue color
+    location: str | None = None
     is_all_day: bool = False
 
 
 class EventUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    category: Optional[str] = None
-    color: Optional[str] = None
-    location: Optional[str] = None
-    is_all_day: Optional[bool] = None
+    title: str | None = None
+    description: str | None = None
+    date: datetime | None = None
+    end_date: datetime | None = None
+    category: str | None = None
+    color: str | None = None
+    location: str | None = None
+    is_all_day: bool | None = None
 
 
 class EventResponse(BaseModel):
     id: int
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     date: datetime
-    end_date: Optional[datetime] = None
-    category: Optional[str] = None
+    end_date: datetime | None = None
+    category: str | None = None
     color: str
-    location: Optional[str] = None
+    location: str | None = None
     is_all_day: bool
     created_at: datetime
     updated_at: datetime
@@ -54,11 +54,11 @@ class EventResponse(BaseModel):
         from_attributes = True
 
 
-@router.get("/events", response_model=List[EventResponse])
+@router.get("/events", response_model=list[EventResponse])
 async def get_events(
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
-    category: Optional[str] = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
+    category: str | None = None,
     limit: int = Query(500, le=1000),
     offset: int = 0,
     current_user: User = Depends(get_current_active_user),
@@ -205,7 +205,7 @@ async def delete_event(
     return {"message": "Event deleted successfully"}
 
 
-@router.get("/events/month/{year}/{month}", response_model=List[EventResponse])
+@router.get("/events/month/{year}/{month}", response_model=list[EventResponse])
 async def get_events_by_month(
     year: int,
     month: int,

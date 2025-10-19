@@ -3,7 +3,7 @@
 
 import { StarFilledIcon, GitHubLogoIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
 import { LanguageSwitcher } from "~/components/deer-flow/language-switcher";
 import { NumberTicker } from "~/components/magicui/number-ticker";
@@ -11,7 +11,7 @@ import { Button } from "~/components/ui/button";
 import { env } from "~/env";
 
 export function SiteHeader() {
-  const t = useTranslations('common');
+  const t = useTranslations("common");
 
   return (
     <header className="supports-backdrop-blur:bg-background/80 bg-background/40 sticky top-0 left-0 z-40 flex h-15 w-full flex-col items-center backdrop-blur-lg">
@@ -37,7 +37,7 @@ export function SiteHeader() {
           >
             <Link href="https://github.com/bytedance/deer-flow" target="_blank">
               <GitHubLogoIcon className="size-4" />
-              {t('starOnGitHub')}
+              {t("starOnGitHub")}
               {env.NEXT_PUBLIC_STATIC_WEBSITE_ONLY &&
                 env.GITHUB_OAUTH_TOKEN && <StarCounter />}
             </Link>
@@ -65,7 +65,7 @@ export async function StarCounter() {
         next: {
           revalidate: 3600,
         },
-      },
+      }
     );
 
     if (response.ok) {

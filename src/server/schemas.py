@@ -9,9 +9,8 @@ ensuring consistency between backend validation and OpenAPI documentation.
 """
 
 from datetime import datetime
-from typing import Optional
 
-from pydantic import BaseModel, Field, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class UserResponse(BaseModel):
@@ -103,14 +102,14 @@ class UserCreateRequest(BaseModel):
 class UserUpdateRequest(BaseModel):
     """Schema for updating user information."""
 
-    email: Optional[EmailStr] = Field(None, description="User email address")
-    username: Optional[str] = Field(
+    email: EmailStr | None = Field(None, description="User email address")
+    username: str | None = Field(
         None,
         description="Username",
         min_length=3,
         max_length=100
     )
-    is_active: Optional[bool] = Field(None, description="User account active status")
+    is_active: bool | None = Field(None, description="User account active status")
 
     class Config:
         json_schema_extra = {

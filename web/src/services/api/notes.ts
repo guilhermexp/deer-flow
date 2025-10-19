@@ -2,9 +2,9 @@
  * Serviço de notas usando REST API
  */
 
-import type { AuthenticatedApiClient } from '~/hooks/use-authenticated-api';
+import type { AuthenticatedApiClient } from "~/hooks/use-authenticated-api";
 
-import { api } from './http-client';
+import { api } from "./http-client";
 
 export interface Note {
   id: number;
@@ -71,17 +71,18 @@ export function createNotesApiService(apiClient: AuthenticatedApiClient) {
     }): Promise<Note[]> {
       try {
         const queryParams = new URLSearchParams();
-        if (params?.search) queryParams.append('search', params.search);
-        if (params?.source) queryParams.append('source', params.source);
-        if (params?.limit) queryParams.append('limit', params.limit.toString());
-        if (params?.offset) queryParams.append('offset', params.offset.toString());
+        if (params?.search) queryParams.append("search", params.search);
+        if (params?.source) queryParams.append("source", params.source);
+        if (params?.limit) queryParams.append("limit", params.limit.toString());
+        if (params?.offset)
+          queryParams.append("offset", params.offset.toString());
 
         const query = queryParams.toString();
-        const endpoint = query ? `/notes?${query}` : '/notes';
+        const endpoint = query ? `/notes?${query}` : "/notes";
 
         return await apiClient.get<Note[]>(endpoint);
       } catch (error) {
-        console.error('Erro ao listar notas:', error);
+        console.error("Erro ao listar notas:", error);
         return [];
       }
     },
@@ -94,7 +95,7 @@ export function createNotesApiService(apiClient: AuthenticatedApiClient) {
         const note = await apiClient.get<Note>(`/notes/${id}`);
         return note;
       } catch (error) {
-        console.error('Erro ao buscar nota:', error);
+        console.error("Erro ao buscar nota:", error);
         return null;
       }
     },
@@ -103,7 +104,7 @@ export function createNotesApiService(apiClient: AuthenticatedApiClient) {
      * Criar nova nota
      */
     async create(data: NoteCreate): Promise<Note> {
-      return await apiClient.post<Note>('/notes', data);
+      return await apiClient.post<Note>("/notes", data);
     },
 
     /**
@@ -125,9 +126,9 @@ export function createNotesApiService(apiClient: AuthenticatedApiClient) {
      */
     async getStats(): Promise<NoteStats | null> {
       try {
-        return await apiClient.get<NoteStats>('/notes/stats');
+        return await apiClient.get<NoteStats>("/notes/stats");
       } catch (error) {
-        console.error('Erro ao buscar estatísticas das notas:', error);
+        console.error("Erro ao buscar estatísticas das notas:", error);
         return null;
       }
     },
@@ -138,13 +139,13 @@ export function createNotesApiService(apiClient: AuthenticatedApiClient) {
     async extractContent(url: string): Promise<ExtractContentResponse | null> {
       try {
         const queryParams = new URLSearchParams();
-        queryParams.append('url', url);
+        queryParams.append("url", url);
 
         return await apiClient.post<ExtractContentResponse>(
           `/notes/extract?${queryParams.toString()}`
         );
       } catch (error) {
-        console.error('Erro ao extrair conteúdo:', error);
+        console.error("Erro ao extrair conteúdo:", error);
         return null;
       }
     },
@@ -152,13 +153,15 @@ export function createNotesApiService(apiClient: AuthenticatedApiClient) {
     /**
      * Gerar ou regenerar resumo de uma nota
      */
-    async summarize(noteId: number): Promise<{ note_id: number; summary: string } | null> {
+    async summarize(
+      noteId: number
+    ): Promise<{ note_id: number; summary: string } | null> {
       try {
         return await apiClient.post<{ note_id: number; summary: string }>(
           `/notes/summarize/${noteId}`
         );
       } catch (error) {
-        console.error('Erro ao gerar resumo:', error);
+        console.error("Erro ao gerar resumo:", error);
         return null;
       }
     },
@@ -169,7 +172,7 @@ export function createNotesApiService(apiClient: AuthenticatedApiClient) {
      */
     async checkNotesTableExists(): Promise<boolean> {
       return true;
-    }
+    },
   };
 }
 
@@ -187,17 +190,18 @@ export const notesApiService = {
   }): Promise<Note[]> {
     try {
       const queryParams = new URLSearchParams();
-      if (params?.search) queryParams.append('search', params.search);
-      if (params?.source) queryParams.append('source', params.source);
-      if (params?.limit) queryParams.append('limit', params.limit.toString());
-      if (params?.offset) queryParams.append('offset', params.offset.toString());
+      if (params?.search) queryParams.append("search", params.search);
+      if (params?.source) queryParams.append("source", params.source);
+      if (params?.limit) queryParams.append("limit", params.limit.toString());
+      if (params?.offset)
+        queryParams.append("offset", params.offset.toString());
 
       const query = queryParams.toString();
-      const endpoint = query ? `/notes?${query}` : '/notes';
+      const endpoint = query ? `/notes?${query}` : "/notes";
 
       return await api.get<Note[]>(endpoint);
     } catch (error) {
-      console.error('Erro ao listar notas:', error);
+      console.error("Erro ao listar notas:", error);
       return [];
     }
   },
@@ -210,7 +214,7 @@ export const notesApiService = {
       const note = await api.get<Note>(`/notes/${id}`);
       return note;
     } catch (error) {
-      console.error('Erro ao buscar nota:', error);
+      console.error("Erro ao buscar nota:", error);
       return null;
     }
   },
@@ -219,7 +223,7 @@ export const notesApiService = {
    * Criar nova nota
    */
   async create(data: NoteCreate): Promise<Note> {
-    return await api.post<Note>('/notes', data);
+    return await api.post<Note>("/notes", data);
   },
 
   /**
@@ -241,9 +245,9 @@ export const notesApiService = {
    */
   async getStats(): Promise<NoteStats | null> {
     try {
-      return await api.get<NoteStats>('/notes/stats');
+      return await api.get<NoteStats>("/notes/stats");
     } catch (error) {
-      console.error('Erro ao buscar estatísticas das notas:', error);
+      console.error("Erro ao buscar estatísticas das notas:", error);
       return null;
     }
   },
@@ -254,13 +258,13 @@ export const notesApiService = {
   async extractContent(url: string): Promise<ExtractContentResponse | null> {
     try {
       const queryParams = new URLSearchParams();
-      queryParams.append('url', url);
+      queryParams.append("url", url);
 
       return await api.post<ExtractContentResponse>(
         `/notes/extract?${queryParams.toString()}`
       );
     } catch (error) {
-      console.error('Erro ao extrair conteúdo:', error);
+      console.error("Erro ao extrair conteúdo:", error);
       return null;
     }
   },
@@ -268,13 +272,15 @@ export const notesApiService = {
   /**
    * Gerar ou regenerar resumo de uma nota
    */
-  async summarize(noteId: number): Promise<{ note_id: number; summary: string } | null> {
+  async summarize(
+    noteId: number
+  ): Promise<{ note_id: number; summary: string } | null> {
     try {
       return await api.post<{ note_id: number; summary: string }>(
         `/notes/summarize/${noteId}`
       );
     } catch (error) {
-      console.error('Erro ao gerar resumo:', error);
+      console.error("Erro ao gerar resumo:", error);
       return null;
     }
   },
@@ -285,5 +291,5 @@ export const notesApiService = {
    */
   async checkNotesTableExists(): Promise<boolean> {
     return true;
-  }
+  },
 };

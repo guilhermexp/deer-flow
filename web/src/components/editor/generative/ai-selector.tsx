@@ -48,7 +48,7 @@ function useProseCompletion() {
               prompt,
               ...options?.body,
             }),
-          },
+          }
         );
 
         let fullText = "";
@@ -69,7 +69,7 @@ function useProseCompletion() {
         throw error;
       }
     },
-    [],
+    []
   );
 
   const reset = useCallback(() => {
@@ -143,7 +143,7 @@ export function AISelector({ onOpenChange }: AISelectorProps) {
 
                 const slice = editor.state.selection.content();
                 const text = editor.storage.markdown.serializer.serialize(
-                  slice.content,
+                  slice.content
                 );
 
                 complete(text, {

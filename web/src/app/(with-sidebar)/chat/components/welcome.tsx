@@ -26,8 +26,9 @@ export function Welcome({ className }: { className?: string }) {
         >
           🦌 DeerFlow
         </a>
-        , um assistente de pesquisa profunda construído com modelos de linguagem de ponta, que ajuda
-        você a pesquisar na web, navegar por informações e lidar com tarefas complexas.
+        , um assistente de pesquisa profunda construído com modelos de linguagem
+        de ponta, que ajuda você a pesquisar na web, navegar por informações e
+        lidar com tarefas complexas.
       </div>
     </motion.div>
   );

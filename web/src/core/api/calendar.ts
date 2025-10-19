@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 // SPDX-License-Identifier: MIT
 
-import { apiClient } from './client';
+import { apiClient } from "./client";
 
 export interface CalendarEvent {
   id: number;
@@ -38,22 +38,32 @@ export const calendarApi = {
     limit?: number;
     offset?: number;
   }): Promise<CalendarEvent[]> {
-    const response = await apiClient.get<CalendarEvent[]>('/calendar/events', { params });
+    const response = await apiClient.get<CalendarEvent[]>("/calendar/events", {
+      params,
+    });
     return response.data;
   },
 
   async getEvent(id: number): Promise<CalendarEvent> {
-    const response = await apiClient.get<CalendarEvent>(`/calendar/events/${id}`);
+    const response = await apiClient.get<CalendarEvent>(
+      `/calendar/events/${id}`
+    );
     return response.data;
   },
 
   async createEvent(data: EventCreate): Promise<CalendarEvent> {
-    const response = await apiClient.post<CalendarEvent>('/calendar/events', data);
+    const response = await apiClient.post<CalendarEvent>(
+      "/calendar/events",
+      data
+    );
     return response.data;
   },
 
   async updateEvent(id: number, data: EventUpdate): Promise<CalendarEvent> {
-    const response = await apiClient.put<CalendarEvent>(`/calendar/events/${id}`, data);
+    const response = await apiClient.put<CalendarEvent>(
+      `/calendar/events/${id}`,
+      data
+    );
     return response.data;
   },
 
@@ -61,8 +71,13 @@ export const calendarApi = {
     await apiClient.delete(`/calendar/events/${id}`);
   },
 
-  async getEventsByMonth(year: number, month: number): Promise<CalendarEvent[]> {
-    const response = await apiClient.get<CalendarEvent[]>(`/calendar/events/month/${year}/${month}`);
+  async getEventsByMonth(
+    year: number,
+    month: number
+  ): Promise<CalendarEvent[]> {
+    const response = await apiClient.get<CalendarEvent[]>(
+      `/calendar/events/month/${year}/${month}`
+    );
     return response.data;
   },
 };

@@ -41,7 +41,7 @@ export function ConversationStarter({
             }}
           >
             <div
-              className="cursor-pointer rounded-xl border border-white/10 bg-white/[0.05] px-4 py-4 text-gray-400 backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.08] hover:text-gray-300 hover:border-white/20"
+              className="cursor-pointer rounded-xl border border-white/10 bg-white/[0.05] px-4 py-4 text-gray-400 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-gray-300"
               onClick={() => {
                 onSend?.(question);
               }}

@@ -56,17 +56,17 @@ export const useStore = create<{
       messageIds: [...state.messageIds, message.id],
       messages: new Map(state.messages).set(message.id, message),
     }));
-    
+
     // Emitir evento após atualizar o store
-    void storeEvents.emit({ type: 'MESSAGE_APPENDED', message });
+    void storeEvents.emit({ type: "MESSAGE_APPENDED", message });
   },
   updateMessage(message: Message) {
     set((state) => ({
       messages: new Map(state.messages).set(message.id, message),
     }));
-    
+
     // Emitir evento após atualizar o store
-    void storeEvents.emit({ type: 'MESSAGE_UPDATED', message });
+    void storeEvents.emit({ type: "MESSAGE_UPDATED", message });
   },
   updateMessages(messages: Message[]) {
     set((state) => {
@@ -74,9 +74,9 @@ export const useStore = create<{
       messages.forEach((m) => newMessages.set(m.id, m));
       return { messages: newMessages };
     });
-    
+
     // Emitir evento após atualizar o store
-    void storeEvents.emit({ type: 'MESSAGES_UPDATED', messages });
+    void storeEvents.emit({ type: "MESSAGES_UPDATED", messages });
   },
   openResearch(researchId: string | null) {
     set({ openResearchId: researchId });
@@ -90,7 +90,7 @@ export const useStore = create<{
   loadConversation(messages: Message[], threadId: string) {
     // Set loading state
     set({ isLoadingHistory: true });
-    
+
     // Process messages in chunks to avoid blocking UI
     setTimeout(() => {
       const messageMap = new Map<string, Message>();
@@ -99,27 +99,34 @@ export const useStore = create<{
       const researchPlanIds = new Map<string, string>();
       const researchReportIds = new Map<string, string>();
       const researchActivityIds = new Map<string, string[]>();
-      
+
       // Process messages in batches to improve performance
       const BATCH_SIZE = 50;
       for (let i = 0; i < messages.length; i += BATCH_SIZE) {
         const batch = messages.slice(i, i + BATCH_SIZE);
-        
+
         batch.forEach((msg) => {
           messageMap.set(msg.id, msg);
           messageIds.push(msg.id);
-          
+
           // Reconstruct research-related maps only for relevant messages
           if (msg.agent === "planner" && msg.role === "assistant") {
             const researchId = msg.id;
             researchIds.push(researchId);
             researchPlanIds.set(researchId, msg.id);
-          } else if (msg.agent === "reporter" && msg.role === "assistant" && researchIds.length > 0) {
+          } else if (
+            msg.agent === "reporter" &&
+            msg.role === "assistant" &&
+            researchIds.length > 0
+          ) {
             const researchId = researchIds[researchIds.length - 1];
             if (researchId) {
               researchReportIds.set(researchId, msg.id);
             }
-          } else if ((msg.agent === "researcher" || msg.agent === "coder") && researchIds.length > 0) {
+          } else if (
+            (msg.agent === "researcher" || msg.agent === "coder") &&
+            researchIds.length > 0
+          ) {
             const researchId = researchIds[researchIds.length - 1];
             if (researchId) {
               const activities = researchActivityIds.get(researchId) ?? [];
@@ -129,7 +136,7 @@ export const useStore = create<{
           }
         });
       }
-      
+
       set({
         threadId,
         messageIds,
@@ -140,7 +147,8 @@ export const useStore = create<{
         researchActivityIds,
         responding: false,
         ongoingResearchId: null,
-        openResearchId: researchIds.length > 0 ? researchIds[researchIds.length - 1] : null,
+        openResearchId:
+          researchIds.length > 0 ? researchIds[researchIds.length - 1] : null,
         isLoadingHistory: false,
       });
     }, 0);
@@ -171,10 +179,10 @@ export async function sendMessage(
     interruptFeedback?: string;
     resources?: Array<Resource>;
   } = {},
-  options: { abortSignal?: AbortSignal } = {},
+  options: { abortSignal?: AbortSignal } = {}
 ) {
   const currentThreadId = useStore.getState().threadId ?? THREAD_ID;
-  
+
   if (content != null) {
     appendMessage({
       id: nanoid(),
@@ -184,9 +192,11 @@ export async function sendMessage(
       contentChunks: [content],
       resources,
     });
-    
+
     // Add to history only for new conversations
-    const existingConversation = useHistoryStore.getState().getConversationByThreadId(currentThreadId);
+    const existingConversation = useHistoryStore
+      .getState()
+      .getConversationByThreadId(currentThreadId);
     if (!existingConversation) {
       addToHistory(content, currentThreadId);
     }
@@ -211,7 +221,7 @@ export async function sendMessage(
       report_style: settings.reportStyle,
       mcp_settings: settings.mcpSettings,
     },
-    options,
+    options
   );
 
   setResponding(true);
@@ -246,7 +256,8 @@ export async function sendMessage(
     }
   } catch (error) {
     console.error("Error in chat stream:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     toast(`An error occurred: ${errorMessage}. Please try again.`);
     // Update message status.
     const isAborted = error instanceof Error && error.name === "AbortError";
@@ -260,10 +271,12 @@ export async function sendMessage(
     useStore.getState().setOngoingResearch(null);
   } finally {
     setResponding(false);
-    
+
     // Update conversation messages in history
     const messages = Array.from(useStore.getState().messages.values());
-    useHistoryStore.getState().updateConversationMessages(currentThreadId, messages);
+    useHistoryStore
+      .getState()
+      .updateConversationMessages(currentThreadId, messages);
   }
 }
 
@@ -338,11 +351,11 @@ function appendResearch(researchId: string) {
     researchIds: [...useStore.getState().researchIds, researchId],
     researchPlanIds: new Map(useStore.getState().researchPlanIds).set(
       researchId,
-      planMessage!.id,
+      planMessage!.id
     ),
     researchActivityIds: new Map(useStore.getState().researchActivityIds).set(
       researchId,
-      messageIds,
+      messageIds
     ),
   });
 }
@@ -364,7 +377,7 @@ function appendResearchActivity(message: Message) {
       useStore.setState({
         researchReportIds: new Map(useStore.getState().researchReportIds).set(
           researchId,
-          message.id,
+          message.id
         ),
       });
     }
@@ -424,12 +437,14 @@ export async function listenToPodcast(researchId: string) {
                 error: e instanceof Error ? e.message : "Unknown error",
               }),
               isStreaming: false,
-            },
+            }
           ),
         }));
         const errorMsg = e instanceof Error ? e.message : "Unknown error";
         if (errorMsg.includes("500")) {
-          toast("Podcast generation service is not available. Please check if TTS API keys are configured.");
+          toast(
+            "Podcast generation service is not available. Please check if TTS API keys are configured."
+          );
         } else {
           toast(`Failed to generate podcast: ${errorMsg}`);
         }
@@ -451,15 +466,15 @@ export function useResearchMessage(researchId: string) {
     useShallow((state) => {
       const messageId = state.researchPlanIds.get(researchId);
       return messageId ? state.messages.get(messageId) : undefined;
-    }),
+    })
   );
 }
 
 export function useMessage(messageId: string | null | undefined) {
   return useStore(
     useShallow((state) =>
-      messageId ? state.messages.get(messageId) : undefined,
-    ),
+      messageId ? state.messages.get(messageId) : undefined
+    )
   );
 }
 
@@ -472,12 +487,12 @@ export function useLastInterruptMessage() {
     useShallow((state) => {
       if (state.messageIds.length >= 2) {
         const lastMessage = state.messages.get(
-          state.messageIds[state.messageIds.length - 1]!,
+          state.messageIds[state.messageIds.length - 1]!
         );
         return lastMessage?.finishReason === "interrupt" ? lastMessage : null;
       }
       return null;
-    }),
+    })
   );
 }
 
@@ -486,14 +501,14 @@ export function useLastFeedbackMessageId() {
     useShallow((state) => {
       if (state.messageIds.length >= 2) {
         const lastMessage = state.messages.get(
-          state.messageIds[state.messageIds.length - 1]!,
+          state.messageIds[state.messageIds.length - 1]!
         );
         if (lastMessage?.finishReason === "interrupt") {
           return state.messageIds[state.messageIds.length - 2];
         }
       }
       return null;
-    }),
+    })
   );
   return waitingForFeedbackMessageId;
 }
@@ -505,6 +520,6 @@ export function useToolCalls() {
         ?.map((id) => getMessage(id)?.toolCalls)
         .filter((toolCalls) => toolCalls != null)
         .flat();
-    }),
+    })
   );
 }

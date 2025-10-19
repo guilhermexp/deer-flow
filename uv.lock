@@ -583,6 +583,16 @@ test = [
     { name = "pytest-postgresql" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+]
+test = [
+    { name = "mongomock" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "arxiv", specifier = ">=2.2.0" },
@@ -631,6 +641,14 @@ requires-dist = [
     { name = "yfinance", specifier = ">=0.2.54" },
 ]
 provides-extras = ["dev", "test"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=8.4.2" },
+    { name = "pytest-cov", specifier = ">=7.0.0" },
+    { name = "ruff", specifier = ">=0.14.1" },
+]
+test = [{ name = "mongomock", specifier = ">=4.3.0" }]
 
 [[package]]
 name = "distro"

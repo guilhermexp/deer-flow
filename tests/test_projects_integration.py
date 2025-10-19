@@ -4,10 +4,9 @@ Teste de integração para API de projetos
 Verifica se a funcionalidade completa está funcionando: autenticação, CRUD de projetos e kanban board
 """
 
-import pytest
-import requests
-import json
 from datetime import datetime
+
+import requests
 
 
 class TestProjectsIntegration:
@@ -61,7 +60,7 @@ class TestProjectsIntegration:
 
         login_result = login_response.json()
         self.access_token = login_result["access_token"]
-        print(f"✅ Login realizado com sucesso")
+        print("✅ Login realizado com sucesso")
 
         # Verificar usuário atual
         headers = {"Authorization": f"Bearer {self.access_token}"}
@@ -100,7 +99,7 @@ class TestProjectsIntegration:
         project = response.json()
         self.test_project_id = project["id"]
 
-        print(f"✅ Projeto criado com sucesso!")
+        print("✅ Projeto criado com sucesso!")
         print(f"   ID: {project['id']}")
         print(f"   Nome: {project['name']}")
         print(f"   Descrição: {project['description']}")
@@ -141,7 +140,7 @@ class TestProjectsIntegration:
             return False
 
         kanban = response.json()
-        print(f"✅ Quadro kanban obtido com sucesso!")
+        print("✅ Quadro kanban obtido com sucesso!")
         print(f"   Projeto: {kanban['project_name']}")
         print(f"   Colunas: {len(kanban['columns'])}")
 
@@ -175,7 +174,7 @@ class TestProjectsIntegration:
         task = response.json()
         self.test_task_id = task["id"]
 
-        print(f"✅ Tarefa criada com sucesso!")
+        print("✅ Tarefa criada com sucesso!")
         print(f"   ID: {task['id']}")
         print(f"   Título: {task['title']}")
         print(f"   Prioridade: {task['priority']}")
@@ -200,7 +199,7 @@ class TestProjectsIntegration:
             return False
 
         task = response.json()
-        print(f"✅ Tarefa movida com sucesso!")
+        print("✅ Tarefa movida com sucesso!")
         print(f"   ID: {task['id']}")
         print(f"   Título: {task['title']}")
         return True
@@ -227,7 +226,7 @@ class TestProjectsIntegration:
             return False
 
         project = response.json()
-        print(f"✅ Projeto atualizado com sucesso!")
+        print("✅ Projeto atualizado com sucesso!")
         print(f"   Nome: {project['name']}")
         print(f"   Descrição: {project['description']}")
         return True
@@ -247,7 +246,7 @@ class TestProjectsIntegration:
             return False
 
         result = response.json()
-        print(f"✅ Projeto deletado com sucesso!")
+        print("✅ Projeto deletado com sucesso!")
         print(f"   Mensagem: {result['message']}")
         return True
 

@@ -79,7 +79,7 @@ const ReportEditor = ({ content, onMarkdownChange }: ReportEditorProps) => {
       }
       setSaveStatus("Saved");
     },
-    500,
+    500
   );
 
   if (!initialContent) return null;

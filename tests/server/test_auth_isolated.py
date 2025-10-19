@@ -10,8 +10,8 @@ Tests cover:
 """
 
 import pytest
-import os
 from pydantic import ValidationError
+
 from src.config.settings import AuthConfig
 
 

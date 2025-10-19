@@ -29,6 +29,6 @@ async def test_async_function():
     """Test async function"""
     async def async_add(a, b):
         return a + b
-    
+
     result = await async_add(3, 4)
     assert result == 7

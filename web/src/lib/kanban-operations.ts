@@ -1,4 +1,10 @@
-import type { Task, Project, TaskStatus, TaskWeekDay, Assignee } from "~/components/jarvis/kanban/lib/types"
+import type {
+  Task,
+  Project,
+  TaskStatus,
+  TaskWeekDay,
+  Assignee,
+} from "~/components/jarvis/kanban/lib/types";
 
 /**
  * Creates a new project with default values
@@ -10,7 +16,7 @@ export function createProject(name: string, description: string): Project {
     description: description.trim(),
     createdAt: new Date().toISOString(),
     isPriority: false,
-  }
+  };
 }
 
 /**
@@ -24,13 +30,13 @@ export function createTask(
   weekDay?: TaskWeekDay,
   existingTask?: Task
 ): Task {
-  const now = new Date()
+  const now = new Date();
   const formattedDate = `${now.getDate().toString().padStart(2, "0")} ${now
     .toLocaleString("pt-BR", { month: "short" })
     .replace(".", "")} ${now.getHours().toString().padStart(2, "0")}:${now
     .getMinutes()
     .toString()
-    .padStart(2, "0")}`
+    .padStart(2, "0")}`;
 
   return {
     id: existingTask?.id ?? `task-${Date.now().toString()}`,
@@ -44,14 +50,14 @@ export function createTask(
     assignees: existingTask?.assignees ?? [],
     status,
     weekDay: weekDay === "none" ? undefined : weekDay,
-  }
+  };
 }
 
 /**
  * Formats a date for task display
  */
 export function formatTaskDate(date: string | Date): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date
+  const dateObj = typeof date === "string" ? new Date(date) : date;
   return dateObj
     .toLocaleDateString("pt-BR", {
       day: "numeric",
@@ -60,38 +66,43 @@ export function formatTaskDate(date: string | Date): string {
       minute: "2-digit",
     })
     .replace(" de ", " ")
-    .replace(".", "")
+    .replace(".", "");
 }
 
 /**
  * Updates a task in the tasks array
  */
 export function updateTaskInList(tasks: Task[], updatedTask: Task): Task[] {
-  return tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+  return tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task));
 }
 
 /**
  * Removes a task from the tasks array
  */
 export function removeTaskFromList(tasks: Task[], taskId: string): Task[] {
-  return tasks.filter((task) => task.id !== taskId)
+  return tasks.filter((task) => task.id !== taskId);
 }
 
 /**
  * Filters tasks by search query
  */
 export function filterTasksByQuery(tasks: Task[], query: string): Task[] {
-  const lowerQuery = query.toLowerCase()
-  return tasks.filter((task) => task.title.toLowerCase().includes(lowerQuery))
+  const lowerQuery = query.toLowerCase();
+  return tasks.filter((task) => task.title.toLowerCase().includes(lowerQuery));
 }
 
 /**
  * Toggles project priority
  */
-export function toggleProjectPriorityInList(projects: Project[], projectId: string): Project[] {
+export function toggleProjectPriorityInList(
+  projects: Project[],
+  projectId: string
+): Project[] {
   return projects.map((project) =>
-    project.id === projectId ? { ...project, isPriority: !project.isPriority } : project
-  )
+    project.id === projectId
+      ? { ...project, isPriority: !project.isPriority }
+      : project
+  );
 }
 
 /**
@@ -105,14 +116,15 @@ export function createRandomAssignee(): Assignee {
     "Ana Costa",
     "Pedro Santos",
     "Sofia Almeida",
-  ]
-  const randomName = names[Math.floor(Math.random() * names.length)] ?? "Unknown"
+  ];
+  const randomName =
+    names[Math.floor(Math.random() * names.length)] ?? "Unknown";
   const initials = randomName
     .split(" ")
     .map((n) => n[0])
     .join("")
-    .toUpperCase()
-  return { name: randomName, initials }
+    .toUpperCase();
+  return { name: randomName, initials };
 }
 
 /**
@@ -127,7 +139,7 @@ export function getDefaultTaskFormData() {
     assignees: [] as Assignee[],
     status: "not-started" as TaskStatus,
     weekDay: "none" as TaskWeekDay | "none",
-  }
+  };
 }
 
 /**
@@ -137,5 +149,5 @@ export function getDefaultProjectFormData() {
   return {
     name: "",
     description: "",
-  }
+  };
 }

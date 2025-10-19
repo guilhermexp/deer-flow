@@ -14,7 +14,7 @@ export const MathematicsWithMarkdown = Mathematics.extend({
         serialize(state: any, node: any) {
           const latex = node.attrs?.latex || "";
           const isBlock = node.attrs?.display === true;
-          
+
           if (isBlock) {
             // Block/display math: $$...$$
             state.write("$$");

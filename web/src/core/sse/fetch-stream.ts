@@ -5,7 +5,7 @@ import { type StreamEvent } from "./StreamEvent";
 
 export async function* fetchStream(
   url: string,
-  init: RequestInit,
+  init: RequestInit
 ): AsyncIterable<StreamEvent> {
   const response = await fetch(url, {
     method: "POST",

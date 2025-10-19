@@ -50,14 +50,14 @@ export function HealthDashboard() {
           } catch (error) {
             console.error(
               "Error parsing localStorage settings for HealthDashboard:",
-              error,
+              error
             );
             return getDefaultVisibleCardsHealth();
           }
         }
       }
       return getDefaultVisibleCardsHealth();
-    },
+    }
   );
 
   const [healthData, setHealthData] = useState<any>(null);
@@ -163,7 +163,7 @@ export function HealthDashboard() {
         } catch (error) {
           console.error(
             "Error parsing localStorage settings for HealthDashboard on mount:",
-            error,
+            error
           );
           setVisibleCards(getDefaultVisibleCardsHealth());
         }
@@ -178,7 +178,7 @@ export function HealthDashboard() {
     if (typeof window !== "undefined") {
       localStorage.setItem(
         LOCAL_STORAGE_KEY_HEALTH,
-        JSON.stringify(newVisibleCards),
+        JSON.stringify(newVisibleCards)
       );
     }
     setIsSettingsModalOpen(false);

@@ -5,16 +5,23 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "check": "next lint && tsc --noEmit",
+    "check": "eslint . && tsc --noEmit",
     "dev": "dotenv -f ../.env -- next dev --turbo -p 4000",
+    "dev:all": "concurrently \"pnpm dev\" \"cd .. && uv run server.py --reload\" --names \"frontend,backend\" --prefix-colors \"blue,green\"",
     "scan": "next dev & npx react-scan@latest localhost:3000",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "preview": "next build && next start",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest --watch",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
@@ -39,6 +46,7 @@
     "@rc-component/mentions": "^1.3.1",
     "@t3-oss/env-nextjs": "^0.13.8",
     "@tailwindcss/typography": "^0.5.19",
+    "@tanstack/react-virtual": "^3.13.12",
     "@tiptap/core": "^2.26.3",
     "@tiptap/extension-code-block": "^2.26.3",
     "@tiptap/extension-document": "^2.26.3",
@@ -93,24 +101,55 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.38.0",
+    "@radix-ui/react-alert-dialog": "^1.1.15",
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-progress": "^1.1.7",
     "@tailwindcss/postcss": "^4.1.14",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
     "@types/hast": "^3.0.4",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.8.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "@vitejs/plugin-react": "^5.0.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "axios": "^1.12.2",
+    "chart.js": "^4.5.1",
+    "date-fns": "^4.1.0",
+    "dompurify": "^3.3.0",
     "dotenv-cli": "^10.0.0",
     "eslint": "^9.37.0",
     "eslint-config-next": "^15.5.5",
+    "eslint-plugin-import": "^2.32.0",
+    "espree": "^10.4.0",
+    "husky": "^9.1.7",
+    "jsdom": "25.0.1",
+    "lint-staged": "^16.2.4",
     "playwright": "^1.56.1",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.0",
     "raw-loader": "^4.0.2",
+    "react-chartjs-2": "^5.3.0",
+    "react-day-picker": "^9.11.1",
     "tailwindcss": "^4.1.14",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.1"
+    "typescript-eslint": "^8.46.1",
+    "uuid": "^13.0.0",
+    "vitest": "^3.2.4",
+    "concurrently": "^9.1.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,mdx}": [
+      "prettier --write"
+    ]
   },
   "ct3aMetadata": {
     "initVersion": "7.39.3"

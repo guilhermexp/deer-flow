@@ -13,24 +13,26 @@ interface ChatHeaderProps {
   showHistoryButton?: boolean;
 }
 
-export function ChatHeader({ 
-  className, 
+export function ChatHeader({
+  className,
   onToggleHistory,
-  showHistoryButton = true 
+  showHistoryButton = true,
 }: ChatHeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false);
-  
+
   return (
     <>
-      <div className={cn(
-        "flex items-center justify-between px-3 py-1.5 border-b border-border/50",
-        "bg-background/80 backdrop-blur-sm",
-        className
-      )}>
+      <div
+        className={cn(
+          "border-border/50 flex items-center justify-between border-b px-3 py-1.5",
+          "bg-background/80 backdrop-blur-sm",
+          className
+        )}
+      >
         <div className="flex items-center gap-1">
-          <h1 className="text-sm font-semibold text-center">DeerFlow Chat</h1>
+          <h1 className="text-center text-sm font-semibold">DeerFlow Chat</h1>
         </div>
-        
+
         <div className="flex items-center gap-1">
           <Button
             size="icon"
@@ -41,7 +43,7 @@ export function ChatHeader({
           >
             <Search className="h-3 w-3" />
           </Button>
-          
+
           {showHistoryButton && onToggleHistory && (
             <Button
               size="icon"
@@ -53,11 +55,11 @@ export function ChatHeader({
               <History className="h-3 w-3" />
             </Button>
           )}
-          
+
           <Button
             size="icon"
             variant="ghost"
-            onClick={() => window.location.href = '/settings'}
+            onClick={() => (window.location.href = "/settings")}
             title="Configurações"
             className="h-6 w-6"
           >
@@ -65,7 +67,7 @@ export function ChatHeader({
           </Button>
         </div>
       </div>
-      
+
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
     </>
   );

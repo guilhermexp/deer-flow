@@ -1,14 +1,14 @@
-import type { Task, TaskWeekDay } from "~/components/jarvis/kanban/lib/types"
+import type { Task, TaskWeekDay } from "~/components/jarvis/kanban/lib/types";
 
-export const DAYS_FILTER_KEY = "kanban-week-days-filter-v2"
-export const MOBILE_COLUMN_KEY = "kanban-week-mobile-column-v2"
+export const DAYS_FILTER_KEY = "kanban-week-days-filter-v2";
+export const MOBILE_COLUMN_KEY = "kanban-week-mobile-column-v2";
 
 export interface WeekDayDefinition {
-  id: TaskWeekDay
-  title: string
-  icon: string
-  color: string
-  progressColor: string
+  id: TaskWeekDay;
+  title: string;
+  icon: string;
+  color: string;
+  progressColor: string;
 }
 
 export const getWeekDayDefinitions = (): WeekDayDefinition[] => [
@@ -61,7 +61,7 @@ export const getWeekDayDefinitions = (): WeekDayDefinition[] => [
     color: "text-indigo-400",
     progressColor: "bg-indigo-500",
   },
-]
+];
 
 export const getColumnsWithTasks = (
   tasks: Task[],
@@ -70,28 +70,32 @@ export const getColumnsWithTasks = (
   return visibleColumns.map((colDef) => ({
     ...colDef,
     tasks: tasks.filter((task) => task.weekDay === colDef.id),
-  }))
-}
+  }));
+};
 
 export const createTransparentDragImage = (): HTMLImageElement => {
-  const dragImage = new Image()
-  dragImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs='
-  return dragImage
-}
+  const dragImage = new Image();
+  dragImage.src =
+    "data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=";
+  return dragImage;
+};
 
 export const saveToLocalStorage = (key: string, value: string): void => {
   try {
-    localStorage.setItem(key, value)
+    localStorage.setItem(key, value);
   } catch (error) {
-    console.error(`Failed to save to localStorage: ${key}`, error)
+    console.error(`Failed to save to localStorage: ${key}`, error);
   }
-}
+};
 
-export const getFromLocalStorage = (key: string, defaultValue: string): string => {
+export const getFromLocalStorage = (
+  key: string,
+  defaultValue: string
+): string => {
   try {
-    return localStorage.getItem(key) ?? defaultValue
+    return localStorage.getItem(key) ?? defaultValue;
   } catch (error) {
-    console.error(`Failed to get from localStorage: ${key}`, error)
-    return defaultValue
+    console.error(`Failed to get from localStorage: ${key}`, error);
+    return defaultValue;
   }
-}
+};

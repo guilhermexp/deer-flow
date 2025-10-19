@@ -10,17 +10,17 @@ export function autoFixMarkdown(markdown: string): string {
  */
 export function normalizeMathForEditor(markdown: string): string {
   let normalized = markdown;
-  
+
   // Convert display math - handle double backslash first to avoid conflicts
   normalized = normalized
-    .replace(/\\\\\[([^\]]*)\\\\\]/g, (_match, content) => `$$${content}$$`)  // \\[...\\] → $$...$$
-    .replace(/\\\[([^\]]*)\\\]/g, (_match, content) => `$$${content}$$`);  // \[...\] → $$...$$
-  
+    .replace(/\\\\\[([^\]]*)\\\\\]/g, (_match, content) => `$$${content}$$`) // \\[...\\] → $$...$$
+    .replace(/\\\[([^\]]*)\\\]/g, (_match, content) => `$$${content}$$`); // \[...\] → $$...$$
+
   // Convert inline math - handle double backslash first to avoid conflicts
   normalized = normalized
-    .replace(/\\\\\(([^)]*)\\\\\)/g, (_match, content) => `$${content}$`)  // \\(...\\) → $...$
-    .replace(/\\\(([^)]*)\\\)/g, (_match, content) => `$${content}$`);    // \(...\) → $...$
-  
+    .replace(/\\\\\(([^)]*)\\\\\)/g, (_match, content) => `$${content}$`) // \\(...\\) → $...$
+    .replace(/\\\(([^)]*)\\\)/g, (_match, content) => `$${content}$`); // \(...\) → $...$
+
   return normalized;
 }
 
@@ -31,16 +31,16 @@ export function normalizeMathForEditor(markdown: string): string {
  */
 export function normalizeMathForDisplay(markdown: string): string {
   let normalized = markdown;
-  
+
   // Convert all LaTeX-style delimiters to $$
   // Both display and inline math use $$ for display component (remarkMath handles both)
   // Handle double backslash first to avoid conflicts
   normalized = normalized
-    .replace(/\\\\\[([^\]]*)\\\\\]/g, (_match, content) => `$$${content}$$`)  // \\[...\\] → $$...$$
-    .replace(/\\\[([^\]]*)\\\]/g, (_match, content) => `$$${content}$$`)      // \[...\] → $$...$$
-    .replace(/\\\\\(([^)]*)\\\\\)/g, (_match, content) => `$$${content}$$`)   // \\(...\\) → $$...$$
-    .replace(/\\\(([^)]*)\\\)/g, (_match, content) => `$$${content}$$`);       // \(...\) → $$...$$
-  
+    .replace(/\\\\\[([^\]]*)\\\\\]/g, (_match, content) => `$$${content}$$`) // \\[...\\] → $$...$$
+    .replace(/\\\[([^\]]*)\\\]/g, (_match, content) => `$$${content}$$`) // \[...\] → $$...$$
+    .replace(/\\\\\(([^)]*)\\\\\)/g, (_match, content) => `$$${content}$$`) // \\(...\\) → $$...$$
+    .replace(/\\\(([^)]*)\\\)/g, (_match, content) => `$$${content}$$`); // \(...\) → $$...$$
+
   return normalized;
 }
 
@@ -53,7 +53,7 @@ function autoCloseTrailingLink(markdown: string): string {
     /!\[([^\]]*)\]\(([^)]*)$/g,
     (match: string, altText: string, url: string): string => {
       return `![${altText}](${url})`;
-    },
+    }
   );
 
   // Fix unclosed link syntax [...](...)
@@ -61,7 +61,7 @@ function autoCloseTrailingLink(markdown: string): string {
     /\[([^\]]*)\]\(([^)]*)$/g,
     (match: string, linkText: string, url: string): string => {
       return `[${linkText}](${url})`;
-    },
+    }
   );
 
   // Fix unclosed image syntax ![...]
@@ -69,7 +69,7 @@ function autoCloseTrailingLink(markdown: string): string {
     /!\[([^\]]*)$/g,
     (match: string, altText: string): string => {
       return `![${altText}]`;
-    },
+    }
   );
 
   // Fix unclosed link syntax [...]
@@ -77,7 +77,7 @@ function autoCloseTrailingLink(markdown: string): string {
     /\[([^\]]*)$/g,
     (match: string, linkText: string): string => {
       return `[${linkText}]`;
-    },
+    }
   );
 
   // Fix unclosed images or links missing ")"
@@ -85,14 +85,14 @@ function autoCloseTrailingLink(markdown: string): string {
     /!\[([^\]]*)\]\(([^)]*)$/g,
     (match: string, altText: string, url: string): string => {
       return `![${altText}](${url})`;
-    },
+    }
   );
 
   fixedMarkdown = fixedMarkdown.replace(
     /\[([^\]]*)\]\(([^)]*)$/g,
     (match: string, linkText: string, url: string): string => {
       return `[${linkText}](${url})`;
-    },
+    }
   );
 
   return fixedMarkdown;

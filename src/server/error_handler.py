@@ -1,12 +1,13 @@
 # Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
-import os
 import logging
+import os
 import traceback
+
 from fastapi import Request, status
-from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ GENERIC_ERROR_MESSAGES = {
 
 async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
     """Handle HTTP exceptions with appropriate detail level"""
-    
+
     # Log the full error details server-side
     logger.error(
         f"HTTP Exception: {exc.status_code} - {exc.detail}",
@@ -46,7 +47,7 @@ async def custom_http_exception_handler(request: Request, exc: StarletteHTTPExce
             "client": request.client.host if request.client else "unknown",
         }
     )
-    
+
     # Prepare response
     if IS_PRODUCTION and exc.status_code >= 500:
         # In production, hide internal server error details
@@ -54,7 +55,7 @@ async def custom_http_exception_handler(request: Request, exc: StarletteHTTPExce
     else:
         # In development or for client errors, show the actual detail
         detail = exc.detail
-    
+
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -67,7 +68,7 @@ async def custom_http_exception_handler(request: Request, exc: StarletteHTTPExce
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """Handle validation errors with appropriate detail level"""
-    
+
     # Log validation errors
     logger.warning(
         f"Validation Error: {exc.errors()}",
@@ -77,7 +78,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "client": request.client.host if request.client else "unknown",
         }
     )
-    
+
     if IS_PRODUCTION:
         # In production, provide generic validation error
         return JSONResponse(
@@ -100,7 +101,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 async def general_exception_handler(request: Request, exc: Exception):
     """Handle all unhandled exceptions"""
-    
+
     # Log the full traceback server-side
     logger.error(
         f"Unhandled Exception: {type(exc).__name__}: {str(exc)}",
@@ -111,7 +112,7 @@ async def general_exception_handler(request: Request, exc: Exception):
             "client": request.client.host if request.client else "unknown",
         }
     )
-    
+
     if IS_PRODUCTION:
         # In production, never expose internal errors
         return JSONResponse(

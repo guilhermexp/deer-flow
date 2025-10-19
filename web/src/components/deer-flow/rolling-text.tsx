@@ -16,7 +16,7 @@ export function RollingText({
     <span
       className={cn(
         "relative flex h-[2em] items-center overflow-hidden",
-        className,
+        className
       )}
     >
       <AnimatePresence mode="popLayout">

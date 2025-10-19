@@ -34,7 +34,12 @@ export type SettingsState = {
     maxPlanIterations: number;
     maxStepNum: number;
     maxSearchResults: number;
-    reportStyle: "academic" | "popular_science" | "news" | "social_media" | "strategic_investment";
+    reportStyle:
+      | "academic"
+      | "popular_science"
+      | "news"
+      | "social_media"
+      | "strategic_investment";
   };
   mcp: {
     servers: MCPServerMetadata[];
@@ -134,7 +139,12 @@ export const getChatStreamSettings = () => {
 };
 
 export function setReportStyle(
-  value: "academic" | "popular_science" | "news" | "social_media" | "strategic_investment",
+  value:
+    | "academic"
+    | "popular_science"
+    | "news"
+    | "social_media"
+    | "strategic_investment"
 ) {
   useSettingsStore.setState((state) => ({
     general: {

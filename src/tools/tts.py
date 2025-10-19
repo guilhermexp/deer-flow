@@ -8,7 +8,7 @@ Text-to-Speech module using volcengine TTS API.
 import json
 import logging
 import uuid
-from typing import Any, Dict, Optional
+from typing import Any
 
 import requests
 
@@ -56,8 +56,8 @@ class VolcengineTTS:
         text_type: str = "plain",
         with_frontend: int = 1,
         frontend_type: str = "unitTson",
-        uid: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        uid: str | None = None,
+    ) -> dict[str, Any]:
         """
         Convert text to speech using volcengine TTS API.
 

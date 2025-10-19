@@ -27,7 +27,7 @@ export const Link = ({
           const result = parseJSON(call.result, []) as Array<{ url: string }>;
           if (Array.isArray(result)) {
             result.forEach((r) => {
-              if (r && typeof r.url === 'string') {
+              if (r && typeof r.url === "string") {
                 // encodeURI is used to handle the case where the link contains chinese or other special characters
                 links.add(encodeURI(r.url));
                 links.add(r.url);
@@ -35,7 +35,7 @@ export const Link = ({
             });
           }
         } catch (error) {
-          console.warn('Failed to parse web_search result:', error);
+          console.warn("Failed to parse web_search result:", error);
         }
       }
     });

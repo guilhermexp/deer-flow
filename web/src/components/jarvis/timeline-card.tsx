@@ -1,8 +1,10 @@
-"use client"
-import { motion } from "framer-motion"
-import { Clock } from "lucide-react"
-import VerticalTimeline, { type TimelineEntry } from "~/components/jarvis/vertical-timeline" // Ensure type import
-import LiquidGlassCard from "~/components/ui/liquid-glass-card"
+"use client";
+import { motion } from "framer-motion";
+import { Clock } from "lucide-react";
+import VerticalTimeline, {
+  type TimelineEntry,
+} from "~/components/jarvis/vertical-timeline"; // Ensure type import
+import LiquidGlassCard from "~/components/ui/liquid-glass-card";
 
 export default function TimelineCard() {
   const timelineData: TimelineEntry[] = [
@@ -59,7 +61,7 @@ export default function TimelineCard() {
       calories: 180,
       hasDetails: true,
     },
-  ]
+  ];
 
   return (
     <motion.div
@@ -68,7 +70,7 @@ export default function TimelineCard() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <LiquidGlassCard className="h-full rounded-xl pb-3 pt-4 px-4 relative z-10">
+      <LiquidGlassCard className="relative z-10 h-full rounded-xl px-4 pt-4 pb-3">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
           <motion.div
             whileHover={{
@@ -76,14 +78,21 @@ export default function TimelineCard() {
               transition: { duration: 0.1 },
             }}
             animate={{ rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, repeatDelay: 3 }}
+            transition={{
+              duration: 2,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatDelay: 3,
+            }}
           >
             <Clock className="h-4 w-4 text-gray-400" />
           </motion.div>
           Timeline
         </h3>
-        <VerticalTimeline entries={timelineData} className="px-3 pb-3 sm:px-4 sm:pb-4" />
+        <VerticalTimeline
+          entries={timelineData}
+          className="px-3 pb-3 sm:px-4 sm:pb-4"
+        />
       </LiquidGlassCard>
     </motion.div>
-  )
+  );
 }

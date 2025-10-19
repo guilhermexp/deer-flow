@@ -100,7 +100,10 @@ export function AddMCPServerDialog({
       setError(null);
       for (const server of addingServers) {
         processingServer = server.name;
-        const metadata = await queryMCPServerMetadata(server, abortControllerRef.current.signal);
+        const metadata = await queryMCPServerMetadata(
+          server,
+          abortControllerRef.current.signal
+        );
         results.push({ ...metadata, name: server.name, enabled: true });
       }
       if (results.length > 0) {
@@ -110,7 +113,7 @@ export function AddMCPServerDialog({
       setOpen(false);
     } catch (e) {
       console.error(e);
-      if (e instanceof Error && e.name === 'AbortError') {
+      if (e instanceof Error && e.name === "AbortError") {
         setError(`A requisição foi cancelada`);
       } else {
         setError(`Falha ao adicionar servidor: ${processingServer}`);
@@ -137,14 +140,16 @@ export function AddMCPServerDialog({
           <DialogTitle>Adicionar Novos Servidores MCP</DialogTitle>
         </DialogHeader>
         <DialogDescription>
-          O DeerFlow usa a configuração MCP JSON padrão para criar um novo servidor.
+          O DeerFlow usa a configuração MCP JSON padrão para criar um novo
+          servidor.
           <br />
-          Cole sua configuração abaixo e clique em &quot;Adicionar&quot; para adicionar novos servidores.
+          Cole sua configuração abaixo e clique em &quot;Adicionar&quot; para
+          adicionar novos servidores.
         </DialogDescription>
 
         <main>
           <Textarea
-            className="h-[360px] sm:max-w-[510px] break-all"
+            className="h-[360px] break-all sm:max-w-[510px]"
             placeholder={
               'Exemplo:\n\n{\n  "mcpServers": {\n    "Meu Servidor": {\n      "command": "python",\n      "args": [\n        "-m", "mcp_server"\n      ],\n      "env": {\n        "API_KEY": "SUA_API_KEY"\n      }\n    }\n  }\n}'
             }
@@ -171,11 +176,11 @@ export function AddMCPServerDialog({
                 {processing && <Loader2 className="animate-spin" />}
                 Adicionar
               </Button>
-              {
-                processing && (
-                  <Button variant="destructive" onClick={handleAbort}>Abortar</Button>
-                )
-              }
+              {processing && (
+                <Button variant="destructive" onClick={handleAbort}>
+                  Abortar
+                </Button>
+              )}
             </div>
           </div>
         </DialogFooter>

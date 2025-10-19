@@ -1,8 +1,14 @@
-import '@testing-library/jest-dom'
-import { vi } from 'vitest'
+import "@testing-library/jest-dom";
+import { vi } from "vitest";
+
+// Provide Jest-compatible global for tests that use jest.* APIs
+// This keeps Vitest-based tests working without refactoring
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(globalThis as any).jest = vi;
 
 // Mock next/navigation
-vi.mock('next/navigation', () => ({
+vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
@@ -14,36 +20,44 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => ({
     get: vi.fn(),
   }),
-  usePathname: () => '/',
+  usePathname: () => "/",
 }));
 
 // Mock database client
-vi.mock('~/lib/neon/client', () => ({
+vi.mock("~/lib/neon/client", () => ({
   getDatabaseClient: () => ({
     auth: {
-      getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+      getSession: () =>
+        Promise.resolve({ data: { session: null }, error: null }),
       onAuthStateChange: () => ({
-        data: { subscription: { unsubscribe: () => { /* empty */ } } }
+        data: {
+          subscription: {
+            unsubscribe: () => {
+              /* empty */
+            },
+          },
+        },
       }),
-      signInWithPassword: () => Promise.resolve({ data: { user: null }, error: null }),
+      signInWithPassword: () =>
+        Promise.resolve({ data: { user: null }, error: null }),
       signUp: () => Promise.resolve({ data: { user: null }, error: null }),
-      signOut: () => Promise.resolve({ error: null })
+      signOut: () => Promise.resolve({ error: null }),
     },
     from: () => ({
       select: () => ({
         eq: () => ({
-          maybeSingle: () => Promise.resolve({ data: null, error: null })
-        })
+          maybeSingle: () => Promise.resolve({ data: null, error: null }),
+        }),
       }),
-      insert: () => Promise.resolve({ error: null })
-    })
-  })
+      insert: () => Promise.resolve({ error: null }),
+    }),
+  }),
 }));
 
 // Mock do window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -53,7 +67,7 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
-})
+});
 
 // Mock do console para evitar logs desnecessários nos testes
 global.console = {
@@ -63,4 +77,4 @@ global.console = {
   info: vi.fn(),
   warn: vi.fn(),
   error: vi.fn(),
-}
+};

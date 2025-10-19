@@ -6,24 +6,14 @@ Database initialization script.
 Run this to create all tables in the database.
 """
 
-import sys
 import os
+import sys
 
 sys.path.append(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 
 from src.database.base import Base, engine
-from src.database.models import (
-    User,
-    Task,
-    Reminder,
-    CalendarEvent,
-    Note,
-    Project,
-    HealthData,
-    Conversation,
-)
 
 
 def init_db():

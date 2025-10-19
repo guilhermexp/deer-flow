@@ -7,14 +7,13 @@ All environment variables are loaded and validated here.
 """
 
 import os
-from typing import Optional, List
+
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
-    validator,
     field_validator,
     model_validator,
-    ConfigDict,
 )
 from pydantic_settings import BaseSettings
 
@@ -141,7 +140,7 @@ class AuthConfig(BaseModel):
         le=30,
         description="Refresh token expiration time in days"
     )
-    cors_allowed_origins: List[str] = Field(
+    cors_allowed_origins: list[str] = Field(
         default=["http://localhost:4000", "http://localhost:3000"],
         description="List of allowed CORS origins"
     )
@@ -210,7 +209,7 @@ class AuthConfig(BaseModel):
 
     @field_validator('cors_allowed_origins', mode='before')
     @classmethod
-    def parse_cors_origins(cls, v) -> List[str]:
+    def parse_cors_origins(cls, v) -> list[str]:
         """Parse CORS origins from comma-separated string or list"""
         if isinstance(v, str):
             return [origin.strip() for origin in v.split(',') if origin.strip()]
@@ -235,11 +234,11 @@ class AuthConfig(BaseModel):
 class ClerkConfig(BaseModel):
     """Clerk authentication configuration"""
 
-    publishable_key: Optional[str] = Field(
+    publishable_key: str | None = Field(
         default=None,
         description="Clerk publishable key"
     )
-    secret_key: Optional[str] = Field(
+    secret_key: str | None = Field(
         default=None,
         description="Clerk secret key"
     )
@@ -252,9 +251,9 @@ class ClerkConfig(BaseModel):
 class LLMConfig(BaseModel):
     """LLM API configuration"""
 
-    openai_api_key: Optional[str] = Field(default=None, description="OpenAI API key")
-    anthropic_api_key: Optional[str] = Field(default=None, description="Anthropic API key")
-    google_api_key: Optional[str] = Field(default=None, description="Google API key")
+    openai_api_key: str | None = Field(default=None, description="OpenAI API key")
+    anthropic_api_key: str | None = Field(default=None, description="Anthropic API key")
+    google_api_key: str | None = Field(default=None, description="Google API key")
 
     model_config = ConfigDict(validate_assignment=True)
 
@@ -262,9 +261,9 @@ class LLMConfig(BaseModel):
 class SearchConfig(BaseModel):
     """Search engine API configuration"""
 
-    tavily_api_key: Optional[str] = Field(default=None, description="Tavily API key")
-    brave_search_api_key: Optional[str] = Field(default=None, description="Brave Search API key")
-    firecrawl_api_key: Optional[str] = Field(default=None, description="Firecrawl API key")
+    tavily_api_key: str | None = Field(default=None, description="Tavily API key")
+    brave_search_api_key: str | None = Field(default=None, description="Brave Search API key")
+    firecrawl_api_key: str | None = Field(default=None, description="Firecrawl API key")
 
     model_config = ConfigDict(validate_assignment=True)
 
@@ -272,8 +271,8 @@ class SearchConfig(BaseModel):
 class RAGConfig(BaseModel):
     """RAG (Retrieval-Augmented Generation) configuration"""
 
-    ragflow_api_url: Optional[str] = Field(default=None, description="RAGFlow API URL")
-    ragflow_api_key: Optional[str] = Field(default=None, description="RAGFlow API key")
+    ragflow_api_url: str | None = Field(default=None, description="RAGFlow API URL")
+    ragflow_api_key: str | None = Field(default=None, description="RAGFlow API key")
 
     model_config = ConfigDict(validate_assignment=True)
 
@@ -282,7 +281,7 @@ class ObservabilityConfig(BaseModel):
     """Observability and monitoring configuration"""
 
     langchain_tracing_v2: bool = Field(default=False, description="Enable LangSmith tracing")
-    langsmith_api_key: Optional[str] = Field(default=None, description="LangSmith API key")
+    langsmith_api_key: str | None = Field(default=None, description="LangSmith API key")
 
     model_config = ConfigDict(validate_assignment=True)
 
@@ -310,12 +309,12 @@ class AppConfig(BaseSettings):
     auth: AuthConfig
 
     # Optional configurations
-    redis: Optional[RedisConfig] = None
-    clerk: Optional[ClerkConfig] = None
-    llm: Optional[LLMConfig] = None
-    search: Optional[SearchConfig] = None
-    rag: Optional[RAGConfig] = None
-    observability: Optional[ObservabilityConfig] = None
+    redis: RedisConfig | None = None
+    clerk: ClerkConfig | None = None
+    llm: LLMConfig | None = None
+    search: SearchConfig | None = None
+    rag: RAGConfig | None = None
+    observability: ObservabilityConfig | None = None
 
     @field_validator('environment')
     @classmethod
@@ -475,7 +474,7 @@ def load_config() -> AppConfig:
 
 
 # Global config instance (lazy loaded)
-_config: Optional[AppConfig] = None
+_config: AppConfig | None = None
 
 
 def get_config() -> AppConfig:

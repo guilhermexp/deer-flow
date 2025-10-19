@@ -1,9 +1,6 @@
 # src/tools/search_postprocessor.py
-import base64
 import logging
 import re
-from typing import Any, Dict, List
-from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +21,7 @@ class SearchResultPostProcessor:
         self.min_score_threshold = min_score_threshold
         self.max_content_length_per_page = max_content_length_per_page
 
-    def process_results(self, results: List[Dict]) -> List[Dict]:
+    def process_results(self, results: list[dict]) -> list[dict]:
         """
         Process search results
 
@@ -81,7 +78,7 @@ class SearchResultPostProcessor:
         )
         return sorted_results
 
-    def _remove_base64_images(self, result: Dict) -> Dict:
+    def _remove_base64_images(self, result: dict) -> dict:
         """Remove base64 encoded images from content"""
 
         if "page" == result.get("type"):
@@ -94,7 +91,7 @@ class SearchResultPostProcessor:
 
         return cleaned_result
 
-    def processPage(self, result: Dict) -> Dict:
+    def processPage(self, result: dict) -> dict:
         """Process page type result"""
         # Clean base64 images from content
         cleaned_result = result.copy()
@@ -124,7 +121,7 @@ class SearchResultPostProcessor:
 
         return cleaned_result
 
-    def processImage(self, result: Dict) -> Dict:
+    def processImage(self, result: dict) -> dict:
         """Process image type result - clean up base64 data and long fields"""
         cleaned_result = result.copy()
 
@@ -169,7 +166,7 @@ class SearchResultPostProcessor:
 
         return cleaned_result
 
-    def _truncate_long_content(self, result: Dict) -> Dict:
+    def _truncate_long_content(self, result: dict) -> dict:
         """Truncate long content"""
 
         truncated_result = result.copy()
@@ -198,7 +195,7 @@ class SearchResultPostProcessor:
 
         return truncated_result
 
-    def _remove_duplicates(self, result: Dict, seen_urls: set) -> Dict:
+    def _remove_duplicates(self, result: dict, seen_urls: set) -> dict:
         """Remove duplicate results"""
 
         url = result.get("url", result.get("image_url", ""))

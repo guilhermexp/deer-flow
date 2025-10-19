@@ -2,11 +2,12 @@
 # SPDX-License-Identifier: MIT
 
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 from sqlalchemy import desc, or_
+from sqlalchemy.orm import Session
 
 from src.database.base import get_db
 from src.database.models import Note, User
@@ -17,33 +18,33 @@ router = APIRouter(prefix="/api/notes", tags=["notes"])
 
 class NoteCreate(BaseModel):
     title: str
-    content: Optional[str] = None
-    source: Optional[str] = None  # youtube, instagram, tiktok, file, etc.
-    source_url: Optional[str] = None
-    transcript: Optional[str] = None
-    summary: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    content: str | None = None
+    source: str | None = None  # youtube, instagram, tiktok, file, etc.
+    source_url: str | None = None
+    transcript: str | None = None
+    summary: str | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class NoteUpdate(BaseModel):
-    title: Optional[str] = None
-    content: Optional[str] = None
-    source: Optional[str] = None
-    source_url: Optional[str] = None
-    transcript: Optional[str] = None
-    summary: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    title: str | None = None
+    content: str | None = None
+    source: str | None = None
+    source_url: str | None = None
+    transcript: str | None = None
+    summary: str | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class NoteResponse(BaseModel):
     id: int
     title: str
-    content: Optional[str] = None
-    source: Optional[str] = None
-    source_url: Optional[str] = None
-    transcript: Optional[str] = None
-    summary: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    content: str | None = None
+    source: str | None = None
+    source_url: str | None = None
+    transcript: str | None = None
+    summary: str | None = None
+    metadata: dict[str, Any] | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -53,14 +54,14 @@ class NoteResponse(BaseModel):
 
 class NoteStats(BaseModel):
     total_notes: int
-    notes_by_source: Dict[str, int]
-    recent_sources: List[str]
+    notes_by_source: dict[str, int]
+    recent_sources: list[str]
 
 
-@router.get("/", response_model=List[NoteResponse])
+@router.get("/", response_model=list[NoteResponse])
 async def get_notes(
-    search: Optional[str] = None,
-    source: Optional[str] = None,
+    search: str | None = None,
+    source: str | None = None,
     limit: int = Query(50, le=200),
     offset: int = 0,
     current_user: User = Depends(get_current_active_user),

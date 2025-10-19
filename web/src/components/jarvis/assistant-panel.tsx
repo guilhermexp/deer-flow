@@ -1,41 +1,59 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
-import { Button } from "~/components/ui/button"
-import { Loader2 } from "lucide-react"
+import * as React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Button } from "~/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 interface AssistantPanelProps {
-  noteId: string
-  onChatSessionUpdate?: (noteId: string, session: any) => void
+  noteId: string;
+  onChatSessionUpdate?: (noteId: string, session: any) => void;
 }
 
-export function AssistantPanel({ noteId, onChatSessionUpdate }: AssistantPanelProps) {
-  const [isLoading, setIsLoading] = React.useState(false)
-  const [messages, setMessages] = React.useState<string[]>([])
+export function AssistantPanel({
+  noteId,
+  onChatSessionUpdate,
+}: AssistantPanelProps) {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [messages, setMessages] = React.useState<string[]>([]);
 
-  const handleSendMessage = React.useCallback((message: string) => {
-    setIsLoading(true)
-    // Simulate AI response
-    setTimeout(() => {
-      setMessages(prev => [...prev, `User: ${message}`, `AI: Esta é uma resposta simulada para "${message}"`])
-      setIsLoading(false)
-      if (onChatSessionUpdate) {
-        onChatSessionUpdate(noteId, { messages: [...messages, `User: ${message}`, `AI: Esta é uma resposta simulada`] })
-      }
-    }, 1000)
-  }, [noteId, messages, onChatSessionUpdate])
+  const handleSendMessage = React.useCallback(
+    (message: string) => {
+      setIsLoading(true);
+      // Simulate AI response
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          `User: ${message}`,
+          `AI: Esta é uma resposta simulada para "${message}"`,
+        ]);
+        setIsLoading(false);
+        if (onChatSessionUpdate) {
+          onChatSessionUpdate(noteId, {
+            messages: [
+              ...messages,
+              `User: ${message}`,
+              `AI: Esta é uma resposta simulada`,
+            ],
+          });
+        }
+      }, 1000);
+    },
+    [noteId, messages, onChatSessionUpdate]
+  );
 
   return (
-    <Card className="h-full bg-transparent border-0">
-      <CardHeader className="px-6 py-4 border-b border-white/10">
-        <CardTitle className="text-lg font-semibold text-white">Assistente AI</CardTitle>
+    <Card className="h-full border-0 bg-transparent">
+      <CardHeader className="border-b border-white/10 px-6 py-4">
+        <CardTitle className="text-lg font-semibold text-white">
+          Assistente AI
+        </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-4">
-          <div className="min-h-[200px] max-h-[400px] overflow-y-auto space-y-2 p-4 bg-white/[0.02] rounded-lg border border-white/10">
+          <div className="max-h-[400px] min-h-[200px] space-y-2 overflow-y-auto rounded-lg border border-white/10 bg-white/[0.02] p-4">
             {messages.length === 0 ? (
-              <p className="text-gray-400 text-center">
+              <p className="text-center text-gray-400">
                 Faça perguntas sobre esta nota...
               </p>
             ) : (
@@ -52,28 +70,32 @@ export function AssistantPanel({ noteId, onChatSessionUpdate }: AssistantPanelPr
               </div>
             )}
           </div>
-          
+
           <div className="flex gap-2">
             <input
               type="text"
               placeholder="Digite sua pergunta..."
-              className="flex-1 px-3 py-2 text-sm rounded-md border bg-white/[0.05] border-white/10 text-gray-100 placeholder:text-gray-500 focus:border-white/20 focus:outline-none"
+              className="flex-1 rounded-md border border-white/10 bg-white/[0.05] px-3 py-2 text-sm text-gray-100 placeholder:text-gray-500 focus:border-white/20 focus:outline-none"
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && e.currentTarget.value) {
-                  handleSendMessage(e.currentTarget.value)
-                  e.currentTarget.value = ''
+                if (e.key === "Enter" && e.currentTarget.value) {
+                  handleSendMessage(e.currentTarget.value);
+                  e.currentTarget.value = "";
                 }
               }}
               disabled={isLoading}
             />
-            <Button size="sm" disabled={isLoading} className="bg-white/[0.05] border-white/10 hover:bg-white/[0.08] text-gray-100">
+            <Button
+              size="sm"
+              disabled={isLoading}
+              className="border-white/10 bg-white/[0.05] text-gray-100 hover:bg-white/[0.08]"
+            >
               Enviar
             </Button>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
-export default AssistantPanel
+export default AssistantPanel;

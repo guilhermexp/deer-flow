@@ -1,21 +1,24 @@
-"use client"
+"use client";
 
-import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "~/lib/utils"
-import EventCard from "./event-card"
-import type { CalendarEvent } from "../lib/types"
-import { DAYS_OF_WEEK_ABBREVIATED, CALENDAR_HOURS } from "../lib/constants" // Importa CALENDAR_HOURS
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "~/lib/utils";
+import EventCard from "./event-card";
+import type { CalendarEvent } from "../lib/types";
+import { DAYS_OF_WEEK_ABBREVIATED, CALENDAR_HOURS } from "../lib/constants"; // Importa CALENDAR_HOURS
 
 interface WeekViewProps {
-  startOfWeek: Date
-  daysInWeek: Date[]
-  getEventsForDayOfWeek: (dayIndex: number, weekStartDate: Date) => CalendarEvent[]
-  isCurrentEventActive: (event: CalendarEvent) => boolean
-  formatHourForDisplay: (hour: number) => string
-  isDateToday: (date: Date | null) => boolean
-  onNavigate: (direction: "next" | "prev") => void
-  onDeleteEvent: (event: CalendarEvent) => void
-  onAddEventClick?: (date: Date) => void
+  startOfWeek: Date;
+  daysInWeek: Date[];
+  getEventsForDayOfWeek: (
+    dayIndex: number,
+    weekStartDate: Date
+  ) => CalendarEvent[];
+  isCurrentEventActive: (event: CalendarEvent) => boolean;
+  formatHourForDisplay: (hour: number) => string;
+  isDateToday: (date: Date | null) => boolean;
+  onNavigate: (direction: "next" | "prev") => void;
+  onDeleteEvent: (event: CalendarEvent) => void;
+  onAddEventClick?: (date: Date) => void;
 }
 
 export default function WeekView({
@@ -32,32 +35,34 @@ export default function WeekView({
   // Suppress unused variable warning - feature not implemented yet
   void onAddEventClick;
   void onNavigate;
-  
-  const cellBackgroundStyle = "bg-white/[0.02] backdrop-blur-sm"
+
+  const cellBackgroundStyle = "bg-white/[0.02] backdrop-blur-sm";
 
   return (
-    <section className="space-y-6 mt-2" aria-label="Week view calendar">
-      <div className="hidden lg:block rounded-lg border border-white/10 p-0.5">
-        <div className="grid grid-cols-[60px_repeat(7,1fr)] gap-px bg-white/10 rounded-md overflow-hidden">
+    <section className="mt-2 space-y-6" aria-label="Week view calendar">
+      <div className="hidden rounded-lg border border-white/10 p-0.5 lg:block">
+        <div className="grid grid-cols-[60px_repeat(7,1fr)] gap-px overflow-hidden rounded-md bg-white/10">
           <div className={cn(cellBackgroundStyle)}>
-            <div className="h-16 flex items-center justify-center border-b border-white/10">
+            <div className="flex h-16 items-center justify-center border-b border-white/10">
               <span className="text-sm font-medium text-gray-400">Time</span>
             </div>
             {/* CORREÇÃO: Usa a constante CALENDAR_HOURS */}
             {CALENDAR_HOURS.map((hour) => (
               <div
                 key={hour}
-                className="h-16 flex items-center justify-center border-b border-white/10 last:border-b-0"
+                className="flex h-16 items-center justify-center border-b border-white/10 last:border-b-0"
               >
-                <span className="text-xs text-gray-400">{formatHourForDisplay(hour)}</span>
+                <span className="text-xs text-gray-400">
+                  {formatHourForDisplay(hour)}
+                </span>
               </div>
             ))}
           </div>
 
           <AnimatePresence mode="wait">
             {daysInWeek.map((day, index) => {
-              const isToday = isDateToday(day)
-              const dayEvents = getEventsForDayOfWeek(index, startOfWeek)
+              const isToday = isDateToday(day);
+              const dayEvents = getEventsForDayOfWeek(index, startOfWeek);
 
               return (
                 <motion.div
@@ -70,7 +75,7 @@ export default function WeekView({
                 >
                   <div
                     className={cn(
-                      "h-16 flex flex-col items-center justify-center border-b border-white/10",
+                      "flex h-16 flex-col items-center justify-center border-b border-white/10",
                       isToday && "bg-blue-500/10"
                     )}
                   >
@@ -95,13 +100,13 @@ export default function WeekView({
                   {/* Time slots with events */}
                   {CALENDAR_HOURS.map((hour) => {
                     const hourEvents = dayEvents.filter((event) => {
-                      return event.startHour === hour
-                    })
+                      return event.startHour === hour;
+                    });
 
                     return (
                       <div
                         key={`${day.toISOString()}-${hour}`}
-                        className="h-16 border-b border-white/10 last:border-b-0 p-1 relative"
+                        className="relative h-16 border-b border-white/10 p-1 last:border-b-0"
                       >
                         {hourEvents.length > 0 && (
                           <div className="space-y-1">
@@ -121,29 +126,29 @@ export default function WeekView({
                               </motion.div>
                             ))}
                             {hourEvents.length > 2 && (
-                              <span className="text-xs text-gray-400 pl-1">
+                              <span className="pl-1 text-xs text-gray-400">
                                 +{hourEvents.length - 2} more
                               </span>
                             )}
                           </div>
                         )}
                       </div>
-                    )
+                    );
                   })}
                 </motion.div>
-              )
+              );
             })}
           </AnimatePresence>
         </div>
       </div>
 
       {/* Mobile view */}
-      <div className="lg:hidden space-y-4">
+      <div className="space-y-4 lg:hidden">
         <div className="grid grid-cols-7 gap-2">
           <AnimatePresence mode="wait">
             {daysInWeek.map((day, index) => {
-              const isToday = isDateToday(day)
-              const dayEvents = getEventsForDayOfWeek(index, startOfWeek)
+              const isToday = isDateToday(day);
+              const dayEvents = getEventsForDayOfWeek(index, startOfWeek);
 
               return (
                 <motion.div
@@ -153,8 +158,10 @@ export default function WeekView({
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.2, delay: index * 0.05 }}
                   className={cn(
-                    "aspect-square rounded-lg border p-2 flex flex-col items-center justify-center relative",
-                    isToday ? "bg-blue-500/10 border-blue-500/30" : "bg-white/[0.02] border-white/10"
+                    "relative flex aspect-square flex-col items-center justify-center rounded-lg border p-2",
+                    isToday
+                      ? "border-blue-500/30 bg-blue-500/10"
+                      : "border-white/10 bg-white/[0.02]"
                   )}
                 >
                   <span
@@ -178,22 +185,24 @@ export default function WeekView({
                       {dayEvents.slice(0, 3).map((_, i) => (
                         <div
                           key={i}
-                          className="w-1 h-1 rounded-full bg-blue-400"
+                          className="h-1 w-1 rounded-full bg-blue-400"
                         />
                       ))}
                     </div>
                   )}
                 </motion.div>
-              )
+              );
             })}
           </AnimatePresence>
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-gray-400">Events this week</h3>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+          <h3 className="text-sm font-medium text-gray-400">
+            Events this week
+          </h3>
+          <div className="max-h-96 space-y-2 overflow-y-auto">
             {daysInWeek.flatMap((day, dayIndex) => {
-              const events = getEventsForDayOfWeek(dayIndex, startOfWeek)
+              const events = getEventsForDayOfWeek(dayIndex, startOfWeek);
               return events.map((event) => (
                 <EventCard
                   key={event.id}
@@ -202,12 +211,14 @@ export default function WeekView({
                   onDelete={onDeleteEvent}
                   view="week"
                 />
-              ))
+              ));
             }).length === 0 ? (
-              <p className="text-center text-gray-400 py-8">No events this week</p>
+              <p className="py-8 text-center text-gray-400">
+                No events this week
+              </p>
             ) : (
               daysInWeek.flatMap((day, dayIndex) => {
-                const events = getEventsForDayOfWeek(dayIndex, startOfWeek)
+                const events = getEventsForDayOfWeek(dayIndex, startOfWeek);
                 return events.map((event) => (
                   <EventCard
                     key={event.id}
@@ -216,12 +227,12 @@ export default function WeekView({
                     onDelete={onDeleteEvent}
                     view="week"
                   />
-                ))
+                ));
               })
             )}
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }

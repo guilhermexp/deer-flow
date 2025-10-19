@@ -2,43 +2,49 @@
 # SPDX-License-Identifier: MIT
 
 from datetime import datetime
-from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 from sqlalchemy import desc
+from sqlalchemy.orm import Session
 
 from src.database.base import get_db
 from src.database.models import Conversation, User
 from src.server.auth import get_current_active_user
-from src.server.pagination import PaginationParams, PaginatedResponse, paginate, create_paginated_response
-from src.server.cache import cache, cached
+from src.server.cache import cached
+from src.server.pagination import (
+    PaginatedResponse,
+    PaginationParams,
+    create_paginated_response,
+    paginate,
+)
 
 router = APIRouter(prefix="/api/conversations", tags=["conversations"])
 
 
 class ConversationCreate(BaseModel):
     thread_id: str
-    title: Optional[str] = None
-    query: Optional[str] = None
-    messages: List[Dict[str, Any]] = []
-    summary: Optional[str] = None
+    title: str | None = None
+    query: str | None = None
+    messages: list[dict[str, Any]] = []
+    summary: str | None = None
 
 
 class ConversationUpdate(BaseModel):
-    title: Optional[str] = None
-    query: Optional[str] = None
-    messages: Optional[List[Dict[str, Any]]] = None
-    summary: Optional[str] = None
+    title: str | None = None
+    query: str | None = None
+    messages: list[dict[str, Any]] | None = None
+    summary: str | None = None
 
 
 class ConversationResponse(BaseModel):
     id: int
     thread_id: str
-    title: Optional[str] = None
-    query: Optional[str] = None
-    messages: List[Dict[str, Any]]
-    summary: Optional[str] = None
+    title: str | None = None
+    query: str | None = None
+    messages: list[dict[str, Any]]
+    summary: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -48,7 +54,7 @@ class ConversationResponse(BaseModel):
 
 @router.get("/", response_model=PaginatedResponse[ConversationResponse])
 async def get_conversations(
-    search: Optional[str] = None,
+    search: str | None = None,
     pagination: PaginationParams = Depends(),
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
@@ -66,14 +72,14 @@ async def get_conversations(
 
     # Order by updated_at
     query = query.order_by(desc(Conversation.updated_at))
-    
+
     # Paginate
     items, pagination_info = paginate(
         query,
         page=pagination.page,
         per_page=pagination.per_page
     )
-    
+
     return create_paginated_response(items, pagination_info, ConversationResponse)
 
 
@@ -186,7 +192,7 @@ async def delete_conversation(
 @router.post("/{thread_id}/messages")
 async def add_messages(
     thread_id: str,
-    messages: List[Dict[str, Any]],
+    messages: list[dict[str, Any]],
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):

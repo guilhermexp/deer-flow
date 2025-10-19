@@ -1,22 +1,28 @@
-"use client"
+"use client";
 
-import React from "react"
-import { Input } from "~/components/ui/input"
-import { Checkbox } from "~/components/ui/checkbox"
-import { Label } from "~/components/ui/label"
-import { urlPlaceholders } from "~/lib/input-modal-utils"
+import React from "react";
+import { Input } from "~/components/ui/input";
+import { Checkbox } from "~/components/ui/checkbox";
+import { Label } from "~/components/ui/label";
+import { urlPlaceholders } from "~/lib/input-modal-utils";
 
 interface UrlInputProps {
-  type: string
-  inputValue: string
-  onChange: (value: string) => void
-  limitPages?: boolean
-  onLimitPagesChange?: (checked: boolean) => void
+  type: string;
+  inputValue: string;
+  onChange: (value: string) => void;
+  limitPages?: boolean;
+  onLimitPagesChange?: (checked: boolean) => void;
 }
 
 export const UrlInput = React.memo(
-  ({ type, inputValue, onChange, limitPages, onLimitPagesChange }: UrlInputProps) => {
-    const placeholder = urlPlaceholders[type] || "Cole a URL aqui"
+  ({
+    type,
+    inputValue,
+    onChange,
+    limitPages,
+    onLimitPagesChange,
+  }: UrlInputProps) => {
+    const placeholder = urlPlaceholders[type] || "Cole a URL aqui";
 
     return (
       <div className="space-y-4">
@@ -25,33 +31,35 @@ export const UrlInput = React.memo(
           value={inputValue}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="bg-white/[0.05] border-white/10 text-gray-100 placeholder:text-gray-500 focus:border-white/20"
+          className="border-white/10 bg-white/[0.05] text-gray-100 placeholder:text-gray-500 focus:border-white/20"
         />
         {type === "website" && onLimitPagesChange && (
-          <div className="flex items-center space-x-2 mt-3">
+          <div className="mt-3 flex items-center space-x-2">
             <Checkbox
               id="limitPages"
               checked={limitPages}
-              onCheckedChange={(checked) => onLimitPagesChange(checked as boolean)}
+              onCheckedChange={(checked) =>
+                onLimitPagesChange(checked as boolean)
+              }
             />
-            <Label htmlFor="limitPages" className="text-gray-400 text-sm">
+            <Label htmlFor="limitPages" className="text-sm text-gray-400">
               Limitar número de páginas para carregar
             </Label>
           </div>
         )}
       </div>
-    )
+    );
   }
-)
+);
 
-UrlInput.displayName = "UrlInput"
+UrlInput.displayName = "UrlInput";
 
 // Twitter-specific URL input
 interface TwitterInputProps {
-  username: string
-  url: string
-  onUsernameChange: (value: string) => void
-  onUrlChange: (value: string) => void
+  username: string;
+  url: string;
+  onUsernameChange: (value: string) => void;
+  onUrlChange: (value: string) => void;
 }
 
 export const TwitterInput = React.memo(
@@ -59,11 +67,11 @@ export const TwitterInput = React.memo(
     return (
       <div className="space-y-4">
         <div>
-          <Label htmlFor="twitterUser" className="text-gray-400 mb-1.5 block">
+          <Label htmlFor="twitterUser" className="mb-1.5 block text-gray-400">
             Nome de usuário
           </Label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <span className="absolute top-1/2 left-3 -translate-y-1/2 text-gray-400">
               @
             </span>
             <Input
@@ -72,12 +80,12 @@ export const TwitterInput = React.memo(
               placeholder="username"
               value={username}
               onChange={(e) => onUsernameChange(e.target.value)}
-              className="pl-7 bg-white/[0.05] border-white/10 text-gray-100 placeholder:text-gray-500 focus:border-white/20"
+              className="border-white/10 bg-white/[0.05] pl-7 text-gray-100 placeholder:text-gray-500 focus:border-white/20"
             />
           </div>
         </div>
         <div>
-          <Label htmlFor="twitterURL" className="text-gray-400 mb-1.5 block">
+          <Label htmlFor="twitterURL" className="mb-1.5 block text-gray-400">
             URL do Tweet (opcional)
           </Label>
           <Input
@@ -86,12 +94,12 @@ export const TwitterInput = React.memo(
             placeholder="https://x.com/username/status/..."
             value={url}
             onChange={(e) => onUrlChange(e.target.value)}
-            className="bg-white/[0.05] border-white/10 text-gray-100 placeholder:text-gray-500 focus:border-white/20"
+            className="border-white/10 bg-white/[0.05] text-gray-100 placeholder:text-gray-500 focus:border-white/20"
           />
         </div>
       </div>
-    )
+    );
   }
-)
+);
 
-TwitterInput.displayName = "TwitterInput"
+TwitterInput.displayName = "TwitterInput";

@@ -7,7 +7,7 @@ Text-to-Speech module using Google Gemini TTS API.
 
 import logging
 import wave
-from typing import Optional, Dict, Any
+from typing import Any
 
 from google import genai
 from google.genai import types
@@ -42,12 +42,12 @@ class GoogleGeminiTTS:
     def text_to_speech(
         self,
         text: str,
-        voice_name: Optional[str] = None,
+        voice_name: str | None = None,
         output_format: str = "wav",
         sample_rate: int = 24000,
         sample_width: int = 2,
         channels: int = 1,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Convert text to speech using Google Gemini TTS API.
 

@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useCallback } from "react"
-import type { Task, Project, ActiveTabValue } from "../lib/types"
+import { useCallback } from "react";
+import type { Task, Project, ActiveTabValue } from "../lib/types";
 
-export const PROJECTS_STORAGE_KEY = "kanban-projects-v2"
-export const TASKS_BY_PROJECT_STORAGE_KEY = "kanban-tasksByProject-v2"
-export const LAST_ACTIVE_PROJECT_KEY = "kanban-lastActiveProject-v2"
-export const LAST_ACTIVE_TAB_KEY = "kanban-lastActiveTab-v2"
+export const PROJECTS_STORAGE_KEY = "kanban-projects-v2";
+export const TASKS_BY_PROJECT_STORAGE_KEY = "kanban-tasksByProject-v2";
+export const LAST_ACTIVE_PROJECT_KEY = "kanban-lastActiveProject-v2";
+export const LAST_ACTIVE_TAB_KEY = "kanban-lastActiveTab-v2";
 
 export const initialDefaultProject: Project = {
   id: "default-project-1",
@@ -14,7 +14,7 @@ export const initialDefaultProject: Project = {
   description: "Um projeto de exemplo para começar a organizar suas tarefas.",
   createdAt: new Date().toISOString(),
   isPriority: false,
-}
+};
 
 export const initialTasksData: Task[] = [
   {
@@ -69,92 +69,115 @@ export const initialTasksData: Task[] = [
     weekDay: "terca",
     description: "Slides da apresentação concluídos.",
   },
-]
+];
 
 export function useKanbanStorage() {
   // Load projects from localStorage
   const loadProjects = useCallback((): Project[] => {
-    const storedProjects = localStorage.getItem(PROJECTS_STORAGE_KEY)
-    let loadedProjects: Project[] = []
-    
+    const storedProjects = localStorage.getItem(PROJECTS_STORAGE_KEY);
+    let loadedProjects: Project[] = [];
+
     if (storedProjects) {
       try {
-        loadedProjects = JSON.parse(storedProjects)
+        loadedProjects = JSON.parse(storedProjects);
       } catch (e) {
-        console.error("Error loading projects from localStorage:", e)
+        console.error("Error loading projects from localStorage:", e);
       }
     }
 
     if (loadedProjects.length === 0) {
-      loadedProjects = [initialDefaultProject]
-      localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(loadedProjects))
+      loadedProjects = [initialDefaultProject];
+      localStorage.setItem(
+        PROJECTS_STORAGE_KEY,
+        JSON.stringify(loadedProjects)
+      );
     }
-    
-    return loadedProjects
-  }, [])
+
+    return loadedProjects;
+  }, []);
 
   // Load tasks from localStorage
-  const loadTasks = useCallback((projects: Project[]): { [projectId: string]: Task[] } => {
-    const storedTasks = localStorage.getItem(TASKS_BY_PROJECT_STORAGE_KEY)
-    let loadedTasks: { [projectId: string]: Task[] } = {}
-    
-    if (storedTasks) {
-      try {
-        loadedTasks = JSON.parse(storedTasks)
-      } catch (e) {
-        console.error("Error loading tasks from localStorage:", e)
-      }
-    }
+  const loadTasks = useCallback(
+    (projects: Project[]): { [projectId: string]: Task[] } => {
+      const storedTasks = localStorage.getItem(TASKS_BY_PROJECT_STORAGE_KEY);
+      let loadedTasks: { [projectId: string]: Task[] } = {};
 
-    // Initialize default tasks if needed
-    if (!loadedTasks[initialDefaultProject.id] && projects.find((p) => p.id === initialDefaultProject.id)) {
-      loadedTasks[initialDefaultProject.id] = initialTasksData.map((task) => ({
-        ...task,
-        projectId: initialDefaultProject.id,
-      }))
-    }
-    
-    return loadedTasks
-  }, [])
+      if (storedTasks) {
+        try {
+          loadedTasks = JSON.parse(storedTasks);
+        } catch (e) {
+          console.error("Error loading tasks from localStorage:", e);
+        }
+      }
+
+      // Initialize default tasks if needed
+      if (
+        !loadedTasks[initialDefaultProject.id] &&
+        projects.find((p) => p.id === initialDefaultProject.id)
+      ) {
+        loadedTasks[initialDefaultProject.id] = initialTasksData.map(
+          (task) => ({
+            ...task,
+            projectId: initialDefaultProject.id,
+          })
+        );
+      }
+
+      return loadedTasks;
+    },
+    []
+  );
 
   // Load last active project
-  const loadLastActiveProject = useCallback((projects: Project[]): Project | null => {
-    const lastActiveProjectId = localStorage.getItem(LAST_ACTIVE_PROJECT_KEY)
-    return projects.find((p) => p.id === lastActiveProjectId) || null
-  }, [])
+  const loadLastActiveProject = useCallback(
+    (projects: Project[]): Project | null => {
+      const lastActiveProjectId = localStorage.getItem(LAST_ACTIVE_PROJECT_KEY);
+      return projects.find((p) => p.id === lastActiveProjectId) || null;
+    },
+    []
+  );
 
   // Load last active tab
   const loadLastActiveTab = useCallback((): ActiveTabValue | null => {
-    return localStorage.getItem(LAST_ACTIVE_TAB_KEY) as ActiveTabValue | null
-  }, [])
+    return localStorage.getItem(LAST_ACTIVE_TAB_KEY) as ActiveTabValue | null;
+  }, []);
 
   // Save projects to localStorage
   const saveProjects = useCallback((projects: Project[]) => {
     if (projects.length > 0 || localStorage.getItem(PROJECTS_STORAGE_KEY)) {
-      localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects))
+      localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(projects));
     }
-  }, [])
+  }, []);
 
   // Save tasks to localStorage
-  const saveTasks = useCallback((tasksByProject: { [projectId: string]: Task[] }) => {
-    if (Object.keys(tasksByProject).length > 0 || localStorage.getItem(TASKS_BY_PROJECT_STORAGE_KEY)) {
-      localStorage.setItem(TASKS_BY_PROJECT_STORAGE_KEY, JSON.stringify(tasksByProject))
-    }
-  }, [])
+  const saveTasks = useCallback(
+    (tasksByProject: { [projectId: string]: Task[] }) => {
+      if (
+        Object.keys(tasksByProject).length > 0 ||
+        localStorage.getItem(TASKS_BY_PROJECT_STORAGE_KEY)
+      ) {
+        localStorage.setItem(
+          TASKS_BY_PROJECT_STORAGE_KEY,
+          JSON.stringify(tasksByProject)
+        );
+      }
+    },
+    []
+  );
 
   // Save last active project
   const saveLastActiveProject = useCallback((project: Project | null) => {
     if (project) {
-      localStorage.setItem(LAST_ACTIVE_PROJECT_KEY, project.id)
+      localStorage.setItem(LAST_ACTIVE_PROJECT_KEY, project.id);
     } else {
-      localStorage.removeItem(LAST_ACTIVE_PROJECT_KEY)
+      localStorage.removeItem(LAST_ACTIVE_PROJECT_KEY);
     }
-  }, [])
+  }, []);
 
   // Save last active tab
   const saveLastActiveTab = useCallback((tab: ActiveTabValue) => {
-    localStorage.setItem(LAST_ACTIVE_TAB_KEY, tab)
-  }, [])
+    localStorage.setItem(LAST_ACTIVE_TAB_KEY, tab);
+  }, []);
 
   return {
     loadProjects,
@@ -165,5 +188,5 @@ export function useKanbanStorage() {
     saveTasks,
     saveLastActiveProject,
     saveLastActiveTab,
-  }
+  };
 }

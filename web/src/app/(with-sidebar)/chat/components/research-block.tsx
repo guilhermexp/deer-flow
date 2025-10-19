@@ -1,7 +1,16 @@
 // Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 // SPDX-License-Identifier: MIT
 
-import { Check, Copy, Headphones, Pencil, Undo2, X, Download, Loader2 } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Headphones,
+  Pencil,
+  Undo2,
+  X,
+  Download,
+  Loader2,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { ScrollContainer } from "~/components/deer-flow/scroll-container";
@@ -24,21 +33,21 @@ export function ResearchBlock({
   researchId: string | null;
 }) {
   const reportId = useStore((state) =>
-    researchId ? state.researchReportIds.get(researchId) : undefined,
+    researchId ? state.researchReportIds.get(researchId) : undefined
   );
   const [activeTab, setActiveTab] = useState("activities");
   const [editing, setEditing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [generatingPodcast, setGeneratingPodcast] = useState(false);
-  
+
   const hasReport = useStore((state) =>
-    researchId ? state.researchReportIds.has(researchId) : false,
+    researchId ? state.researchReportIds.has(researchId) : false
   );
   const reportStreaming = useStore((state) =>
-    reportId ? (state.messages.get(reportId)?.isStreaming ?? false) : false,
+    reportId ? (state.messages.get(reportId)?.isStreaming ?? false) : false
   );
   const { isReplay } = useReplay();
-  
+
   useEffect(() => {
     if (hasReport) {
       setActiveTab("report");
@@ -84,12 +93,12 @@ export function ResearchBlock({
       return;
     }
     const now = new Date();
-    const pad = (n: number) => n.toString().padStart(2, '0');
+    const pad = (n: number) => n.toString().padStart(2, "0");
     const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
     const filename = `research-report-${timestamp}.md`;
-    const blob = new Blob([report.content], { type: 'text/markdown' });
+    const blob = new Blob([report.content], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = filename;
     document.body.appendChild(a);
@@ -100,7 +109,6 @@ export function ResearchBlock({
     }, 0);
   }, [reportId]);
 
-    
   const handleEdit = useCallback(() => {
     setEditing((editing) => !editing);
   }, []);
@@ -115,10 +123,16 @@ export function ResearchBlock({
   return (
     <div className={cn("h-full w-full", className)}>
       <Card className={cn("relative h-full w-full pt-4", className)}>
-        <div className="absolute right-2 top-2 flex flex-wrap items-center justify-end gap-1 z-10 max-w-[50%] sm:max-w-none">
+        <div className="absolute top-2 right-2 z-10 flex max-w-[50%] flex-wrap items-center justify-end gap-1 sm:max-w-none">
           {hasReport && !reportStreaming && (
             <>
-              <Tooltip title={generatingPodcast ? "Generating podcast..." : "Generate Podcast"}>
+              <Tooltip
+                title={
+                  generatingPodcast
+                    ? "Generating podcast..."
+                    : "Generate Podcast"
+                }
+              >
                 <Button
                   className="text-gray-400 hover:text-gray-200"
                   size="icon"
@@ -141,7 +155,11 @@ export function ResearchBlock({
                   disabled={isReplay}
                   onClick={handleEdit}
                 >
-                  {editing ? <Undo2 className="h-4 w-4" /> : <Pencil className="h-4 w-4" />}
+                  {editing ? (
+                    <Undo2 className="h-4 w-4" />
+                  ) : (
+                    <Pencil className="h-4 w-4" />
+                  )}
                 </Button>
               </Tooltip>
               <Tooltip title="Copy">
@@ -151,7 +169,11 @@ export function ResearchBlock({
                   variant="ghost"
                   onClick={handleCopy}
                 >
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  {copied ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
                 </Button>
               </Tooltip>
               <Tooltip title="Download report as markdown">
@@ -184,7 +206,7 @@ export function ResearchBlock({
           value={activeTab}
           onValueChange={(value) => setActiveTab(value)}
         >
-          <div className="flex w-full justify-center mt-8 overflow-x-auto scrollbar-hide">
+          <div className="scrollbar-hide mt-8 flex w-full justify-center overflow-x-auto">
             <TabsList className="flex-shrink-0">
               <TabsTrigger
                 className="px-8"

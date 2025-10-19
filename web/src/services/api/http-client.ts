@@ -8,10 +8,10 @@
 
 // Use relative URL to leverage Next.js API proxy at /api/[...path]
 // This avoids CORS issues and works in both development and production
-const API_URL = '/api';
+const API_URL = "/api";
 
 interface HttpClientOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   headers?: Record<string, string>;
   body?: any;
   token?: string; // Token de autenticação opcional
@@ -24,7 +24,7 @@ class HttpClientError extends Error {
     public data?: any
   ) {
     super(message);
-    this.name = 'HttpClientError';
+    this.name = "HttpClientError";
   }
 }
 
@@ -32,17 +32,12 @@ export async function httpClient<T = any>(
   endpoint: string,
   options: HttpClientOptions = {}
 ): Promise<T> {
-  const {
-    method = 'GET',
-    headers: customHeaders = {},
-    body,
-    token
-  } = options;
+  const { method = "GET", headers: customHeaders = {}, body, token } = options;
 
   // Construir headers
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...customHeaders
+    "Content-Type": "application/json",
+    ...customHeaders,
   };
 
   // Adicionar token de autenticação se fornecido
@@ -52,20 +47,20 @@ export async function httpClient<T = any>(
 
   // Construir URL completo
   const url = `${API_URL}${endpoint}`;
-  console.log('🔍 HTTP Client Debug:', { API_URL, endpoint, url, method });
+  console.log("🔍 HTTP Client Debug:", { API_URL, endpoint, url, method });
 
   // Construir opções do fetch
   const fetchOptions: RequestInit = {
     method,
     headers,
-    credentials: 'include',
+    credentials: "include",
   };
 
   // Adicionar body se presente
   if (body !== undefined) {
     if (body instanceof FormData) {
       // Para FormData, remover Content-Type para deixar o browser definir
-      delete headers['Content-Type'];
+      delete headers["Content-Type"];
       fetchOptions.body = body;
     } else {
       fetchOptions.body = JSON.stringify(body);
@@ -82,9 +77,9 @@ export async function httpClient<T = any>(
 
     // Tentar parsear resposta como JSON
     let data: any;
-    const contentType = response.headers.get('content-type');
+    const contentType = response.headers.get("content-type");
 
-    if (contentType?.includes('application/json')) {
+    if (contentType?.includes("application/json")) {
       data = await response.json();
     } else {
       data = await response.text();
@@ -93,7 +88,7 @@ export async function httpClient<T = any>(
     // Se a resposta não for OK, lançar erro
     if (!response.ok) {
       throw new HttpClientError(
-        data?.detail || data?.message || 'Erro na requisição',
+        data?.detail || data?.message || "Erro na requisição",
         response.status,
         data
       );
@@ -107,7 +102,7 @@ export async function httpClient<T = any>(
 
     // Erro de rede ou outro erro
     throw new HttpClientError(
-      error instanceof Error ? error.message : 'Erro de conexão',
+      error instanceof Error ? error.message : "Erro de conexão",
       0,
       error
     );
@@ -116,20 +111,33 @@ export async function httpClient<T = any>(
 
 // Métodos de conveniência
 export const api = {
-  get: <T = any>(endpoint: string, options?: Omit<HttpClientOptions, 'method' | 'body'>) =>
-    httpClient<T>(endpoint, { ...options, method: 'GET' }),
+  get: <T = any>(
+    endpoint: string,
+    options?: Omit<HttpClientOptions, "method" | "body">
+  ) => httpClient<T>(endpoint, { ...options, method: "GET" }),
 
-  post: <T = any>(endpoint: string, body?: any, options?: Omit<HttpClientOptions, 'method' | 'body'>) =>
-    httpClient<T>(endpoint, { ...options, method: 'POST', body }),
+  post: <T = any>(
+    endpoint: string,
+    body?: any,
+    options?: Omit<HttpClientOptions, "method" | "body">
+  ) => httpClient<T>(endpoint, { ...options, method: "POST", body }),
 
-  put: <T = any>(endpoint: string, body?: any, options?: Omit<HttpClientOptions, 'method' | 'body'>) =>
-    httpClient<T>(endpoint, { ...options, method: 'PUT', body }),
+  put: <T = any>(
+    endpoint: string,
+    body?: any,
+    options?: Omit<HttpClientOptions, "method" | "body">
+  ) => httpClient<T>(endpoint, { ...options, method: "PUT", body }),
 
-  patch: <T = any>(endpoint: string, body?: any, options?: Omit<HttpClientOptions, 'method' | 'body'>) =>
-    httpClient<T>(endpoint, { ...options, method: 'PATCH', body }),
+  patch: <T = any>(
+    endpoint: string,
+    body?: any,
+    options?: Omit<HttpClientOptions, "method" | "body">
+  ) => httpClient<T>(endpoint, { ...options, method: "PATCH", body }),
 
-  delete: <T = any>(endpoint: string, options?: Omit<HttpClientOptions, 'method' | 'body'>) =>
-    httpClient<T>(endpoint, { ...options, method: 'DELETE' }),
+  delete: <T = any>(
+    endpoint: string,
+    options?: Omit<HttpClientOptions, "method" | "body">
+  ) => httpClient<T>(endpoint, { ...options, method: "DELETE" }),
 };
 
 export { HttpClientError };

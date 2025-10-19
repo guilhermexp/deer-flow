@@ -28,17 +28,17 @@ function Image({
   // Filter out invalid URLs early
   const isValidUrl = useCallback((url: string) => {
     if (!url) return false;
-    
+
     // Skip x-raw-image URLs (internal browser URLs)
-    if (url.startsWith('x-raw-image://')) return false;
-    
+    if (url.startsWith("x-raw-image://")) return false;
+
     // Skip malformed URLs
     try {
       new URL(url);
       return true;
     } catch {
       // Try to handle relative URLs
-      if (url.startsWith('/') || url.startsWith('./')) {
+      if (url.startsWith("/") || url.startsWith("./")) {
         return true;
       }
       return false;
@@ -59,7 +59,7 @@ function Image({
     setIsError(false);
     setIsLoading(false);
   }, []);
-  
+
   const handleError = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
       e.currentTarget.style.display = "none";
@@ -69,7 +69,7 @@ function Image({
       }
       setIsError(true);
     },
-    [isValidUrl],
+    [isValidUrl]
   );
   return (
     <span className={cn("block w-fit overflow-hidden", className)}>
@@ -81,7 +81,7 @@ function Image({
             className={cn(
               "size-full object-cover",
               imageTransition && "transition-all duration-200 ease-out",
-              imageClassName,
+              imageClassName
             )}
             src={src}
             alt={alt}

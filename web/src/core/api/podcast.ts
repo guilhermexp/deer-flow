@@ -12,7 +12,7 @@ export async function generatePodcast(content: string) {
       },
       body: JSON.stringify({ content }),
     });
-    
+
     if (!response.ok) {
       // Try to get error message from response
       let errorMessage = `HTTP error! status: ${response.status}`;
@@ -26,7 +26,7 @@ export async function generatePodcast(content: string) {
       }
       throw new Error(errorMessage);
     }
-    
+
     const arrayBuffer = await response.arrayBuffer();
     const blob = new Blob([arrayBuffer], { type: "audio/mp3" });
     const audioUrl = URL.createObjectURL(blob);

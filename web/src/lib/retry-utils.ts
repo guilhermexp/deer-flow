@@ -16,7 +16,7 @@ export class RetryError extends Error {
 
   constructor(message: string, attempts: number, lastError: Error) {
     super(message);
-    this.name = 'RetryError';
+    this.name = "RetryError";
     this.attempts = attempts;
     this.lastError = lastError;
   }
@@ -60,11 +60,7 @@ export async function retry<T>(
     }
   }
 
-  throw new RetryError(
-    `Failed after ${retries} attempts`,
-    retries,
-    lastError!
-  );
+  throw new RetryError(`Failed after ${retries} attempts`, retries, lastError!);
 }
 
 /**
@@ -83,7 +79,7 @@ export async function retryWithTimeout<T>(
       return await Promise.race([
         fn(),
         new Promise<never>((_, reject) => {
-          controller.signal.addEventListener('abort', () => {
+          controller.signal.addEventListener("abort", () => {
             reject(new Error(`Operation timed out after ${timeoutMs}ms`));
           });
         }),

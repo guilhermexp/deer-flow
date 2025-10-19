@@ -1,8 +1,8 @@
 // Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 // SPDX-License-Identifier: MIT
 
-import { SignUp } from '@clerk/nextjs';
-import { useMemo } from 'react';
+import { SignUp } from "@clerk/nextjs";
+import { useMemo } from "react";
 
 // Importar componentes da landing page
 function Ray() {
@@ -70,18 +70,18 @@ function Footer() {
 
 export default function SignUpPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+    <div className="bg-background flex min-h-screen flex-col items-center justify-center">
       {/* Background customizado */}
       <Ray />
 
       {/* Componente de sign up do Clerk */}
-      <main className="flex flex-1 items-center justify-center z-[100]">
+      <main className="z-[100] flex flex-1 items-center justify-center">
         <SignUp
           appearance={{
             elements: {
               rootBox: "mx-auto",
               card: "bg-card shadow-lg",
-            }
+            },
           }}
           routing="path"
           path="/sign-up"

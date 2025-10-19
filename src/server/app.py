@@ -6,7 +6,7 @@ import base64
 import json
 import logging
 import os
-from typing import Annotated, Any, List, cast
+from typing import Annotated, Any, cast
 from uuid import uuid4
 
 from fastapi import FastAPI, HTTPException, Query
@@ -33,6 +33,7 @@ from src.prose.graph.builder import build_graph as build_prose_graph
 from src.rag.builder import build_retriever
 from src.rag.milvus import load_examples
 from src.rag.retriever import Resource
+from src.server.calendar_routes import router as calendar_router
 from src.server.chat_request import (
     ChatRequest,
     EnhancePromptRequest,
@@ -42,22 +43,21 @@ from src.server.chat_request import (
     TTSRequest,
 )
 from src.server.config_request import ConfigResponse
+from src.server.dashboard_routes import router as dashboard_router
 from src.server.mcp_request import MCPServerMetadataRequest, MCPServerMetadataResponse
 from src.server.mcp_utils import load_mcp_tools
+
+# Import routers
+from src.server.notes_routes import router as notes_router
+from src.server.projects_routes import router as projects_router
 from src.server.rag_request import (
     RAGConfigResponse,
     RAGResourceRequest,
     RAGResourcesResponse,
 )
+from src.server.reminders_routes import router as reminders_router
 from src.tools import VolcengineTTS
 from src.utils.json_utils import sanitize_args
-
-# Import routers
-from src.server.notes_routes import router as notes_router
-from src.server.calendar_routes import router as calendar_router
-from src.server.projects_routes import router as projects_router
-from src.server.dashboard_routes import router as dashboard_router
-from src.server.reminders_routes import router as reminders_router
 
 logger = logging.getLogger(__name__)
 
@@ -86,8 +86,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,  # Restrict to specific origins
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],  # Use the configured list of methods
-    allow_headers=["*"],  # Now allow all headers, but can be restricted further
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["*"],  # Allow all headers; restrict in production if needed
 )
 
 # Load examples into Milvus if configured
@@ -104,8 +104,23 @@ app.include_router(dashboard_router)
 app.include_router(reminders_router)
 
 
+@app.get("/health")
+async def health() -> dict[str, str]:
+    """Simple health check endpoint.
+
+    Returns 200 with a small JSON payload and supports only GET,
+    so other methods like POST will return 405 (method not allowed),
+    matching test expectations.
+    """
+    return {"status": "healthy"}
+
+
 @app.post("/api/chat/stream")
 async def chat_stream(request: ChatRequest):
+    # Basic validation: require at least one message with content
+    if not request.messages:
+        raise HTTPException(status_code=422, detail="messages field is required")
+
     # Check if MCP server configuration is enabled
     mcp_enabled = get_bool_env("ENABLE_MCP_SERVER_CONFIGURATION", False)
 
@@ -287,7 +302,7 @@ async def _stream_graph_events(
                 message_chunk, message_metadata, thread_id, agent
             ):
                 yield event
-    except Exception as e:
+    except Exception:
         logger.exception("Error during graph execution")
         yield _make_event(
             "error",
@@ -299,9 +314,9 @@ async def _stream_graph_events(
 
 
 async def _astream_workflow_generator(
-    messages: List[dict],
+    messages: list[dict],
     thread_id: str,
-    resources: List[Resource],
+    resources: list[Resource],
     max_plan_iterations: int,
     max_step_num: int,
     max_search_results: int,
@@ -636,5 +651,5 @@ async def config():
     """Get the config of the server."""
     return ConfigResponse(
         rag=RAGConfigResponse(provider=SELECTED_RAG_PROVIDER),
-        models=get_configured_llm_models(),
+        llm_models=get_configured_llm_models(),
     )

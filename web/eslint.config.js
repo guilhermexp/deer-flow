@@ -1,93 +1,79 @@
-// Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
-// SPDX-License-Identifier: MIT
-
-import { FlatCompat } from "@eslint/eslintrc";
 import tseslint from "typescript-eslint";
-
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-});
+import js from "@eslint/js";
 
 export default tseslint.config(
   {
-    ignores: [".next", "src/components"],
+    ignores: [
+      ".next/**",
+      "dist/**",
+      "node_modules/**",
+      ".turbo/**",
+      "build/**",
+      "coverage/**",
+      "tests/**",
+      "*.mjs",
+      "*.js",
+      "next-env.d.ts",
+    ],
   },
-  ...compat.extends("next/core-web-vitals"),
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
     files: ["**/*.ts", "**/*.tsx"],
-    extends: [
-      ...tseslint.configs.recommended,
-      ...tseslint.configs.recommendedTypeChecked,
-      ...tseslint.configs.stylisticTypeChecked,
-    ],
-    rules: {
-      "@next/next/no-img-element": "off",
-      "@typescript-eslint/array-type": "off",
-      "@typescript-eslint/consistent-type-definitions": "off",
-      "@typescript-eslint/consistent-type-imports": [
-        "warn",
-        { prefer: "type-imports", fixStyle: "inline-type-imports" },
-      ],
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        { argsIgnorePattern: "^_" },
-      ],
-      "@typescript-eslint/require-await": "off",
-      "@typescript-eslint/no-empty-object-type": "off",
-      "@typescript-eslint/no-misused-promises": [
-        "error",
-        { checksVoidReturn: { attributes: false } },
-      ],
-      "@typescript-eslint/no-redundant-type-constituents": "off",
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
-      "@typescript-eslint/no-unsafe-argument": "off",
-      "@typescript-eslint/no-unsafe-return": "off",
-      "import/order": [
-        "error",
-        {
-          distinctGroup: false,
-          groups: [
-            "builtin",
-            "external",
-            "internal",
-            "parent",
-            "sibling",
-            "index",
-            "object",
-          ],
-          pathGroups: [
-            {
-              pattern: "~/**",
-              group: "internal",
-            },
-            {
-              pattern: "./**.css",
-              group: "object",
-            },
-            {
-              pattern: "**.md",
-              group: "object",
-            },
-          ],
-          "newlines-between": "always",
-          alphabetize: {
-            order: "asc",
-            caseInsensitive: true,
-          },
-        },
-      ],
-    },
-  },
-  {
-    linterOptions: {
-      reportUnusedDisableDirectives: true,
-    },
     languageOptions: {
       parserOptions: {
         projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        Buffer: "readonly",
+        global: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        module: "readonly",
+        require: "readonly",
+        exports: "readonly",
       },
     },
+    rules: {
+      // TypeScript specific rules
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/prefer-nullish-coalescing": "warn",
+      "@typescript-eslint/no-floating-promises": "warn",
+      "@typescript-eslint/triple-slash-reference": "off",
+
+      // General ESLint rules
+      "no-console": "off", // Allow console.log for development
+      "prefer-const": "error",
+      "no-var": "error",
+      "no-empty": "warn",
+    },
   },
+  {
+    files: ["**/*.js", "**/*.jsx", "**/*.mjs"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        Buffer: "readonly",
+        global: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        module: "readonly",
+        require: "readonly",
+        exports: "readonly",
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "no-console": "off",
+      "no-undef": "off",
+    },
+  }
 );

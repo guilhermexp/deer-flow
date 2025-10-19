@@ -1,94 +1,108 @@
-export const CALENDAR_STORAGE_KEY = "calendar_events"
+export const CALENDAR_STORAGE_KEY = "calendar_events";
 
-export const CALENDAR_FILTERS: Array<{ value: CalendarFilter; label: string }> = [
-  { value: "all", label: "Todos" },
-  { value: "rotina", label: "Rotina" },
-  { value: "habitos", label: "Hábitos" },
-  { value: "workout", label: "Workout" },
-  { value: "lembretes", label: "Lembretes" },
-]
+export const CALENDAR_FILTERS: Array<{ value: CalendarFilter; label: string }> =
+  [
+    { value: "all", label: "Todos" },
+    { value: "rotina", label: "Rotina" },
+    { value: "habitos", label: "Hábitos" },
+    { value: "workout", label: "Workout" },
+    { value: "lembretes", label: "Lembretes" },
+  ];
 
-import type { CalendarFilter, CalendarEvent } from "./types"
+import type { CalendarFilter, CalendarEvent } from "./types";
 
-export const SAMPLE_EVENTS_DATA: Omit<CalendarEvent, "id" | "day" | "time">[] = [
-  {
-    title: "Reunião de Planejamento Semanal",
-    subtitle: "Discussão de metas e tarefas",
-    date: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)).toISOString(), // Segunda-feira desta semana
-    startHour: 9,
-    duration: 1.5,
-    color: "blue" as const,
-    category: "rotina" as const,
-  },
-  {
-    title: "Sessão de Yoga Matinal",
-    subtitle: "Foco em flexibilidade e respiração",
-    date: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 2)).toISOString(), // Terça-feira desta semana
-    startHour: 7,
-    duration: 1,
-    color: "green" as const,
-    category: "habitos" as const,
-  },
-  {
-    title: "Treino de Força - Pernas",
-    subtitle: "Academia - Foco em agachamentos e leg press",
-    date: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 3)).toISOString(), // Quarta-feira desta semana
-    startHour: 18,
-    duration: 1,
-    color: "orange" as const,
-    category: "workout" as const,
-  },
-  {
-    title: "Pagar Contas",
-    subtitle: "Luz, água, internet",
-    date: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 4)).toISOString(), // Quinta-feira desta semana
-    startHour: 10,
-    duration: 0.5,
-    color: "purple" as const,
-    category: "lembretes" as const,
-  },
-  {
-    title: "Almoço com Cliente X",
-    subtitle: "Restaurante Italiano",
-    date: new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 5)).toISOString(), // Sexta-feira desta semana
-    startHour: 12,
-    duration: 1.5,
-    color: "red" as const,
-    category: "rotina" as const,
-  },
-  {
-    title: "Estudar Novo Framework",
-    subtitle: "Capítulo 3 e 4",
-    date: new Date().toISOString(), // Hoje
-    startHour: 14,
-    duration: 2,
-    color: "blue" as const,
-    category: "habitos" as const,
-  },
-  {
-    title: "Corrida no Parque",
-    subtitle: "5km",
-    date: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), // Amanhã
-    startHour: 7,
-    duration: 1,
-    color: "orange" as const,
-    category: "workout" as const,
-  },
-]
+export const SAMPLE_EVENTS_DATA: Omit<CalendarEvent, "id" | "day" | "time">[] =
+  [
+    {
+      title: "Reunião de Planejamento Semanal",
+      subtitle: "Discussão de metas e tarefas",
+      date: new Date(
+        new Date().setDate(new Date().getDate() - new Date().getDay() + 1)
+      ).toISOString(), // Segunda-feira desta semana
+      startHour: 9,
+      duration: 1.5,
+      color: "blue" as const,
+      category: "rotina" as const,
+    },
+    {
+      title: "Sessão de Yoga Matinal",
+      subtitle: "Foco em flexibilidade e respiração",
+      date: new Date(
+        new Date().setDate(new Date().getDate() - new Date().getDay() + 2)
+      ).toISOString(), // Terça-feira desta semana
+      startHour: 7,
+      duration: 1,
+      color: "green" as const,
+      category: "habitos" as const,
+    },
+    {
+      title: "Treino de Força - Pernas",
+      subtitle: "Academia - Foco em agachamentos e leg press",
+      date: new Date(
+        new Date().setDate(new Date().getDate() - new Date().getDay() + 3)
+      ).toISOString(), // Quarta-feira desta semana
+      startHour: 18,
+      duration: 1,
+      color: "orange" as const,
+      category: "workout" as const,
+    },
+    {
+      title: "Pagar Contas",
+      subtitle: "Luz, água, internet",
+      date: new Date(
+        new Date().setDate(new Date().getDate() - new Date().getDay() + 4)
+      ).toISOString(), // Quinta-feira desta semana
+      startHour: 10,
+      duration: 0.5,
+      color: "purple" as const,
+      category: "lembretes" as const,
+    },
+    {
+      title: "Almoço com Cliente X",
+      subtitle: "Restaurante Italiano",
+      date: new Date(
+        new Date().setDate(new Date().getDate() - new Date().getDay() + 5)
+      ).toISOString(), // Sexta-feira desta semana
+      startHour: 12,
+      duration: 1.5,
+      color: "red" as const,
+      category: "rotina" as const,
+    },
+    {
+      title: "Estudar Novo Framework",
+      subtitle: "Capítulo 3 e 4",
+      date: new Date().toISOString(), // Hoje
+      startHour: 14,
+      duration: 2,
+      color: "blue" as const,
+      category: "habitos" as const,
+    },
+    {
+      title: "Corrida no Parque",
+      subtitle: "5km",
+      date: new Date(
+        new Date().setDate(new Date().getDate() + 1)
+      ).toISOString(), // Amanhã
+      startHour: 7,
+      duration: 1,
+      color: "orange" as const,
+      category: "workout" as const,
+    },
+  ];
 
-export const CALENDAR_HOURS: number[] = Array.from({ length: 24 }, (_, i) => i)
+export const CALENDAR_HOURS: number[] = Array.from({ length: 24 }, (_, i) => i);
 
 export const EVENT_COLORS_STYLES: {
   [key: string]: {
-    bg: string
-    text: string
-    border: string
-    hoverBg?: string
-    activeRing?: string
-    card?: string
-    current?: string
-    dot?: string
-  }
+    bg: string;
+    text: string;
+    border: string;
+    hoverBg?: string;
+    activeRing?: string;
+    card?: string;
+    current?: string;
+    dot?: string;
+  };
 } = {
   blue: {
     bg: "bg-blue-500/20",
@@ -181,14 +195,24 @@ export const EVENT_COLORS_STYLES: {
     current: "ring-2 ring-slate-400/50",
     dot: "bg-slate-400",
   },
-}
+};
 
-export const EVENT_COLOR_NAMES = Object.keys(EVENT_COLORS_STYLES).filter((color) => color !== "gray")
+export const EVENT_COLOR_NAMES = Object.keys(EVENT_COLORS_STYLES).filter(
+  (color) => color !== "gray"
+);
 
-export const DAYS_OF_WEEK_ABBREVIATED = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+export const DAYS_OF_WEEK_ABBREVIATED = [
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat",
+  "Sun",
+];
 
 export const CALENDAR_VIEW_MODES = [
   { label: "Day", value: "day" },
   { label: "Week", value: "week" },
   { label: "Month", value: "month" },
-] as const
+] as const;

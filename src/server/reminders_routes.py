@@ -2,14 +2,14 @@
 # SPDX-License-Identifier: MIT
 
 from datetime import datetime, timedelta
-from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy import and_, desc
 from sqlalchemy.orm import Session
-from sqlalchemy import desc, and_
 
 from src.database.base import get_db
-from src.database.models import Reminder, User, TaskPriority
+from src.database.models import Reminder, TaskPriority, User
 from src.server.auth import get_current_active_user
 
 router = APIRouter(prefix="/api/reminders", tags=["reminders"])
@@ -18,27 +18,27 @@ router = APIRouter(prefix="/api/reminders", tags=["reminders"])
 class ReminderCreate(BaseModel):
     title: str
     time: str  # HH:MM format
-    date: Optional[datetime] = None
-    priority: Optional[TaskPriority] = TaskPriority.MEDIUM
-    category: Optional[str] = None
+    date: datetime | None = None
+    priority: TaskPriority | None = TaskPriority.MEDIUM
+    category: str | None = None
 
 
 class ReminderUpdate(BaseModel):
-    title: Optional[str] = None
-    time: Optional[str] = None
-    date: Optional[datetime] = None
-    priority: Optional[TaskPriority] = None
-    category: Optional[str] = None
-    is_completed: Optional[bool] = None
+    title: str | None = None
+    time: str | None = None
+    date: datetime | None = None
+    priority: TaskPriority | None = None
+    category: str | None = None
+    is_completed: bool | None = None
 
 
 class ReminderResponse(BaseModel):
     id: int
     title: str
     time: str
-    date: Optional[datetime] = None
+    date: datetime | None = None
     priority: TaskPriority
-    category: Optional[str] = None
+    category: str | None = None
     is_completed: bool
     created_at: datetime
     updated_at: datetime
@@ -47,7 +47,7 @@ class ReminderResponse(BaseModel):
         from_attributes = True
 
 
-@router.get("/today", response_model=List[ReminderResponse])
+@router.get("/today", response_model=list[ReminderResponse])
 async def get_today_reminders(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
@@ -71,12 +71,12 @@ async def get_today_reminders(
     return [ReminderResponse.from_orm(reminder) for reminder in reminders]
 
 
-@router.get("/", response_model=List[ReminderResponse])
+@router.get("/", response_model=list[ReminderResponse])
 async def get_reminders(
-    date: Optional[datetime] = None,
-    priority: Optional[TaskPriority] = None,
-    category: Optional[str] = None,
-    is_completed: Optional[bool] = None,
+    date: datetime | None = None,
+    priority: TaskPriority | None = None,
+    category: str | None = None,
+    is_completed: bool | None = None,
     limit: int = Query(100, le=1000),
     offset: int = 0,
     current_user: User = Depends(get_current_active_user),

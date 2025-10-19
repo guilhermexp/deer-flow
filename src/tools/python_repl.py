@@ -3,7 +3,7 @@
 
 import logging
 import os
-from typing import Annotated, Optional
+from typing import Annotated
 
 from langchain_core.tools import tool
 from langchain_experimental.utilities import PythonREPL
@@ -21,7 +21,7 @@ def _is_python_repl_enabled() -> bool:
 
 
 # Initialize REPL and logger
-repl: Optional[PythonREPL] = PythonREPL() if _is_python_repl_enabled() else None
+repl: PythonREPL | None = PythonREPL() if _is_python_repl_enabled() else None
 logger = logging.getLogger(__name__)
 
 

@@ -1,42 +1,42 @@
-"use client"
+"use client";
 
-import { useCallback } from "react"
-import { useCalendarEventsApi } from "./useCalendarEventsApi"
-import { useCalendarDateNavigation } from "./useCalendarDateNavigation"
-import { useCalendarDisplayLogic } from "./useCalendarDisplayLogic"
-import { useCalendarDialogs } from "./useCalendarDialogs"
-import type { NewEventFormData } from "../lib/types" // Importar NewEventFormData
+import { useCallback } from "react";
+import { useCalendarEventsApi } from "./useCalendarEventsApi";
+import { useCalendarDateNavigation } from "./useCalendarDateNavigation";
+import { useCalendarDisplayLogic } from "./useCalendarDisplayLogic";
+import { useCalendarDialogs } from "./useCalendarDialogs";
+import type { NewEventFormData } from "../lib/types"; // Importar NewEventFormData
 
 export const useCalendar = () => {
-  const { events, addEvent, deleteEvent, isLoading } = useCalendarEventsApi()
-  const dateNavigation = useCalendarDateNavigation()
+  const { events, addEvent, deleteEvent, isLoading } = useCalendarEventsApi();
+  const dateNavigation = useCalendarDateNavigation();
   const displayLogic = useCalendarDisplayLogic(
     events,
     dateNavigation.currentDate,
     dateNavigation.monthDisplayDate,
-    dateNavigation.startOfWeekDate,
-  )
+    dateNavigation.startOfWeekDate
+  );
   // useCalendarDialogs não precisa mais de currentDate, monthDisplayDate, viewMode para o AddEventDialog
-  const dialogs = useCalendarDialogs()
+  const dialogs = useCalendarDialogs();
 
   // handleAddNewEvent agora recebe os dados do evento diretamente do AddEventDialog
   const handleAddNewEvent = useCallback(
     async (eventData: NewEventFormData) => {
-      addEvent(eventData)
+      addEvent(eventData);
       // dialogs.handleCloseAddEventDialog() // O diálogo já se fecha e reseta
     },
-    [addEvent], // dialogs.handleCloseAddEventDialog não é mais necessário aqui
-  )
+    [addEvent] // dialogs.handleCloseAddEventDialog não é mais necessário aqui
+  );
 
   const handleConfirmDelete = useCallback(() => {
     if (dialogs.confirmDeleteAction) {
-      const eventIdToDelete = dialogs.confirmDeleteAction()
+      const eventIdToDelete = dialogs.confirmDeleteAction();
       if (eventIdToDelete) {
-        deleteEvent(eventIdToDelete)
+        deleteEvent(eventIdToDelete);
       }
     }
-    dialogs.handleCloseDeleteDialog()
-  }, [deleteEvent, dialogs])
+    dialogs.handleCloseDeleteDialog();
+  }, [deleteEvent, dialogs]);
 
   return {
     // Do useCalendarEvents
@@ -67,7 +67,8 @@ export const useCalendar = () => {
     isDateToday: displayLogic.isDateToday,
     eventsForSelectedDayInDayView: displayLogic.eventsForSelectedDayInDayView,
     relevantHoursForDayViewDisplay: displayLogic.relevantHoursForDayViewDisplay,
-    currentTimePositionInDayViewDisplay: displayLogic.currentTimePositionInDayViewDisplay,
+    currentTimePositionInDayViewDisplay:
+      displayLogic.currentTimePositionInDayViewDisplay,
     getDaysForMonthView: displayLogic.getDaysForMonthView,
     // Do useCalendarDialogs
     isAddEventDialogOpen: dialogs.isAddEventDialogOpen,
@@ -81,5 +82,5 @@ export const useCalendar = () => {
     // Handlers combinados
     handleAddNewEvent, // Agora aceita NewEventFormData
     handleConfirmDelete,
-  }
-}
+  };
+};

@@ -31,40 +31,50 @@ export function MainLayoutClient({ children }: MainLayoutClientProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const pathname = usePathname();
   const pageTitle = routeTitles[pathname] || "";
-  
+
   const toggleMobileSidebar = useCallback(() => {
-    setIsMobileSidebarOpen(prev => !prev);
+    setIsMobileSidebarOpen((prev) => !prev);
   }, []);
 
   // Páginas que precisam de altura total
-  const fullHeightPages = ['/jarvis/projects', '/chat'];
+  const fullHeightPages = ["/jarvis/projects", "/chat"];
   const isFullHeightPage = fullHeightPages.includes(pathname);
 
   return (
     <div className="bg-background text-foreground min-h-screen">
       <RouteWarmup />
       <ServiceWorkerRegister />
-      <AppSidebar isMobileOpen={isMobileSidebarOpen} toggleMobileSidebar={toggleMobileSidebar} />
-      <div className={`min-h-screen flex flex-col lg:pl-12 ${isFullHeightPage ? 'h-screen' : ''}`}>
-        <AppHeader 
+      <AppSidebar
+        isMobileOpen={isMobileSidebarOpen}
+        toggleMobileSidebar={toggleMobileSidebar}
+      />
+      <div
+        className={`flex min-h-screen flex-col lg:pl-12 ${isFullHeightPage ? "h-screen" : ""}`}
+      >
+        <AppHeader
           userName="User"
           pageTitle={pageTitle}
           onMenuClick={toggleMobileSidebar}
         />
         <PageTitleProvider
           userName="User"
-          toggleCommandPalette={() => setIsCommandPaletteOpen(prev => !prev)}
+          toggleCommandPalette={() => setIsCommandPaletteOpen((prev) => !prev)}
         >
-          <main className={`flex-1 ${isFullHeightPage ? 'h-full overflow-auto' : 'px-4 sm:px-6 lg:px-8 py-6 lg:py-8'}`}>
+          <main
+            className={`flex-1 ${isFullHeightPage ? "h-full overflow-auto" : "px-4 py-6 sm:px-6 lg:px-8 lg:py-8"}`}
+          >
             {isFullHeightPage ? (
               <div className="h-full w-full">{children}</div>
             ) : (
-              <div className="max-w-7xl mx-auto w-full">{children}</div>
+              <div className="mx-auto w-full max-w-7xl">{children}</div>
             )}
           </main>
         </PageTitleProvider>
       </div>
-      <GlobalCommandPalette isOpen={isCommandPaletteOpen} setIsOpen={setIsCommandPaletteOpen} />
+      <GlobalCommandPalette
+        isOpen={isCommandPaletteOpen}
+        setIsOpen={setIsCommandPaletteOpen}
+      />
       <Toaster />
     </div>
   );

@@ -39,12 +39,13 @@ export function Jumbotron() {
           <AuroraText>ao Seu Alcance</AuroraText>
         </h1>
         <p className="max-w-4xl p-2 text-center text-sm opacity-85 md:text-2xl">
-          Conheça o DeerFlow, seu assistente pessoal de Pesquisa Profunda. Com ferramentas poderosas como
-          mecanismos de busca, rastreadores da web, serviços Python e MCP, ele
-          oferece insights instantâneos, relatórios abrangentes e até mesmo podcasts cativantes.
+          Conheça o DeerFlow, seu assistente pessoal de Pesquisa Profunda. Com
+          ferramentas poderosas como mecanismos de busca, rastreadores da web,
+          serviços Python e MCP, ele oferece insights instantâneos, relatórios
+          abrangentes e até mesmo podcasts cativantes.
         </p>
         <div className="flex gap-6">
-          <Button className="text-lg w-42" size="lg" asChild>
+          <Button className="w-42 text-lg" size="lg" asChild>
             <Link
               target={
                 env.NEXT_PUBLIC_STATIC_WEBSITE_ONLY ? "_blank" : undefined

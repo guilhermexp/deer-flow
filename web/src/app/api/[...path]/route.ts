@@ -1,27 +1,32 @@
-import { type NextRequest } from 'next/server';
+import { type NextRequest } from "next/server";
 
-const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:8005';
+// Garantir execução no runtime Node para compatibilidade com streaming de corpo
+export const runtime = "nodejs";
+// Desativar caching para garantir comportamento dinâmico em produção
+export const dynamic = "force-dynamic";
+
+const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:8005";
 const PROXY_DEBUG = /^(true|1)$/i.test(
-  process.env.PROXY_DEBUG ?? process.env.DEBUG ?? ''
+  process.env.PROXY_DEBUG ?? process.env.DEBUG ?? ""
 );
 const MAX_RETRIES = Math.max(
   0,
-  Number.parseInt(process.env.PROXY_RETRY_COUNT ?? '2', 10) || 0
+  Number.parseInt(process.env.PROXY_RETRY_COUNT ?? "2", 10) || 0
 );
 const RETRY_DELAY_MS = Math.max(
   50,
-  Number.parseInt(process.env.PROXY_RETRY_DELAY_MS ?? '150', 10) || 150
+  Number.parseInt(process.env.PROXY_RETRY_DELAY_MS ?? "150", 10) || 150
 );
 
 const HOP_BY_HOP_HEADERS = new Set([
-  'connection',
-  'keep-alive',
-  'proxy-authenticate',
-  'proxy-authorization',
-  'te',
-  'trailer',
-  'transfer-encoding',
-  'upgrade'
+  "connection",
+  "keep-alive",
+  "proxy-authenticate",
+  "proxy-authorization",
+  "te",
+  "trailer",
+  "transfer-encoding",
+  "upgrade",
 ]);
 
 const RETRYABLE_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
@@ -30,13 +35,14 @@ type ParamsContext = { params: Promise<{ path: string[] }> };
 
 const debugLog = (...args: unknown[]) => {
   if (PROXY_DEBUG) {
-    console.debug('[Proxy]', ...args);
+    console.debug("[Proxy]", ...args);
   }
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const isBodylessMethod = (method: string) => method === 'GET' || method === 'HEAD';
+const isBodylessMethod = (method: string) =>
+  method === "GET" || method === "HEAD";
 
 function buildForwardHeaders(request: NextRequest): Headers {
   const headers = new Headers();
@@ -48,24 +54,31 @@ function buildForwardHeaders(request: NextRequest): Headers {
     }
   });
 
-  const hostHeader = request.headers.get('host');
+  const hostHeader = request.headers.get("host");
   if (hostHeader) {
-    headers.set('x-forwarded-host', hostHeader);
+    headers.set("x-forwarded-host", hostHeader);
   }
 
-  const protocol = request.nextUrl.protocol.replace(/:$/, '');
-  headers.set('x-forwarded-proto', protocol);
+  const protocol = request.nextUrl.protocol.replace(/:$/, "");
+  headers.set("x-forwarded-proto", protocol);
 
-  const incomingForwardedFor = request.headers.get('x-forwarded-for');
-  const remoteAddress = request.headers.get('x-real-ip')
-    ?? request.headers.get('cf-connecting-ip')
-    ?? undefined;
+  const incomingForwardedFor = request.headers.get("x-forwarded-for");
+  const remoteAddress =
+    request.headers.get("x-real-ip") ??
+    request.headers.get("cf-connecting-ip") ??
+    undefined;
   const forwardedFor = [incomingForwardedFor, remoteAddress]
     .filter((value) => value && value.length > 0)
-    .join(', ');
+    .join(", ");
   if (forwardedFor) {
-    headers.set('x-forwarded-for', forwardedFor);
+    headers.set("x-forwarded-for", forwardedFor);
   }
+
+  // Remove headers that should be computed by fetch/runtime for the new request
+  // Avoids mismatch errors that can cause network failures on POST/PUT
+  headers.delete("host");
+  headers.delete("content-length");
+  headers.delete("content-encoding");
 
   return headers;
 }
@@ -79,7 +92,7 @@ function createResponseHeaders(response: Response): Headers {
       return;
     }
 
-    if (lowerKey === 'set-cookie') {
+    if (lowerKey === "set-cookie") {
       headers.append(key, value);
     } else {
       headers.set(key, value);
@@ -120,7 +133,10 @@ async function fetchWithRetry(
       if (attempt === maxRetries) {
         break;
       }
-      debugLog(`Retrying request due to network error. Attempt ${attempt + 1}/${maxRetries}`, error);
+      debugLog(
+        `Retrying request due to network error. Attempt ${attempt + 1}/${maxRetries}`,
+        error
+      );
     }
 
     const delayMs = RETRY_DELAY_MS * 2 ** attempt;
@@ -131,7 +147,7 @@ async function fetchWithRetry(
     throw lastError;
   }
 
-  throw new Error('Proxy request failed after retries');
+  throw new Error("Proxy request failed after retries");
 }
 
 async function handler(request: NextRequest, { params }: ParamsContext) {
@@ -141,37 +157,41 @@ async function handler(request: NextRequest, { params }: ParamsContext) {
     const resolvedParams = await params;
     pathSegments = resolvedParams.path ?? [];
 
-    const backendPath = `/api/${pathSegments.join('/')}`;
+    const backendPath = `/api/${pathSegments.join("/")}`;
     const backendUrl = `${BACKEND_URL}${backendPath}`;
 
     const searchParams = request.nextUrl.searchParams.toString();
-    const urlWithParams = searchParams ? `${backendUrl}?${searchParams}` : backendUrl;
+    const urlWithParams = searchParams
+      ? `${backendUrl}?${searchParams}`
+      : backendUrl;
 
     debugLog(`${request.method} ${urlWithParams}`);
 
     const forwardHeaders = buildForwardHeaders(request);
     const headerEntries = Array.from(forwardHeaders.entries());
 
-    let requestBodyBuffer: ArrayBuffer | undefined;
-    if (!isBodylessMethod(request.method)) {
-      requestBodyBuffer = await request.arrayBuffer();
-      debugLog('Forwarding request body (%d bytes)', requestBodyBuffer.byteLength);
-    }
+    // Stream the body directly to o backend when houver
+    const hasBody = !isBodylessMethod(request.method);
+    const requestBody = hasBody ? request.body : undefined;
 
     const response = await fetchWithRetry(
       urlWithParams,
       () => ({
         method: request.method,
         headers: new Headers(headerEntries),
-        body: requestBodyBuffer ? requestBodyBuffer.slice(0) : undefined,
+        body: requestBody,
+        // Required by Node/Undici when streaming request bodies
+        ...(hasBody ? { duplex: "half" as const } : {}),
       }),
-      MAX_RETRIES
+      hasBody ? 0 : MAX_RETRIES
     );
 
-    debugLog(`Backend responded with ${response.status} ${response.statusText}`);
+    debugLog(
+      `Backend responded with ${response.status} ${response.statusText}`
+    );
 
-    if (response.headers.get('content-type')?.includes('text/event-stream')) {
-      debugLog('Handling SSE stream response');
+    if (response.headers.get("content-type")?.includes("text/event-stream")) {
+      debugLog("Handling SSE stream response");
 
       const stream = new ReadableStream({
         async start(controller) {
@@ -196,14 +216,14 @@ async function handler(request: NextRequest, { params }: ParamsContext) {
       });
 
       const sseHeaders = createResponseHeaders(response);
-      if (!sseHeaders.has('content-type')) {
-        sseHeaders.set('content-type', 'text/event-stream');
+      if (!sseHeaders.has("content-type")) {
+        sseHeaders.set("content-type", "text/event-stream");
       }
-      if (!sseHeaders.has('cache-control')) {
-        sseHeaders.set('cache-control', 'no-cache');
+      if (!sseHeaders.has("cache-control")) {
+        sseHeaders.set("cache-control", "no-cache");
       }
-      if (!sseHeaders.has('connection')) {
-        sseHeaders.set('connection', 'keep-alive');
+      if (!sseHeaders.has("connection")) {
+        sseHeaders.set("connection", "keep-alive");
       }
 
       return new Response(stream, {
@@ -221,11 +241,11 @@ async function handler(request: NextRequest, { params }: ParamsContext) {
       headers: responseHeaders,
     });
   } catch (error) {
-    console.error('[Proxy] Failed to forward request', error);
+    console.error("[Proxy] Failed to forward request", error);
 
-    const message = error instanceof Error ? error.message : 'Unknown error';
+    const message = error instanceof Error ? error.message : "Unknown error";
     const responseBody = {
-      error: 'Failed to proxy request',
+      error: "Failed to proxy request",
       message,
       backend: BACKEND_URL,
       path: pathSegments,
@@ -233,7 +253,7 @@ async function handler(request: NextRequest, { params }: ParamsContext) {
 
     return new Response(JSON.stringify(responseBody), {
       status: 502,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   }
 }

@@ -2,23 +2,23 @@
 # SPDX-License-Identifier: MIT
 
 import os
-import time
-import psutil
 import platform
-from typing import Dict, Any, Optional
+import time
 from datetime import datetime
-from sqlalchemy import text
-from sqlalchemy.orm import Session
+from typing import Any
 
-from src.database.base import get_db, engine
+import psutil
+from sqlalchemy import text
+
+from src.database.base import get_db
 from src.server.cache import cache
 
 
 class HealthChecker:
     """Comprehensive health check system"""
-    
+
     @staticmethod
-    async def check_database() -> Dict[str, Any]:
+    async def check_database() -> dict[str, Any]:
         """Check database connectivity and performance
 
         Uses generic SQL (SELECT 1) compatible with both SQLite and PostgreSQL.
@@ -85,14 +85,14 @@ class HealthChecker:
             "response_time_ms": round(response_time, 2),
             "details": details
         }
-    
+
     @staticmethod
-    async def check_redis() -> Dict[str, Any]:
+    async def check_redis() -> dict[str, Any]:
         """Check Redis connectivity and performance"""
         start_time = time.time()
         status = "healthy"
         details = {}
-        
+
         try:
             if not cache.enabled:
                 status = "disabled"
@@ -102,14 +102,14 @@ class HealthChecker:
                 pong = await cache.redis_client.ping()
                 if not pong:
                     raise Exception("Redis ping failed")
-                
+
                 # Get Redis info
                 info = await cache.redis_client.info()
                 details["version"] = info.get("redis_version", "unknown")
                 details["connected_clients"] = info.get("connected_clients", 0)
                 details["used_memory_human"] = info.get("used_memory_human", "unknown")
                 details["uptime_days"] = info.get("uptime_in_days", 0)
-                
+
                 # Test cache operations
                 test_key = "health_check_test"
                 await cache.set("health", test_key, {"timestamp": time.time()}, ttl=60)
@@ -117,27 +117,27 @@ class HealthChecker:
                 if not test_value:
                     raise Exception("Cache set/get test failed")
                 await cache.delete("health", test_key)
-                
+
             else:
                 status = "unhealthy"
                 details["error"] = "Redis client not initialized"
-                
+
         except Exception as e:
             status = "unhealthy"
             details["error"] = str(e)
-        
+
         response_time = (time.time() - start_time) * 1000
-        
+
         return {
             "service": "redis",
             "status": status,
             "response_time_ms": round(response_time, 2),
             "details": details
         }
-    
-    
+
+
     @staticmethod
-    async def check_external_apis() -> Dict[str, Any]:
+    async def check_external_apis() -> dict[str, Any]:
         """Check external API configurations"""
         apis = {
             "tavily": bool(os.getenv("TAVILY_API_KEY")),
@@ -147,10 +147,10 @@ class HealthChecker:
             "volcengine_tts": bool(os.getenv("VOLCENGINE_TTS_APPID")),
             "ragflow": bool(os.getenv("RAGFLOW_API_KEY")),
         }
-        
+
         configured_count = sum(apis.values())
         total_count = len(apis)
-        
+
         return {
             "service": "external_apis",
             "status": "healthy" if configured_count > 0 else "warning",
@@ -160,14 +160,14 @@ class HealthChecker:
                 "apis": apis
             }
         }
-    
+
     @staticmethod
-    def get_system_info() -> Dict[str, Any]:
+    def get_system_info() -> dict[str, Any]:
         """Get system resource information"""
         cpu_percent = psutil.cpu_percent(interval=1)
         memory = psutil.virtual_memory()
         disk = psutil.disk_usage('/')
-        
+
         return {
             "platform": platform.system(),
             "platform_version": platform.version(),
@@ -188,19 +188,19 @@ class HealthChecker:
                 "used_percent": disk.percent
             }
         }
-    
+
     @classmethod
-    async def check_all(cls) -> Dict[str, Any]:
+    async def check_all(cls) -> dict[str, Any]:
         """Run all health checks"""
         start_time = time.time()
-        
+
         # Run all checks
         checks = {
             "database": await cls.check_database(),
             "redis": await cls.check_redis(),
             "external_apis": await cls.check_external_apis(),
         }
-        
+
         # Determine overall status
         statuses = [check["status"] for check in checks.values()]
         if "unhealthy" in statuses:
@@ -209,9 +209,9 @@ class HealthChecker:
             overall_status = "degraded"
         else:
             overall_status = "healthy"
-        
+
         total_time = (time.time() - start_time) * 1000
-        
+
         return {
             "status": overall_status,
             "timestamp": datetime.utcnow().isoformat(),

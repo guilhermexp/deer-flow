@@ -29,12 +29,12 @@ export function ResearchReportBlock({
         useStore.setState({
           messages: new Map(useStore.getState().messages).set(
             message.id,
-            message,
+            message
           ),
         });
       }
     },
-    [message],
+    [message]
   );
   const contentRef = useRef<HTMLDivElement>(null);
   const isCompleted = message?.isStreaming === false && message?.content !== "";

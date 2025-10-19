@@ -46,7 +46,7 @@ export function SettingsDialog() {
         }
       }, 0);
     },
-    [open],
+    [open]
   );
 
   const handleSave = useCallback(() => {
@@ -116,7 +116,7 @@ export function SettingsDialog() {
                     className={cn(
                       "hover:accent-foreground hover:bg-accent mb-1 flex h-8 w-full cursor-pointer items-center gap-1.5 rounded px-2",
                       activeTabId === tab.id &&
-                        "!bg-primary !text-primary-foreground",
+                        "!bg-primary !text-primary-foreground"
                     )}
                     onClick={() => setActiveTabId(tab.id)}
                   >
@@ -128,7 +128,7 @@ export function SettingsDialog() {
                         className={cn(
                           "border-muted-foreground text-muted-foreground ml-auto px-1 py-0 text-xs",
                           activeTabId === tab.id &&
-                            "border-primary-foreground text-primary-foreground",
+                            "border-primary-foreground text-primary-foreground"
                         )}
                       >
                         {tab.badge}

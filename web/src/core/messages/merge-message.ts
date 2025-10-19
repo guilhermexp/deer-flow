@@ -60,7 +60,11 @@ export function mergeMessage(message: Message, event: ChatEvent) {
           try {
             const argsString = toolCall.argsChunks?.join("") || "";
             // Skip parsing if the string is clearly incomplete or malformed
-            if (argsString.trim() === "}" || argsString.trim() === "{" || argsString.trim() === "") {
+            if (
+              argsString.trim() === "}" ||
+              argsString.trim() === "{" ||
+              argsString.trim() === ""
+            ) {
               toolCall.args = {};
               delete toolCall.argsChunks;
               return;
@@ -69,14 +73,17 @@ export function mergeMessage(message: Message, event: ChatEvent) {
             delete toolCall.argsChunks;
           } catch (error) {
             console.error("Failed to parse tool call args:", error);
-            console.error("Raw args string:", toolCall.argsChunks?.join("") ?? "");
+            console.error(
+              "Raw args string:",
+              toolCall.argsChunks?.join("") ?? ""
+            );
             // Try to extract partial data if possible
             const rawString = toolCall.argsChunks?.join("") ?? "";
-            toolCall.args = { 
-              error: "Failed to parse arguments", 
+            toolCall.args = {
+              error: "Failed to parse arguments",
               raw: rawString,
               // Attempt to extract any valid fields
-              ...(tryExtractPartialJSON(rawString) ?? {})
+              ...(tryExtractPartialJSON(rawString) ?? {}),
             };
             delete toolCall.argsChunks;
           }
@@ -93,7 +100,8 @@ function mergeTextMessage(message: Message, event: MessageChunkEvent) {
     message.contentChunks.push(event.data.content);
   }
   if (event.data.reasoning_content) {
-    message.reasoningContent = (message.reasoningContent ?? "") + event.data.reasoning_content;
+    message.reasoningContent =
+      (message.reasoningContent ?? "") + event.data.reasoning_content;
     message.reasoningContentChunks = message.reasoningContentChunks ?? [];
     message.reasoningContentChunks.push(event.data.reasoning_content);
   }
@@ -101,11 +109,15 @@ function mergeTextMessage(message: Message, event: MessageChunkEvent) {
 function convertToolChunkArgs(args: string) {
   // Convert escaped characters in args
   if (!args) return "";
-  return args.replace(/&#91;/g, "[").replace(/&#93;/g, "]").replace(/&#123;/g, "{").replace(/&#125;/g, "}");
+  return args
+    .replace(/&#91;/g, "[")
+    .replace(/&#93;/g, "]")
+    .replace(/&#123;/g, "{")
+    .replace(/&#125;/g, "}");
 }
 function mergeToolCallMessage(
   message: Message,
-  event: ToolCallsEvent | ToolCallChunksEvent,
+  event: ToolCallsEvent | ToolCallChunksEvent
 ) {
   if (event.type === "tool_calls" && event.data.tool_calls[0]?.name) {
     message.toolCalls = event.data.tool_calls.map((raw) => ({
@@ -120,14 +132,14 @@ function mergeToolCallMessage(
   for (const chunk of event.data.tool_call_chunks) {
     if (chunk.id) {
       const toolCall = message.toolCalls.find(
-        (toolCall) => toolCall.id === chunk.id,
+        (toolCall) => toolCall.id === chunk.id
       );
       if (toolCall) {
         toolCall.argsChunks = [convertToolChunkArgs(chunk.args)];
       }
     } else {
       const streamingToolCall = message.toolCalls.find(
-        (toolCall) => toolCall.argsChunks?.length,
+        (toolCall) => toolCall.argsChunks?.length
       );
       if (streamingToolCall) {
         streamingToolCall.argsChunks!.push(convertToolChunkArgs(chunk.args));
@@ -138,10 +150,10 @@ function mergeToolCallMessage(
 
 function mergeToolCallResultMessage(
   message: Message,
-  event: ToolCallResultEvent,
+  event: ToolCallResultEvent
 ) {
   const toolCall = message.toolCalls?.find(
-    (toolCall) => toolCall.id === event.data.tool_call_id,
+    (toolCall) => toolCall.id === event.data.tool_call_id
   );
   if (toolCall) {
     toolCall.result = event.data.content;

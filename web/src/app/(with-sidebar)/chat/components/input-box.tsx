@@ -42,7 +42,7 @@ export function InputBox({
     options?: {
       interruptFeedback?: string;
       resources?: Array<Resource>;
-    },
+    }
   ) => void;
   onCancel?: () => void;
   onRemoveFeedback?: () => void;
@@ -50,10 +50,10 @@ export function InputBox({
   const t = useTranslations("chat.inputBox");
   const tCommon = useTranslations("common");
   const enableDeepThinking = useSettingsStore(
-    (state) => state.general.enableDeepThinking,
+    (state) => state.general.enableDeepThinking
   );
   const backgroundInvestigation = useSettingsStore(
-    (state) => state.general.enableBackgroundInvestigation,
+    (state) => state.general.enableBackgroundInvestigation
   );
   const { config, loading } = useConfig();
   const reportStyle = useSettingsStore((state) => state.general.reportStyle);
@@ -85,7 +85,7 @@ export function InputBox({
         }
       }
     },
-    [responding, onCancel, onSend, feedback, onRemoveFeedback],
+    [responding, onCancel, onSend, feedback, onRemoveFeedback]
   );
 
   const handleEnhancePrompt = useCallback(async () => {
@@ -128,7 +128,7 @@ export function InputBox({
     <div
       className={cn(
         "bg-card relative flex h-full w-full flex-col rounded-[24px] border",
-        className,
+        className
       )}
       ref={containerRef}
     >
@@ -203,7 +203,7 @@ export function InputBox({
           className={cn(
             "h-24 px-4 pt-5",
             feedback && "pt-9",
-            isEnhanceAnimating && "transition-all duration-500",
+            isEnhanceAnimating && "transition-all duration-500"
           )}
           ref={inputRef}
           loading={loading}
@@ -235,7 +235,7 @@ export function InputBox({
               <Button
                 className={cn(
                   "rounded-2xl",
-                  enableDeepThinking && "!border-brand !text-brand",
+                  enableDeepThinking && "!border-brand !text-brand"
                 )}
                 variant="outline"
                 onClick={() => {
@@ -263,7 +263,7 @@ export function InputBox({
             <Button
               className={cn(
                 "rounded-2xl",
-                backgroundInvestigation && "!border-brand !text-brand",
+                backgroundInvestigation && "!border-brand !text-brand"
               )}
               variant="outline"
               onClick={() =>
@@ -282,7 +282,7 @@ export function InputBox({
               size="icon"
               className={cn(
                 "hover:bg-accent h-10 w-10",
-                isEnhancing && "animate-pulse",
+                isEnhancing && "animate-pulse"
               )}
               onClick={handleEnhancePrompt}
               disabled={isEnhancing || currentPrompt.trim() === ""}

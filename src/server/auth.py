@@ -1,18 +1,19 @@
 # Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
-import os
 import logging
-from typing import Optional
+import os
 from datetime import datetime
-from fastapi import Depends, HTTPException, status, Header
+
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from pydantic import BaseModel, EmailStr
 
 from src.database.base import get_db
 from src.database.models import User
+
 from .clerk_auth import clerk_auth
-from .schemas import UserResponse
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +21,24 @@ logger = logging.getLogger(__name__)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 
+class UserResponse(BaseModel):
+    """Serializable user representation for API responses and validation tests."""
+
+    id: int
+    email: EmailStr
+    username: str
+    clerk_id: str
+    is_active: bool = True
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 async def get_current_user(
-    authorization: Optional[str] = Header(None),
-    token: Optional[str] = Depends(oauth2_scheme),
+    authorization: str | None = Header(None),
+    token: str | None = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ) -> User:
     """
@@ -139,10 +155,10 @@ async def get_current_active_user(
 
 
 async def get_optional_current_user(
-    authorization: Optional[str] = Header(None),
-    token: Optional[str] = Depends(oauth2_scheme),
+    authorization: str | None = Header(None),
+    token: str | None = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
-) -> Optional[User]:
+) -> User | None:
     """Get current user if authenticated, None otherwise. Useful for optional auth endpoints."""
     try:
         return await get_current_user(authorization, token, db)

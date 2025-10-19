@@ -2,9 +2,9 @@
  * Serviço de eventos de calendário usando REST API
  */
 
-import type { AuthenticatedApiClient } from '~/hooks/use-authenticated-api';
+import type { AuthenticatedApiClient } from "~/hooks/use-authenticated-api";
 
-import { api } from './http-client';
+import { api } from "./http-client";
 
 export interface CalendarEvent {
   id: number;
@@ -60,18 +60,22 @@ export function createCalendarApiService(apiClient: AuthenticatedApiClient) {
     }): Promise<CalendarEvent[]> {
       try {
         const queryParams = new URLSearchParams();
-        if (params?.start_date) queryParams.append('start_date', params.start_date);
-        if (params?.end_date) queryParams.append('end_date', params.end_date);
-        if (params?.category) queryParams.append('category', params.category);
-        if (params?.limit) queryParams.append('limit', params.limit.toString());
-        if (params?.offset) queryParams.append('offset', params.offset.toString());
+        if (params?.start_date)
+          queryParams.append("start_date", params.start_date);
+        if (params?.end_date) queryParams.append("end_date", params.end_date);
+        if (params?.category) queryParams.append("category", params.category);
+        if (params?.limit) queryParams.append("limit", params.limit.toString());
+        if (params?.offset)
+          queryParams.append("offset", params.offset.toString());
 
         const query = queryParams.toString();
-        const endpoint = query ? `/calendar/events?${query}` : '/calendar/events';
+        const endpoint = query
+          ? `/calendar/events?${query}`
+          : "/calendar/events";
 
         return await apiClient.get<CalendarEvent[]>(endpoint);
       } catch (error) {
-        console.error('Erro ao listar eventos:', error);
+        console.error("Erro ao listar eventos:", error);
         return [];
       }
     },
@@ -81,10 +85,12 @@ export function createCalendarApiService(apiClient: AuthenticatedApiClient) {
      */
     async get(id: number): Promise<CalendarEvent | null> {
       try {
-        const event = await apiClient.get<CalendarEvent>(`/calendar/events/${id}`);
+        const event = await apiClient.get<CalendarEvent>(
+          `/calendar/events/${id}`
+        );
         return event;
       } catch (error) {
-        console.error('Erro ao buscar evento:', error);
+        console.error("Erro ao buscar evento:", error);
         return null;
       }
     },
@@ -93,13 +99,16 @@ export function createCalendarApiService(apiClient: AuthenticatedApiClient) {
      * Criar novo evento
      */
     async create(data: CalendarEventCreate): Promise<CalendarEvent> {
-      return await apiClient.post<CalendarEvent>('/calendar/events', data);
+      return await apiClient.post<CalendarEvent>("/calendar/events", data);
     },
 
     /**
      * Atualizar evento
      */
-    async update(id: number, data: CalendarEventUpdate): Promise<CalendarEvent> {
+    async update(
+      id: number,
+      data: CalendarEventUpdate
+    ): Promise<CalendarEvent> {
       return await apiClient.put<CalendarEvent>(`/calendar/events/${id}`, data);
     },
 
@@ -119,7 +128,7 @@ export function createCalendarApiService(apiClient: AuthenticatedApiClient) {
           `/calendar/events/month/${year}/${month}`
         );
       } catch (error) {
-        console.error('Erro ao buscar eventos do mês:', error);
+        console.error("Erro ao buscar eventos do mês:", error);
         return [];
       }
     },
@@ -130,7 +139,7 @@ export function createCalendarApiService(apiClient: AuthenticatedApiClient) {
      */
     async checkCalendarEventsTableExists(): Promise<boolean> {
       return true;
-    }
+    },
   };
 }
 
@@ -149,18 +158,20 @@ export const calendarApiService = {
   }): Promise<CalendarEvent[]> {
     try {
       const queryParams = new URLSearchParams();
-      if (params?.start_date) queryParams.append('start_date', params.start_date);
-      if (params?.end_date) queryParams.append('end_date', params.end_date);
-      if (params?.category) queryParams.append('category', params.category);
-      if (params?.limit) queryParams.append('limit', params.limit.toString());
-      if (params?.offset) queryParams.append('offset', params.offset.toString());
+      if (params?.start_date)
+        queryParams.append("start_date", params.start_date);
+      if (params?.end_date) queryParams.append("end_date", params.end_date);
+      if (params?.category) queryParams.append("category", params.category);
+      if (params?.limit) queryParams.append("limit", params.limit.toString());
+      if (params?.offset)
+        queryParams.append("offset", params.offset.toString());
 
       const query = queryParams.toString();
-      const endpoint = query ? `/calendar/events?${query}` : '/calendar/events';
+      const endpoint = query ? `/calendar/events?${query}` : "/calendar/events";
 
       return await api.get<CalendarEvent[]>(endpoint);
     } catch (error) {
-      console.error('Erro ao listar eventos:', error);
+      console.error("Erro ao listar eventos:", error);
       return [];
     }
   },
@@ -173,7 +184,7 @@ export const calendarApiService = {
       const event = await api.get<CalendarEvent>(`/calendar/events/${id}`);
       return event;
     } catch (error) {
-      console.error('Erro ao buscar evento:', error);
+      console.error("Erro ao buscar evento:", error);
       return null;
     }
   },
@@ -182,7 +193,7 @@ export const calendarApiService = {
    * Criar novo evento
    */
   async create(data: CalendarEventCreate): Promise<CalendarEvent> {
-    return await api.post<CalendarEvent>('/calendar/events', data);
+    return await api.post<CalendarEvent>("/calendar/events", data);
   },
 
   /**
@@ -208,7 +219,7 @@ export const calendarApiService = {
         `/calendar/events/month/${year}/${month}`
       );
     } catch (error) {
-      console.error('Erro ao buscar eventos do mês:', error);
+      console.error("Erro ao buscar eventos do mês:", error);
       return [];
     }
   },
@@ -219,5 +230,5 @@ export const calendarApiService = {
    */
   async checkCalendarEventsTableExists(): Promise<boolean> {
     return true;
-  }
+  },
 };

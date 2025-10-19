@@ -1,18 +1,16 @@
 # Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
-import os
 import logging
+import os
 import time
-from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 from functools import lru_cache
+from typing import Any
 
-from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
-import jwt
-from jwt import PyJWTError
 import httpx
+import jwt
+from sqlalchemy.orm import Session
 
 from src.database.models import User
 
@@ -37,8 +35,8 @@ class ClerkAuthMiddleware:
             self.issuer = os.getenv("CLERK_ISSUER", f"https://clerk.{os.getenv('CLERK_DOMAIN', 'example.com')}")
 
         self.jwks_uri = f"{self.issuer}/.well-known/jwks.json" if self.issuer else None
-        self._jwks_cache: Optional[Dict[str, Any]] = None
-        self._jwks_cache_time: Optional[datetime] = None
+        self._jwks_cache: dict[str, Any] | None = None
+        self._jwks_cache_time: datetime | None = None
         self._jwks_cache_ttl = timedelta(hours=1)  # Cache JWKS for 1 hour
 
         if not self.clerk_publishable_key:
@@ -47,7 +45,7 @@ class ClerkAuthMiddleware:
             logger.info("Clerk auth middleware initialized with JWKS support")
 
     @lru_cache(maxsize=128)
-    def _get_jwk_for_kid(self, kid: str) -> Optional[Dict[str, Any]]:
+    def _get_jwk_for_kid(self, kid: str) -> dict[str, Any] | None:
         """Get JWK (JSON Web Key) for a specific key ID with caching."""
         jwks = self._fetch_jwks()
         if not jwks:
@@ -58,7 +56,7 @@ class ClerkAuthMiddleware:
                 return key
         return None
 
-    def _fetch_jwks(self, retry_count: int = 3, retry_delay: float = 1.0) -> Optional[Dict[str, Any]]:
+    def _fetch_jwks(self, retry_count: int = 3, retry_delay: float = 1.0) -> dict[str, Any] | None:
         """
         Fetch JWKS from Clerk with retry logic and caching.
 
@@ -108,7 +106,7 @@ class ClerkAuthMiddleware:
 
         return None
 
-    async def verify_token(self, token: str, retry_count: int = 2) -> Optional[dict]:
+    async def verify_token(self, token: str, retry_count: int = 2) -> dict | None:
         """
         Verify a Clerk JWT token and return user data with retry logic.
 
@@ -265,7 +263,7 @@ class ClerkAuthMiddleware:
         logger.info(f"Created new user {user.email} from Clerk auth")
         return user
 
-    def extract_token_from_header(self, authorization: str) -> Optional[str]:
+    def extract_token_from_header(self, authorization: str) -> str | None:
         """Extract bearer token from Authorization header."""
         if not authorization:
             return None

@@ -26,7 +26,10 @@ const CardToggleItem: React.FC<CardToggleItemProps> = ({
 
   return (
     <div className={cn("flex items-center justify-between py-2", className)}>
-      <Label htmlFor={cardId} className="text-sm font-medium cursor-pointer text-gray-100">
+      <Label
+        htmlFor={cardId}
+        className="cursor-pointer text-sm font-medium text-gray-100"
+      >
         {cardName}
       </Label>
       <Switch

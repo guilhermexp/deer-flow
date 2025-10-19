@@ -3,8 +3,9 @@
 
 import hashlib
 import logging
+from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Set
+from typing import Any
 
 from langchain_milvus.vectorstores import Milvus as LangchainMilvus
 from langchain_openai import OpenAIEmbeddings
@@ -27,7 +28,7 @@ class DashscopeEmbeddings:
         self._model: str = kwargs.get("model", "")
         self._encoding_format: str = kwargs.get("encoding_format", "float")
 
-    def _embed(self, texts: Sequence[str]) -> List[List[float]]:
+    def _embed(self, texts: Sequence[str]) -> list[list[float]]:
         """Internal helper performing the embedding API call."""
         clean_texts = [t if isinstance(t, str) else str(t) for t in texts]
         if not clean_texts:
@@ -39,12 +40,12 @@ class DashscopeEmbeddings:
         )
         return [d.embedding for d in resp.data]
 
-    def embed_query(self, text: str) -> List[float]:
+    def embed_query(self, text: str) -> list[float]:
         """Return embedding for a given text."""
         embeddings = self._embed([text])
         return embeddings[0] if embeddings else []
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
         """Return embeddings for multiple documents (LangChain interface)."""
         return self._embed(texts)
 
@@ -286,7 +287,7 @@ class MilvusRetriever(Retriever):
         # Fallback to filename without extension
         return filename.replace(".md", "").replace("_", " ").title()
 
-    def _split_content(self, content: str) -> List[str]:
+    def _split_content(self, content: str) -> list[str]:
         """Split long markdown text into paragraph-based chunks."""
         if len(content) <= self.chunk_size:
             return [content]
@@ -308,7 +309,7 @@ class MilvusRetriever(Retriever):
 
         return chunks
 
-    def _get_existing_document_ids(self) -> Set[str]:
+    def _get_existing_document_ids(self) -> set[str]:
         """Return set of existing document identifiers in the collection."""
         try:
             if self._is_milvus_lite():
@@ -331,7 +332,7 @@ class MilvusRetriever(Retriever):
             return set()
 
     def _insert_document_chunk(
-        self, doc_id: str, content: str, title: str, url: str, metadata: Dict[str, Any]
+        self, doc_id: str, content: str, title: str, url: str, metadata: dict[str, Any]
     ) -> None:
         """Insert a single content chunk into Milvus."""
         try:
@@ -407,7 +408,7 @@ class MilvusRetriever(Retriever):
             not self.uri.startswith(("http://", "https://")) and "://" not in self.uri
         )
 
-    def _get_embedding(self, text: str) -> List[float]:
+    def _get_embedding(self, text: str) -> list[float]:
         """Return embedding for a given text."""
         try:
             # Validate input
@@ -427,7 +428,7 @@ class MilvusRetriever(Retriever):
         except Exception as e:
             raise RuntimeError(f"Failed to generate embedding: {str(e)}")
 
-    def list_resources(self, query: Optional[str] = None) -> List[Resource]:
+    def list_resources(self, query: str | None = None) -> list[Resource]:
         """List available resource summaries.
 
         Strategy:
@@ -444,7 +445,7 @@ class MilvusRetriever(Retriever):
         Returns:
             List of ``Resource`` objects.
         """
-        resources: List[Resource] = []
+        resources: list[Resource] = []
 
         # Ensure connection established
         if not self.client:
@@ -512,7 +513,7 @@ class MilvusRetriever(Retriever):
             return self._list_local_markdown_resources()
         return resources
 
-    def _list_local_markdown_resources(self) -> List[Resource]:
+    def _list_local_markdown_resources(self) -> list[Resource]:
         """Return local example markdown files as ``Resource`` objects.
 
         These are surfaced even when not ingested so users can choose to load
@@ -542,8 +543,8 @@ class MilvusRetriever(Retriever):
         return resources
 
     def query_relevant_documents(
-        self, query: str, resources: Optional[List[Resource]] = None
-    ) -> List[Document]:
+        self, query: str, resources: list[Resource] | None = None
+    ) -> list[Document]:
         """Perform vector similarity search returning rich ``Document`` objects.
 
         Args:
@@ -712,7 +713,7 @@ class MilvusRetriever(Retriever):
         except Exception as e:
             logger.warning("Could not clear existing examples: %s", e)
 
-    def get_loaded_examples(self) -> List[Dict[str, str]]:
+    def get_loaded_examples(self) -> list[dict[str, str]]:
         """Return metadata for previously ingested example documents."""
         try:
             if not self.client:

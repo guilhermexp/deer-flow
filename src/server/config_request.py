@@ -10,4 +10,6 @@ class ConfigResponse(BaseModel):
     """Response model for server config."""
 
     rag: RAGConfigResponse = Field(..., description="The config of the RAG")
-    models: dict[str, list[str]] = Field(..., description="The configured models")
+    llm_models: dict[str, list[str]] = Field(
+        ..., description="The configured models grouped by type"
+    )

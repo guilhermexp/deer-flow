@@ -1,17 +1,19 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import type { Task, Project, ActiveTabValue } from "../lib/types"
-import { useKanbanStorageAsync } from "./use-kanban-storage-async"
-import { useKanbanTasks } from "./use-kanban-tasks"
-import { useKanbanColumns } from "./use-kanban-columns"
-import { useKanbanDragDrop } from "./use-kanban-drag-drop"
+import { useState, useEffect } from "react";
+import type { Task, Project, ActiveTabValue } from "../lib/types";
+import { useKanbanStorageAsync } from "./use-kanban-storage-async";
+import { useKanbanTasks } from "./use-kanban-tasks";
+import { useKanbanColumns } from "./use-kanban-columns";
+import { useKanbanDragDrop } from "./use-kanban-drag-drop";
 
 export function useKanbanBoardAsync() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [currentProject, setCurrentProject] = useState<Project | null>(null)
-  const [tasksByProject, setTasksByProject] = useState<{ [projectId: string]: Task[] }>({})
-  const [activeTab, setActiveTab] = useState<ActiveTabValue>("projectList")
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [currentProject, setCurrentProject] = useState<Project | null>(null);
+  const [tasksByProject, setTasksByProject] = useState<{
+    [projectId: string]: Task[];
+  }>({});
+  const [activeTab, setActiveTab] = useState<ActiveTabValue>("projectList");
 
   // Async storage operations
   const {
@@ -24,45 +26,55 @@ export function useKanbanBoardAsync() {
     saveTasks,
     saveLastActiveProject,
     saveLastActiveTab,
-  } = useKanbanStorageAsync()
+  } = useKanbanStorageAsync();
 
   // Initialize state from async storage when loaded
   useEffect(() => {
     if (!loading) {
-      setProjects(storedProjects)
-      setTasksByProject(storedTasks)
-      setCurrentProject(storedCurrentProject)
-      setActiveTab(storedActiveTab)
+      setProjects(storedProjects);
+      setTasksByProject(storedTasks);
+      setCurrentProject(storedCurrentProject);
+      setActiveTab(storedActiveTab);
     }
-  }, [loading, storedProjects, storedTasks, storedCurrentProject, storedActiveTab])
+  }, [
+    loading,
+    storedProjects,
+    storedTasks,
+    storedCurrentProject,
+    storedActiveTab,
+  ]);
 
   // Save data to async storage when changed
   useEffect(() => {
     if (!loading) {
-      saveProjects(projects)
+      saveProjects(projects);
     }
-  }, [projects, saveProjects, loading])
+  }, [projects, saveProjects, loading]);
 
   useEffect(() => {
     if (!loading) {
-      saveTasks(tasksByProject)
+      saveTasks(tasksByProject);
     }
-  }, [tasksByProject, saveTasks, loading])
+  }, [tasksByProject, saveTasks, loading]);
 
   useEffect(() => {
     if (!loading) {
-      saveLastActiveProject(currentProject)
+      saveLastActiveProject(currentProject);
     }
-  }, [currentProject, saveLastActiveProject, loading])
+  }, [currentProject, saveLastActiveProject, loading]);
 
   useEffect(() => {
     if (!loading) {
-      saveLastActiveTab(activeTab)
+      saveLastActiveTab(activeTab);
     }
-  }, [activeTab, saveLastActiveTab, loading])
+  }, [activeTab, saveLastActiveTab, loading]);
 
   // Task management
-  const taskHooks = useKanbanTasks(currentProject, tasksByProject, setTasksByProject)
+  const taskHooks = useKanbanTasks(
+    currentProject,
+    tasksByProject,
+    setTasksByProject
+  );
 
   // Column/Project management
   const columnHooks = useKanbanColumns(
@@ -71,10 +83,10 @@ export function useKanbanBoardAsync() {
     setTasksByProject,
     setCurrentProject,
     setActiveTab
-  )
+  );
 
   // Drag and drop
-  const dragDropHooks = useKanbanDragDrop(taskHooks.handleUpdateTask)
+  const dragDropHooks = useKanbanDragDrop(taskHooks.handleUpdateTask);
 
   return {
     // State
@@ -84,14 +96,14 @@ export function useKanbanBoardAsync() {
     activeTab,
     setActiveTab,
     loading,
-    
+
     // Task hooks
     ...taskHooks,
-    
+
     // Column hooks
     ...columnHooks,
-    
+
     // Drag and drop hooks
     ...dragDropHooks,
-  }
+  };
 }

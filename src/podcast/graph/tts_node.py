@@ -1,7 +1,6 @@
 # Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
-import base64
 import logging
 import os
 
@@ -49,11 +48,11 @@ def tts_node(state: PodcastState):
                         f"Failed to generate audio for line {i+1}: {result['error']}"
                     )
                     # Continue processing other lines instead of failing completely
-                    logger.warning(f"Continuing with remaining lines...")
+                    logger.warning("Continuing with remaining lines...")
             except Exception as e:
                 logger.error(f"Exception processing line {i+1}: {str(e)}")
                 # Continue with other lines
-                logger.warning(f"Continuing with remaining lines...")
+                logger.warning("Continuing with remaining lines...")
 
         logger.info(f"Successfully generated {len(state['audio_chunks'])} audio chunks")
     except Exception as e:

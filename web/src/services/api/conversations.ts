@@ -2,7 +2,7 @@
  * Serviço de conversas usando REST API
  */
 
-import { api } from './http-client';
+import { api } from "./http-client";
 
 export interface Conversation {
   id: number;
@@ -39,7 +39,7 @@ export const conversationsApiService = {
       const conversation = await api.get<Conversation>(`/conversations/${id}`);
       return conversation;
     } catch (error) {
-      console.error('Erro ao buscar conversa:', error);
+      console.error("Erro ao buscar conversa:", error);
       return null;
     }
   },
@@ -49,10 +49,12 @@ export const conversationsApiService = {
    */
   async getByThreadId(thread_id: string): Promise<Conversation | null> {
     try {
-      const conversation = await api.get<Conversation>(`/conversations/${thread_id}`);
+      const conversation = await api.get<Conversation>(
+        `/conversations/${thread_id}`
+      );
       return conversation;
     } catch (error) {
-      console.error('Erro ao buscar conversa por thread_id:', error);
+      console.error("Erro ao buscar conversa por thread_id:", error);
       return null;
     }
   },
@@ -60,7 +62,11 @@ export const conversationsApiService = {
   /**
    * Listar todas as conversas do usuário
    */
-  async list(params?: { search?: string; page?: number; per_page?: number }): Promise<{
+  async list(params?: {
+    search?: string;
+    page?: number;
+    per_page?: number;
+  }): Promise<{
     items: Conversation[];
     total: number;
     page: number;
@@ -69,22 +75,23 @@ export const conversationsApiService = {
   }> {
     try {
       const queryParams = new URLSearchParams();
-      if (params?.search) queryParams.append('search', params.search);
-      if (params?.page) queryParams.append('page', params.page.toString());
-      if (params?.per_page) queryParams.append('per_page', params.per_page.toString());
+      if (params?.search) queryParams.append("search", params.search);
+      if (params?.page) queryParams.append("page", params.page.toString());
+      if (params?.per_page)
+        queryParams.append("per_page", params.per_page.toString());
 
       const query = queryParams.toString();
-      const endpoint = query ? `/conversations?${query}` : '/conversations';
+      const endpoint = query ? `/conversations?${query}` : "/conversations";
 
       return await api.get(endpoint);
     } catch (error) {
-      console.error('Erro ao listar conversas:', error);
+      console.error("Erro ao listar conversas:", error);
       return {
         items: [],
         total: 0,
         page: 1,
         per_page: 50,
-        pages: 0
+        pages: 0,
       };
     }
   },
@@ -93,13 +100,16 @@ export const conversationsApiService = {
    * Criar nova conversa
    */
   async create(data: ConversationCreate): Promise<Conversation> {
-    return await api.post<Conversation>('/conversations', data);
+    return await api.post<Conversation>("/conversations", data);
   },
 
   /**
    * Atualizar conversa
    */
-  async update(thread_id: string, data: ConversationUpdate): Promise<Conversation> {
+  async update(
+    thread_id: string,
+    data: ConversationUpdate
+  ): Promise<Conversation> {
     return await api.put<Conversation>(`/conversations/${thread_id}`, data);
   },
 
@@ -113,7 +123,10 @@ export const conversationsApiService = {
   /**
    * Adicionar mensagens a uma conversa
    */
-  async addMessages(thread_id: string, messages: any[]): Promise<{ thread_id: string; message_count: number }> {
+  async addMessages(
+    thread_id: string,
+    messages: any[]
+  ): Promise<{ thread_id: string; message_count: number }> {
     return await api.post(`/conversations/${thread_id}/messages`, messages);
   },
 
@@ -123,5 +136,5 @@ export const conversationsApiService = {
    */
   async checkConversationsTableExists(): Promise<boolean> {
     return true;
-  }
+  },
 };

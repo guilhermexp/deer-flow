@@ -1,21 +1,22 @@
 # Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 # SPDX-License-Identifier: MIT
 
+import enum
 from datetime import datetime
+
 from sqlalchemy import (
+    JSON,
+    Boolean,
     Column,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
     Integer,
     String,
-    DateTime,
-    Boolean,
-    Float,
-    JSON,
-    ForeignKey,
     Text,
-    Enum,
 )
 from sqlalchemy.orm import relationship
-import enum
 
 from .base import Base
 

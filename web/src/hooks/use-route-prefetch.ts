@@ -12,7 +12,7 @@ export function useRoutePrefetch(routes?: string[]) {
 
   useEffect(() => {
     if (!routes || routes.length === 0) return;
-    
+
     // Prefetch immediately on next tick without delay
     const prefetchRoutes = () => {
       routes.forEach((route) => {
@@ -21,7 +21,7 @@ export function useRoutePrefetch(routes?: string[]) {
     };
 
     // Use requestIdleCallback for non-blocking prefetch
-    if ('requestIdleCallback' in window) {
+    if ("requestIdleCallback" in window) {
       const id = requestIdleCallback(prefetchRoutes);
       return () => cancelIdleCallback(id);
     } else {

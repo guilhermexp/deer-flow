@@ -34,7 +34,7 @@ export default function RootPage() {
       {/* Loading state */}
       <main className="flex flex-1 items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="border-primary mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
           <p className="text-muted-foreground">Carregando...</p>
         </div>
       </main>

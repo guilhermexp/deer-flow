@@ -1,7 +1,6 @@
 # src/utils/token_manager.py
 import copy
 import logging
-from typing import List
 
 from langchain_core.messages import (
     AIMessage,
@@ -36,7 +35,7 @@ class ContextManager:
         self.token_limit = token_limit
         self.preserve_prefix_message_count = preserve_prefix_message_count
 
-    def count_tokens(self, messages: List[BaseMessage]) -> int:
+    def count_tokens(self, messages: list[BaseMessage]) -> int:
         """
         Count tokens in message list
 
@@ -132,7 +131,7 @@ class ContextManager:
 
         return english_tokens + non_english_tokens
 
-    def is_over_limit(self, messages: List[BaseMessage]) -> bool:
+    def is_over_limit(self, messages: list[BaseMessage]) -> bool:
         """
         Check if messages exceed token limit
 
@@ -144,7 +143,7 @@ class ContextManager:
         """
         return self.count_tokens(messages) > self.token_limit
 
-    def compress_messages(self, state: dict) -> List[BaseMessage]:
+    def compress_messages(self, state: dict) -> list[BaseMessage]:
         """
         Compress messages to fit within token limit
 
@@ -178,7 +177,7 @@ class ContextManager:
         state["messages"] = compressed_messages
         return state
 
-    def _compress_messages(self, messages: List[BaseMessage]) -> List[BaseMessage]:
+    def _compress_messages(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """
         Compress compressible messages
 
@@ -252,7 +251,7 @@ class ContextManager:
 
         return truncated_message
 
-    def _create_summary_message(self, messages: List[BaseMessage]) -> BaseMessage:
+    def _create_summary_message(self, messages: list[BaseMessage]) -> BaseMessage:
         """
         Create summary for messages
 

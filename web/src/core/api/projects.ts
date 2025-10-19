@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 // SPDX-License-Identifier: MIT
 
-import { apiClient } from './client';
+import { apiClient } from "./client";
 
 export interface Project {
   id: number;
@@ -30,7 +30,7 @@ export interface KanbanTask {
   id: number;
   title: string;
   description?: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
   order: number;
   created_at: string;
 }
@@ -38,7 +38,7 @@ export interface KanbanTask {
 export interface KanbanTaskCreate {
   title: string;
   description?: string;
-  priority: 'low' | 'medium' | 'high';
+  priority: "low" | "medium" | "high";
   order?: number;
 }
 
@@ -66,7 +66,7 @@ export const projectsApi = {
     limit?: number;
     offset?: number;
   }): Promise<Project[]> {
-    const response = await apiClient.get<Project[]>('/projects/', { params });
+    const response = await apiClient.get<Project[]>("/projects/", { params });
     return response.data;
   },
 
@@ -76,7 +76,7 @@ export const projectsApi = {
   },
 
   async createProject(data: ProjectCreate): Promise<Project> {
-    const response = await apiClient.post<Project>('/projects/', data);
+    const response = await apiClient.post<Project>("/projects/", data);
     return response.data;
   },
 
@@ -90,11 +90,17 @@ export const projectsApi = {
   },
 
   async getKanbanBoard(projectId: number): Promise<KanbanBoard> {
-    const response = await apiClient.get<KanbanBoard>(`/projects/${projectId}/kanban`);
+    const response = await apiClient.get<KanbanBoard>(
+      `/projects/${projectId}/kanban`
+    );
     return response.data;
   },
 
-  async createKanbanTask(projectId: number, task: KanbanTaskCreate, columnId = 'backlog'): Promise<KanbanTask> {
+  async createKanbanTask(
+    projectId: number,
+    task: KanbanTaskCreate,
+    columnId = "backlog"
+  ): Promise<KanbanTask> {
     const response = await apiClient.post<KanbanTask>(
       `/projects/${projectId}/tasks?column_id=${columnId}`,
       task
@@ -102,7 +108,11 @@ export const projectsApi = {
     return response.data;
   },
 
-  async moveKanbanTask(projectId: number, taskId: number, data: TaskMoveRequest): Promise<KanbanTask> {
+  async moveKanbanTask(
+    projectId: number,
+    taskId: number,
+    data: TaskMoveRequest
+  ): Promise<KanbanTask> {
     const response = await apiClient.put<KanbanTask>(
       `/projects/${projectId}/tasks/${taskId}/move`,
       data

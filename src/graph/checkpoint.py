@@ -5,7 +5,6 @@ import json
 import logging
 import uuid
 from datetime import datetime
-from typing import List, Optional, Tuple
 
 try:
     import psycopg
@@ -41,7 +40,7 @@ class ChatStreamManager:
     """
 
     def __init__(
-        self, checkpoint_saver: bool = False, db_uri: Optional[str] = None
+        self, checkpoint_saver: bool = False, db_uri: str | None = None
     ) -> None:
         """
         Initialize the ChatStreamManager with database connections.
@@ -164,7 +163,7 @@ class ChatStreamManager:
 
         try:
             # Create namespace for this thread's messages
-            store_namespace: Tuple[str, str] = ("messages", thread_id)
+            store_namespace: tuple[str, str] = ("messages", thread_id)
 
             # Get or initialize message cursor for tracking chunks
             cursor = self.store.get(store_namespace, "cursor")
@@ -196,7 +195,7 @@ class ChatStreamManager:
             return False
 
     def _persist_complete_conversation(
-        self, thread_id: str, store_namespace: Tuple[str, str], final_index: int
+        self, thread_id: str, store_namespace: tuple[str, str], final_index: int
     ) -> bool:
         """
         Persist completed conversation to database (MongoDB or PostgreSQL).
@@ -218,7 +217,7 @@ class ChatStreamManager:
             memories = self.store.search(store_namespace, limit=final_index + 2)
 
             # Extract message content, filtering out cursor metadata
-            messages: List[str] = []
+            messages: list[str] = []
             for item in memories:
                 value = item.dict().get("value", "")
                 # Skip cursor metadata, only include actual message chunks
@@ -248,7 +247,7 @@ class ChatStreamManager:
             )
             return False
 
-    def _persist_to_mongodb(self, thread_id: str, messages: List[str]) -> bool:
+    def _persist_to_mongodb(self, thread_id: str, messages: list[str]) -> bool:
         """Persist conversation to MongoDB."""
         try:
             # Get MongoDB collection for chat streams
@@ -288,7 +287,7 @@ class ChatStreamManager:
             self.logger.error(f"Error persisting to MongoDB: {e}")
             return False
 
-    def _persist_to_postgresql(self, thread_id: str, messages: List[str]) -> bool:
+    def _persist_to_postgresql(self, thread_id: str, messages: list[str]) -> bool:
         """Persist conversation to PostgreSQL."""
         try:
             with self.postgres_conn.cursor() as cursor:

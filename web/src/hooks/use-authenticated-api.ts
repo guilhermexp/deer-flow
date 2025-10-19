@@ -5,10 +5,10 @@
  * Clerk authentication tokens in all requests.
  */
 
-import { useAuth } from '@clerk/nextjs';
-import { useMemo } from 'react';
+import { useAuth } from "@clerk/nextjs";
+import { useMemo } from "react";
 
-import { httpClient } from '~/services/api/http-client';
+import { httpClient } from "~/services/api/http-client";
 
 export interface AuthenticatedApiClient {
   get: <T = any>(endpoint: string) => Promise<T>;
@@ -50,7 +50,7 @@ export function useAuthenticatedApi(): AuthenticatedApiClient {
       get: async <T = any>(endpoint: string): Promise<T> => {
         const token = await getToken();
         return httpClient<T>(endpoint, {
-          method: 'GET',
+          method: "GET",
           token: token ?? undefined,
         });
       },
@@ -58,7 +58,7 @@ export function useAuthenticatedApi(): AuthenticatedApiClient {
       post: async <T = any>(endpoint: string, body?: any): Promise<T> => {
         const token = await getToken();
         return httpClient<T>(endpoint, {
-          method: 'POST',
+          method: "POST",
           body,
           token: token ?? undefined,
         });
@@ -67,7 +67,7 @@ export function useAuthenticatedApi(): AuthenticatedApiClient {
       put: async <T = any>(endpoint: string, body?: any): Promise<T> => {
         const token = await getToken();
         return httpClient<T>(endpoint, {
-          method: 'PUT',
+          method: "PUT",
           body,
           token: token ?? undefined,
         });
@@ -76,7 +76,7 @@ export function useAuthenticatedApi(): AuthenticatedApiClient {
       patch: async <T = any>(endpoint: string, body?: any): Promise<T> => {
         const token = await getToken();
         return httpClient<T>(endpoint, {
-          method: 'PATCH',
+          method: "PATCH",
           body,
           token: token ?? undefined,
         });
@@ -85,7 +85,7 @@ export function useAuthenticatedApi(): AuthenticatedApiClient {
       delete: async <T = any>(endpoint: string): Promise<T> => {
         const token = await getToken();
         return httpClient<T>(endpoint, {
-          method: 'DELETE',
+          method: "DELETE",
           token: token ?? undefined,
         });
       },

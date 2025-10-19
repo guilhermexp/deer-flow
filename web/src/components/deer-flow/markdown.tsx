@@ -14,7 +14,10 @@ import "katex/dist/katex.min.css";
 import { Button } from "~/components/ui/button";
 import { rehypeSplitWordsIntoSpans } from "~/core/rehype";
 import { katexOptions } from "~/core/markdown/katex";
-import { autoFixMarkdown, normalizeMathForDisplay } from "~/core/utils/markdown";
+import {
+  autoFixMarkdown,
+  normalizeMathForDisplay,
+} from "~/core/utils/markdown";
 import { cn } from "~/lib/utils";
 
 import Image from "./image";
@@ -51,11 +54,12 @@ export function Markdown({
     };
   }, [checkLinkCredibility]);
 
-  const rehypePlugins = useMemo<NonNullable<ReactMarkdownOptions["rehypePlugins"]>>(() => {
-    const plugins: NonNullable<ReactMarkdownOptions["rehypePlugins"]> = [[
-      rehypeKatex,
-      katexOptions,
-    ]];
+  const rehypePlugins = useMemo<
+    NonNullable<ReactMarkdownOptions["rehypePlugins"]>
+  >(() => {
+    const plugins: NonNullable<ReactMarkdownOptions["rehypePlugins"]> = [
+      [rehypeKatex, katexOptions],
+    ];
     if (animated) {
       plugins.push(rehypeSplitWordsIntoSpans);
     }
@@ -70,7 +74,7 @@ export function Markdown({
         {...props}
       >
         {autoFixMarkdown(
-          dropMarkdownQuote(normalizeMathForDisplay(children ?? "")) ?? "",
+          dropMarkdownQuote(normalizeMathForDisplay(children ?? "")) ?? ""
         )}
       </ReactMarkdown>
       {enableCopy && typeof children === "string" && (
@@ -112,8 +116,6 @@ function CopyButton({ content }: { content: string }) {
   );
 }
 
-
-
 function dropMarkdownQuote(markdown?: string | null): string | null {
   if (!markdown) return null;
 
@@ -124,19 +126,19 @@ function dropMarkdownQuote(markdown?: string | null): string | null {
   ];
 
   let result = markdown;
-  
+
   for (const { prefix, suffix, prefixLen } of patternsToRemove) {
     if (result.startsWith(prefix) && !result.endsWith(suffix)) {
       result = result.slice(prefixLen);
-      break;  // remove prefix without suffix only once
+      break; // remove prefix without suffix only once
     }
   }
-  
+
   let changed = true;
 
   while (changed) {
     changed = false;
-    
+
     for (const { prefix, suffix, prefixLen } of patternsToRemove) {
       let startIndex = 0;
       while ((startIndex = result.indexOf(prefix, startIndex)) !== -1) {
@@ -155,6 +157,6 @@ function dropMarkdownQuote(markdown?: string | null): string | null {
       }
     }
   }
-  
+
   return result;
 }

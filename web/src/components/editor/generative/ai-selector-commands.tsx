@@ -50,7 +50,7 @@ const AISelectorCommands = ({ onSelect }: AISelectorCommandsProps) => {
             onSelect={(value) => {
               const slice = editor.state.selection.content();
               const text = editor.storage.markdown.serializer.serialize(
-                slice.content,
+                slice.content
               );
               onSelect(text, value);
             }}

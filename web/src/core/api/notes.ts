@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 // SPDX-License-Identifier: MIT
 
-import { apiClient } from './client';
+import { apiClient } from "./client";
 
 export interface Note {
   id: number;
@@ -50,7 +50,7 @@ export const notesApi = {
     limit?: number;
     offset?: number;
   }): Promise<Note[]> {
-    const response = await apiClient.get<Note[]>('/notes/', { params });
+    const response = await apiClient.get<Note[]>("/notes/", { params });
     return response.data;
   },
 
@@ -60,7 +60,7 @@ export const notesApi = {
   },
 
   async createNote(data: NoteCreate): Promise<Note> {
-    const response = await apiClient.post<Note>('/notes/', data);
+    const response = await apiClient.post<Note>("/notes/", data);
     return response.data;
   },
 
@@ -74,17 +74,24 @@ export const notesApi = {
   },
 
   async getStats(): Promise<NoteStats> {
-    const response = await apiClient.get<NoteStats>('/notes/stats');
+    const response = await apiClient.get<NoteStats>("/notes/stats");
     return response.data;
   },
 
   async extractContent(url: string): Promise<ExtractContentResponse> {
-    const response = await apiClient.post<ExtractContentResponse>('/notes/extract', { url });
+    const response = await apiClient.post<ExtractContentResponse>(
+      "/notes/extract",
+      { url }
+    );
     return response.data;
   },
 
-  async summarizeNote(id: number): Promise<{ note_id: number; summary: string }> {
-    const response = await apiClient.post<{ note_id: number; summary: string }>(`/notes/summarize/${id}`);
+  async summarizeNote(
+    id: number
+  ): Promise<{ note_id: number; summary: string }> {
+    const response = await apiClient.post<{ note_id: number; summary: string }>(
+      `/notes/summarize/${id}`
+    );
     return response.data;
   },
 };

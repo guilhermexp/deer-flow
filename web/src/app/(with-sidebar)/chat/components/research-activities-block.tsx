@@ -39,7 +39,7 @@ export function ResearchActivitiesBlock({
   researchId: string;
 }) {
   const activityIds = useStore((state) =>
-    state.researchActivityIds.get(researchId),
+    state.researchActivityIds.get(researchId)
   )!;
   const ongoing = useStore((state) => state.ongoingResearchId === researchId);
   return (
@@ -62,7 +62,7 @@ export function ResearchActivitiesBlock({
                 <ActivityListItem messageId={activityId} />
                 {i !== activityIds.length - 1 && <hr className="my-8" />}
               </motion.li>
-            ),
+            )
         )}
       </ul>
       {ongoing && <LoadingAnimation className="mx-4 my-12" />}
@@ -114,16 +114,16 @@ function ActivityListItem({ messageId }: { messageId: string }) {
 const __pageCache = new LRUCache<string, string>({ max: 100 });
 type SearchResult =
   | {
-    type: "page";
-    title: string;
-    url: string;
-    content: string;
-  }
+      type: "page";
+      title: string;
+      url: string;
+      content: string;
+    }
   | {
-    type: "image";
-    image_url: string;
-    image_description: string;
-  };
+      type: "image";
+      image_url: string;
+      image_description: string;
+    };
 
 function WebSearchToolCall({ toolCall }: { toolCall: ToolCallRuntime }) {
   const t = useTranslations("chat.research");
@@ -150,11 +150,11 @@ function WebSearchToolCall({ toolCall }: { toolCall: ToolCallRuntime }) {
   }, [toolCall.result]);
   const pageResults = useMemo(
     () => searchResults?.filter((result) => result.type === "page"),
-    [searchResults],
+    [searchResults]
   );
   const imageResults = useMemo(
     () => searchResults?.filter((result) => result.type === "image"),
-    [searchResults],
+    [searchResults]
   );
   return (
     <section className="mt-4 pl-4">
@@ -246,7 +246,7 @@ function CrawlToolCall({ toolCall }: { toolCall: ToolCallRuntime }) {
   const t = useTranslations("chat.research");
   const url = useMemo(
     () => (toolCall.args as { url: string }).url,
-    [toolCall.args],
+    [toolCall.args]
   );
   const title = useMemo(() => __pageCache.get(url), [url]);
   return (
@@ -385,7 +385,7 @@ function PythonToolCallResult({ result }: { result: string }) {
   const { resolvedTheme } = useTheme();
   const hasError = useMemo(
     () => result.includes("Error executing code:\n"),
-    [result],
+    [result]
   );
   const error = useMemo(() => {
     if (hasError) {

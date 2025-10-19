@@ -1,9 +1,14 @@
-'use client';
+"use client";
 
-import { useUser, useClerk } from '@clerk/nextjs';
-import type { UserResource } from '@clerk/types';
-import { useRouter } from 'next/navigation';
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useUser, useClerk } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 
 interface User {
   id: string;
@@ -19,7 +24,11 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, username?: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    username?: string
+  ) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
 }
@@ -30,27 +39,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
-  
+
   // Clerk hooks
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const { signOut } = useClerk();
 
   // Helper function to convert Clerk user to our User format
-  const setClerkUserData = useCallback((clerkUserData: UserResource | null | undefined) => {
-    if (!clerkUserData) return null;
-    
-    const userData: User = {
-      id: clerkUserData.id,
-      email: clerkUserData.emailAddresses[0]?.emailAddress ?? '',
-      firstName: clerkUserData.firstName ?? undefined,
-      lastName: clerkUserData.lastName ?? undefined,
-      fullName: clerkUserData.fullName ?? undefined,
-      imageUrl: clerkUserData.imageUrl ?? undefined,
-    };
-    
-    setUser(userData);
-    return userData;
-  }, []);
+  const setClerkUserData = useCallback(
+    (clerkUserData: any | null | undefined) => {
+      if (!clerkUserData) return null;
+
+      const userData: User = {
+        id: clerkUserData.id,
+        email: clerkUserData.emailAddresses[0]?.emailAddress ?? "",
+        firstName: clerkUserData.firstName ?? undefined,
+        lastName: clerkUserData.lastName ?? undefined,
+        fullName: clerkUserData.fullName ?? undefined,
+        imageUrl: clerkUserData.imageUrl ?? undefined,
+      };
+
+      setUser(userData);
+      return userData;
+    },
+    []
+  );
 
   const checkAuth = useCallback(async () => {
     if (!clerkLoaded) {
@@ -64,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
       }
     } catch (error) {
-      console.error('❌ Auth check failed:', error);
+      console.error("❌ Auth check failed:", error);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -79,27 +91,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      
+
       // Redirect to Clerk's sign-in page
-      router.push('/sign-in');
-      
+      router.push("/sign-in");
     } catch (error) {
-      console.error('❌ Auth: Login failed:', error);
+      console.error("❌ Auth: Login failed:", error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (email: string, password: string, username?: string) => {
+  const register = async (
+    email: string,
+    password: string,
+    username?: string
+  ) => {
     try {
       setIsLoading(true);
-      
+
       // Redirect to Clerk's sign-up page
-      router.push('/sign-up');
-      
+      router.push("/sign-up");
     } catch (error) {
-      console.error('❌ Auth: Registration failed:', error);
+      console.error("❌ Auth: Registration failed:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -110,12 +124,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await signOut();
       setUser(null);
-      router.push('/login');
+      router.push("/login");
     } catch (error) {
-      console.error('❌ Auth: Logout failed:', error);
+      console.error("❌ Auth: Logout failed:", error);
       // Even if logout fails, clear local state
       setUser(null);
-      router.push('/login');
+      router.push("/login");
     }
   };
 
@@ -135,7 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

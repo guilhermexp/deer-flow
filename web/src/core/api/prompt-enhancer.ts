@@ -14,7 +14,7 @@ export interface EnhancePromptResponse {
 }
 
 export async function enhancePrompt(
-  request: EnhancePromptRequest,
+  request: EnhancePromptRequest
 ): Promise<string> {
   const response = await fetch(resolveServiceURL("prompt/enhance"), {
     method: "POST",

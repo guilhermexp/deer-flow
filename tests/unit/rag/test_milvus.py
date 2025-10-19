@@ -19,7 +19,6 @@ This ensures tests don't leave behind temporary files that clutter the workspace
 from __future__ import annotations
 
 import shutil
-import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 from uuid import uuid4

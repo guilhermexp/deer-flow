@@ -41,6 +41,7 @@ def repair_json_output(content: str) -> str:
     Returns:
         str: Repaired JSON string, or original content if not JSON
     """
+    original_content = content
     content = content.strip()
 
     try:
@@ -54,5 +55,8 @@ def repair_json_output(content: str) -> str:
         content = json.dumps(repaired_content, ensure_ascii=False)
     except Exception as e:
         logger.warning(f"JSON repair failed: {e}")
+        # On failure, return the original (untrimmed) content to avoid
+        # unintended mutations like whitespace removal.
+        return original_content
 
     return content

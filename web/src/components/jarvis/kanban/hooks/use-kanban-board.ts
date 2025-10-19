@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import type { Task, Project, ActiveTabValue, TaskStatus } from "../lib/types"
-import { useKanbanApi } from "./use-kanban-api"
-import { useKanbanTasks } from "./use-kanban-tasks"
-import { useKanbanColumns } from "./use-kanban-columns"
-import { useKanbanDragDrop } from "./use-kanban-drag-drop"
+import { useState } from "react";
+import type { Task, Project, ActiveTabValue, TaskStatus } from "../lib/types";
+import { useKanbanApi } from "./use-kanban-api";
+import { useKanbanTasks } from "./use-kanban-tasks";
+import { useKanbanColumns } from "./use-kanban-columns";
+import { useKanbanDragDrop } from "./use-kanban-drag-drop";
 
 export function useKanbanBoard() {
   // Use the new API hook instead of localStorage
@@ -26,15 +26,15 @@ export function useKanbanBoard() {
     deleteProject: apiDeleteProject,
     createTask: apiCreateTask,
     moveTask: apiMoveTask,
-    isAuthenticated
-  } = useKanbanApi()
+    isAuthenticated,
+  } = useKanbanApi();
 
   // Task management - use original signature
   const taskHooks = useKanbanTasks(
-    currentProject, 
-    tasksByProject, 
+    currentProject,
+    tasksByProject,
     setTasksByProject
-  )
+  );
 
   // Column/Project management - use original signature
   const columnHooks = useKanbanColumns(
@@ -43,68 +43,68 @@ export function useKanbanBoard() {
     setTasksByProject,
     setCurrentProject,
     setActiveTab
-  )
+  );
 
   // Drag and drop
-  const dragDropHooks = useKanbanDragDrop(taskHooks.handleUpdateTask)
+  const dragDropHooks = useKanbanDragDrop(taskHooks.handleUpdateTask);
 
   // Override methods that need API integration
   const handleSaveNewProject = async () => {
-    if (!columnHooks.newProjectFormData.name.trim()) return
-    
+    if (!columnHooks.newProjectFormData.name.trim()) return;
+
     try {
       const newProject = await apiCreateProject({
         name: columnHooks.newProjectFormData.name,
-        description: columnHooks.newProjectFormData.description
-      })
-      
+        description: columnHooks.newProjectFormData.description,
+      });
+
       if (newProject) {
-        setCurrentProject(newProject)
-        setActiveTab("kanbanBoard")
-        columnHooks.setIsCreateProjectDialogOpen(false)
-        columnHooks.setNewProjectFormData({ name: "", description: "" })
+        setCurrentProject(newProject);
+        setActiveTab("kanbanBoard");
+        columnHooks.setIsCreateProjectDialogOpen(false);
+        columnHooks.setNewProjectFormData({ name: "", description: "" });
       }
     } catch (error) {
-      console.error("Error creating project:", error)
+      console.error("Error creating project:", error);
     }
-  }
+  };
 
   const handleAddTaskToColumn = async (columnId: string, title: string) => {
-    if (!currentProject || !title.trim()) return
-    
+    if (!currentProject || !title.trim()) return;
+
     try {
-      await apiCreateTask(currentProject.id, { title }, columnId)
+      await apiCreateTask(currentProject.id, { title }, columnId);
     } catch (error) {
-      console.error("Error creating task:", error)
+      console.error("Error creating task:", error);
     }
-  }
+  };
 
   const handleUpdateTask = async (updatedTask: Task) => {
-    if (!currentProject) return
-    
+    if (!currentProject) return;
+
     // Handle status changes that require API calls
-    const originalTasks = tasksByProject[currentProject.id] || []
-    const originalTask = originalTasks.find(t => t.id === updatedTask.id)
-    
+    const originalTasks = tasksByProject[currentProject.id] || [];
+    const originalTask = originalTasks.find((t) => t.id === updatedTask.id);
+
     if (originalTask && originalTask.status !== updatedTask.status) {
       const columnMap: { [key in TaskStatus]: string } = {
-        'not-started': 'backlog',
-        'in-progress': 'in_progress',
-        'done': 'done',
-        'paused': 'todo'
-      }
-      
+        "not-started": "backlog",
+        "in-progress": "in_progress",
+        done: "done",
+        paused: "todo",
+      };
+
       try {
-        const columnId = columnMap[updatedTask.status]
-        await apiMoveTask(currentProject.id, updatedTask.id, columnId, 0)
+        const columnId = columnMap[updatedTask.status];
+        await apiMoveTask(currentProject.id, updatedTask.id, columnId, 0);
       } catch (error) {
-        console.error("Error moving task:", error)
+        console.error("Error moving task:", error);
       }
     }
-    
+
     // Also update local state
-    taskHooks.handleUpdateTask(updatedTask)
-  }
+    taskHooks.handleUpdateTask(updatedTask);
+  };
 
   return {
     // State
@@ -116,23 +116,23 @@ export function useKanbanBoard() {
     loading,
     error,
     isAuthenticated,
-    
+
     // Task hooks (with API overrides)
     ...taskHooks,
     handleUpdateTask,
     handleAddTaskToColumn,
-    
+
     // Column hooks (with API overrides)
     ...columnHooks,
     handleSaveNewProject,
-    
+
     // Drag and drop hooks
     ...dragDropHooks,
-    
+
     // API methods
     loadProjects,
     createProject: apiCreateProject,
     updateProject: apiUpdateProject,
     deleteProject: apiDeleteProject,
-  }
+  };
 }

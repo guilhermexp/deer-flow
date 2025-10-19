@@ -6,9 +6,9 @@
 // SPDX-License-Identifier: MIT
 
 import "./src/env.js";
-import createNextIntlPlugin from 'next-intl/plugin';
+import createNextIntlPlugin from "next-intl/plugin";
 
-const withNextIntl = createNextIntlPlugin('./src/i18n.ts');
+const withNextIntl = createNextIntlPlugin("./src/i18n.ts");
 
 /** @type {import("next").NextConfig} */
 
@@ -40,34 +40,34 @@ const config = {
     config.optimization = {
       ...config.optimization,
       splitChunks: {
-        chunks: 'all',
+        chunks: "all",
         cacheGroups: {
           // Separar Chart.js em bundle próprio
           charts: {
             test: /[\\/]node_modules[\\/](chart\.js|react-chartjs-2)[\\/]/,
-            name: 'charts',
-            chunks: 'all',
+            name: "charts",
+            chunks: "all",
             priority: 20,
           },
           // Separar Framer Motion
           animations: {
             test: /[\\/]node_modules[\\/](framer-motion|motion)[\\/]/,
-            name: 'animations',
-            chunks: 'all',
+            name: "animations",
+            chunks: "all",
             priority: 20,
           },
           // Separar TipTap
           editor: {
             test: /[\\/]node_modules[\\/](@tiptap)[\\/]/,
-            name: 'editor',
-            chunks: 'all',
+            name: "editor",
+            chunks: "all",
             priority: 20,
           },
           // Radix UI components
           ui: {
             test: /[\\/]node_modules[\\/](@radix-ui)[\\/]/,
-            name: 'ui',
-            chunks: 'all',
+            name: "ui",
+            chunks: "all",
             priority: 10,
           },
         },
@@ -82,13 +82,13 @@ const config = {
 
   // Custom server configuration
   serverRuntimeConfig: {
-    port: parseInt(process.env.PORT || '4000', 10),
+    port: parseInt(process.env.PORT || "4000", 10),
   },
 
   experimental: {
     optimizePackageImports: [
       "lucide-react",
-      "framer-motion", 
+      "framer-motion",
       "@radix-ui/react-accordion",
       "@radix-ui/react-dialog",
       "@radix-ui/react-dropdown-menu",
@@ -111,8 +111,8 @@ const config = {
   async headers() {
     // Only enforce HTTPS in production
     const headers = [];
-    
-    if (process.env.NODE_ENV === 'production') {
+
+    if (process.env.NODE_ENV === "production") {
       headers.push({
         source: "/:path*",
         headers: [
@@ -123,7 +123,7 @@ const config = {
         ],
       });
     }
-    
+
     return headers;
   },
 
@@ -137,7 +137,7 @@ const config = {
 
   // Configurações de performance para desenvolvimento
   devIndicators: {
-    position: 'bottom-right',
+    position: "bottom-right",
   },
 };
 

@@ -15,7 +15,7 @@ export const ResourceMentions = forwardRef<
   { onKeyDown: (args: { event: KeyboardEvent }) => boolean },
   ResourceMentionsProps
 >((props, ref) => {
-  const t = useTranslations("common")
+  const t = useTranslations("common");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const selectItem = (index: number) => {
@@ -28,7 +28,7 @@ export const ResourceMentions = forwardRef<
 
   const upHandler = () => {
     setSelectedIndex(
-      (selectedIndex + props.items.length - 1) % props.items.length,
+      (selectedIndex + props.items.length - 1) % props.items.length
     );
   };
 
@@ -71,7 +71,7 @@ export const ResourceMentions = forwardRef<
             className={cn(
               "focus-visible:ring-ring hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-full items-center justify-start gap-2 rounded-md px-4 py-2 text-sm whitespace-nowrap transition-colors focus-visible:ring-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
               selectedIndex === index &&
-                "bg-secondary text-secondary-foreground",
+                "bg-secondary text-secondary-foreground"
             )}
             key={index}
             onClick={() => selectItem(index)}

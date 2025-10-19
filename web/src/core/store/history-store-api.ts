@@ -23,8 +23,13 @@ interface HistoryState {
   isLoading: boolean;
   error: string | null;
   loadConversations: () => Promise<void>;
-  addConversation: (item: Omit<HistoryItem, "id" | "timestamp">) => Promise<void>;
-  updateConversationMessages: (threadId: string, messages: Message[]) => Promise<void>;
+  addConversation: (
+    item: Omit<HistoryItem, "id" | "timestamp">
+  ) => Promise<void>;
+  updateConversationMessages: (
+    threadId: string,
+    messages: Message[]
+  ) => Promise<void>;
   removeConversation: (id: string, threadId?: string) => Promise<void>;
   clearHistory: () => void;
   getRecentConversations: (limit?: number) => HistoryItem[];
@@ -52,7 +57,9 @@ export const useHistoryStoreApi = create<HistoryState>((set, get) => ({
   loadConversations: async () => {
     set({ isLoading: true, error: null });
     try {
-      const apiConversations = await conversationsApi.getConversations({ limit: 100 });
+      const apiConversations = await conversationsApi.getConversations({
+        limit: 100,
+      });
       const localConversations = apiConversations.map(convertApiToLocal);
       set({ conversations: localConversations });
     } catch (error) {
@@ -74,7 +81,7 @@ export const useHistoryStoreApi = create<HistoryState>((set, get) => ({
         thread_id: item.threadId,
         title: item.title,
         query: item.query,
-        messages: item.messages as any ?? [],
+        messages: (item.messages as any) ?? [],
         summary: item.summary,
       });
 
@@ -100,9 +107,10 @@ export const useHistoryStoreApi = create<HistoryState>((set, get) => ({
     try {
       // Limit messages to save
       const MAX_MESSAGES_TO_SAVE = 200;
-      const messagesToSave = messages.length > MAX_MESSAGES_TO_SAVE 
-        ? messages.slice(-MAX_MESSAGES_TO_SAVE)
-        : messages;
+      const messagesToSave =
+        messages.length > MAX_MESSAGES_TO_SAVE
+          ? messages.slice(-MAX_MESSAGES_TO_SAVE)
+          : messages;
 
       // Update via API
       await conversationsApi.updateConversation(threadId, {
@@ -122,9 +130,7 @@ export const useHistoryStoreApi = create<HistoryState>((set, get) => ({
       // Update locally even if API fails
       set((state) => ({
         conversations: state.conversations.map((conv) =>
-          conv.threadId === threadId
-            ? { ...conv, messages }
-            : conv
+          conv.threadId === threadId ? { ...conv, messages } : conv
         ),
       }));
     }
@@ -136,7 +142,7 @@ export const useHistoryStoreApi = create<HistoryState>((set, get) => ({
       if (threadId) {
         await conversationsApi.deleteConversation(threadId);
       }
-      
+
       // Remove from local state
       set((state) => ({
         conversations: state.conversations.filter((conv) => conv.id !== id),
@@ -156,8 +162,8 @@ export const useHistoryStoreApi = create<HistoryState>((set, get) => ({
   },
 
   getRecentConversations: (limit = 10) => {
-    return get().conversations
-      .sort((a, b) => b.timestamp - a.timestamp)
+    return get()
+      .conversations.sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, limit);
   },
 
@@ -167,12 +173,16 @@ export const useHistoryStoreApi = create<HistoryState>((set, get) => ({
 }));
 
 // Helper function to add to history
-export const addToHistoryApi = async (query: string, threadId: string, fileName?: string) => {
+export const addToHistoryApi = async (
+  query: string,
+  threadId: string,
+  fileName?: string
+) => {
   const store = useHistoryStoreApi.getState();
-  
+
   // Generate title from query
   const title = query.length > 50 ? query.substring(0, 50) + "..." : query;
-  
+
   await store.addConversation({
     title,
     query,

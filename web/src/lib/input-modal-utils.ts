@@ -11,10 +11,10 @@ import {
   VoicemailIcon as VoiceIcon,
   LockIcon as LoomIcon,
   VideoIcon,
-} from "lucide-react"
-import type React from "react"
+} from "lucide-react";
+import type React from "react";
 
-import type { WebhookData } from "~/lib/webhook-service"
+import type { WebhookData } from "~/lib/webhook-service";
 
 // Icon mapping for different content types
 export const iconMapping: Record<string, React.ElementType> = {
@@ -30,7 +30,7 @@ export const iconMapping: Record<string, React.ElementType> = {
   website: WebsiteIcon,
   audio: VoiceIcon,
   loom: LoomIcon,
-}
+};
 
 // Icon color mapping
 export const getIconColorClass = (type: string): string => {
@@ -47,9 +47,9 @@ export const getIconColorClass = (type: string): string => {
     website: "text-cyan-500",
     audio: "text-purple-500",
     loom: "text-blue-500",
-  }
-  return colorMap[type] ?? ""
-}
+  };
+  return colorMap[type] ?? "";
+};
 
 // URL placeholders for different types
 export const urlPlaceholders: Record<string, string> = {
@@ -59,7 +59,7 @@ export const urlPlaceholders: Record<string, string> = {
   website: "URL do Website (ex: https://example.com)",
   loom: "URL do Loom (ex: https://loom.com/share/...)",
   article: "URL do Artigo (ex: https://medium.com/article-slug)",
-}
+};
 
 // File accept attributes for different file types
 export const getFileAcceptAttribute = (type: string): string => {
@@ -68,19 +68,19 @@ export const getFileAcceptAttribute = (type: string): string => {
     txt: ".txt",
     markdown: ".md,.markdown",
     audio: "audio/*",
-  }
-  return acceptMap[type] ?? "*/*"
-}
+  };
+  return acceptMap[type] ?? "*/*";
+};
 
 // Max file size for different types
 export const getMaxFileSize = (type: string): string => {
-  return type === "audio" ? "25MB" : "10MB"
-}
+  return type === "audio" ? "25MB" : "10MB";
+};
 
 // Validation for different input types
 export interface ValidationResult {
-  isValid: boolean
-  webhookData: WebhookData
+  isValid: boolean;
+  webhookData: WebhookData;
 }
 
 export const validateTwitterInput = (
@@ -89,13 +89,13 @@ export const validateTwitterInput = (
   baseData: WebhookData
 ): ValidationResult => {
   if (!username) {
-    return { isValid: false, webhookData: baseData }
+    return { isValid: false, webhookData: baseData };
   }
   return {
     isValid: true,
     webhookData: { ...baseData, username, url },
-  }
-}
+  };
+};
 
 export const validateUrlInput = (
   url: string,
@@ -104,7 +104,7 @@ export const validateUrlInput = (
   baseData: WebhookData
 ): ValidationResult => {
   if (!url) {
-    return { isValid: false, webhookData: baseData }
+    return { isValid: false, webhookData: baseData };
   }
   return {
     isValid: true,
@@ -113,34 +113,34 @@ export const validateUrlInput = (
       url,
       ...(type === "website" && { limitPages }),
     },
-  }
-}
+  };
+};
 
 export const validateFileInput = (
   file: File | null,
   baseData: WebhookData
 ): ValidationResult => {
   if (!file) {
-    return { isValid: false, webhookData: baseData }
+    return { isValid: false, webhookData: baseData };
   }
   return {
     isValid: true,
     webhookData: { ...baseData, file },
-  }
-}
+  };
+};
 
 export const validateTextInput = (
   text: string,
   baseData: WebhookData
 ): ValidationResult => {
   if (!text) {
-    return { isValid: false, webhookData: baseData }
+    return { isValid: false, webhookData: baseData };
   }
   return {
     isValid: true,
     webhookData: { ...baseData, text },
-  }
-}
+  };
+};
 
 // Check if submit button should be disabled
 export const isSubmitDisabled = (
@@ -153,38 +153,38 @@ export const isSubmitDisabled = (
     file,
     textInput,
   }: {
-    twitterUsername: string
-    inputValue: string
-    file: File | null
-    textInput: string
+    twitterUsername: string;
+    inputValue: string;
+    file: File | null;
+    textInput: string;
   }
 ): boolean => {
   if (isLoading || processStatus === "processing") {
-    return true
+    return true;
   }
 
   if (processStatus !== "idle") {
-    return false
+    return false;
   }
 
   switch (type) {
     case "twitter":
-      return !twitterUsername
+      return !twitterUsername;
     case "youtube":
     case "tiktok":
     case "instagram":
     case "website":
     case "loom":
     case "article":
-      return !inputValue
+      return !inputValue;
     case "pdf":
     case "txt":
     case "markdown":
     case "audio":
-      return !file
+      return !file;
     case "text":
-      return !textInput
+      return !textInput;
     default:
-      return true
+      return true;
   }
-}
+};

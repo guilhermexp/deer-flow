@@ -1,0 +1,46 @@
+{
+  "classification_timestamp": "2025-10-17T10:19:35.749801",
+  "summary": {
+    "total_files": 686,
+    "removable_files": 43,
+    "retention_rate": 93.73,
+    "total_size_mb": 14.4,
+    "removable_size_mb": 6.38,
+    "potential_savings_mb": 6.38
+  },
+  "by_category": {
+    "temporary": 2,
+    "code": 483,
+    "other": 79,
+    "config": 38,
+    "cache": 7,
+    "documentation": 5,
+    "test": 7,
+    "screenshot": 20,
+    "spec": 28,
+    "mock_data": 17
+  },
+  "by_importance": {
+    "obsolete": 20,
+    "critical": 487,
+    "optional": 102,
+    "important": 77
+  },
+  "by_action": {
+    "remove": 20,
+    "keep": 537,
+    "review": 128,
+    "consolidate": 1
+  },
+  "detailed_classification": [
+    {
+      "file_info": {
+        "path": "backend.log",
+        "name": "backend.log",
+        "size": 7136,
+        "modified": "2025-10-16T23:23:13.955139",
+        "extension": ".log",
+        "type": "file",
+        "hash": "007aeb27"
+      },
+      "category": 

@@ -1,24 +1,27 @@
-"use client"
+"use client";
 
-import type { Column, Task, TaskStatus } from "../lib/types"
-import KanbanColumn from "./kanban-column"
-import { Diamond, Pause, Circle, CheckCircle } from "lucide-react"
-import React from "react"
+import type { Column, Task, TaskStatus } from "../lib/types";
+import KanbanColumn from "./kanban-column";
+import { Diamond, Pause, Circle, CheckCircle } from "lucide-react";
+import React from "react";
 
 interface KanbanViewProps {
-  tasks: Task[]
-  searchQuery: string
-  onAddTask: (columnId: TaskStatus) => void
-  onEditTask: (task: Task) => void
-  onDeleteTask: (task: Task) => void
-  onDragStartTask: (e: React.DragEvent | MouseEvent | TouchEvent | PointerEvent, task: Task) => void
-  onDragEnd?: () => void
-  onDragOver: (e: React.DragEvent, columnId: string) => void
-  onDragLeave: () => void
-  onDrop: (e: React.DragEvent, columnId: TaskStatus) => void
-  dragOverColumn: string | null
-  isDragging?: boolean
-  draggedTask?: Task | null
+  tasks: Task[];
+  searchQuery: string;
+  onAddTask: (columnId: TaskStatus) => void;
+  onEditTask: (task: Task) => void;
+  onDeleteTask: (task: Task) => void;
+  onDragStartTask: (
+    e: React.DragEvent | MouseEvent | TouchEvent | PointerEvent,
+    task: Task
+  ) => void;
+  onDragEnd?: () => void;
+  onDragOver: (e: React.DragEvent, columnId: string) => void;
+  onDragLeave: () => void;
+  onDrop: (e: React.DragEvent, columnId: TaskStatus) => void;
+  dragOverColumn: string | null;
+  isDragging?: boolean;
+  draggedTask?: Task | null;
 }
 
 const columnsDefinition: Omit<Column, "tasks">[] = [
@@ -54,7 +57,7 @@ const columnsDefinition: Omit<Column, "tasks">[] = [
     color: "text-green-400",
     progressColor: "bg-green-500",
   },
-]
+];
 
 export default function KanbanView({
   tasks,
@@ -76,12 +79,12 @@ export default function KanbanView({
     return columnsDefinition.map((colDef) => ({
       ...colDef,
       tasks: tasks.filter((task) => task.status === colDef.status),
-    }))
-  }, [tasks])
+    }));
+  }, [tasks]);
 
   return (
     <div className="kanban-view-container h-full overflow-auto">
-      <div className="kanban-columns-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 p-2 h-full">
+      <div className="kanban-columns-grid grid h-full grid-cols-1 gap-3 p-2 md:grid-cols-2 lg:grid-cols-4">
         {processedColumns.map((column) => (
           <KanbanColumn
             key={column.id}
@@ -101,5 +104,5 @@ export default function KanbanView({
         ))}
       </div>
     </div>
-  )
+  );
 }

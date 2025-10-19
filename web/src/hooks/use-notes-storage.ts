@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-import type { Note } from '~/app/(with-sidebar)/notes/page';
+import type { Note } from "~/app/(with-sidebar)/notes/page";
 
-const NOTES_STORAGE_KEY = 'jarvis-notes';
+const NOTES_STORAGE_KEY = "jarvis-notes";
 
 /**
  * Hook simplificado para gerenciar notas no localStorage
@@ -15,27 +15,34 @@ export function useNotesStorage() {
   // Carregar notas ao montar o componente
   useEffect(() => {
     try {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         const stored = localStorage.getItem(NOTES_STORAGE_KEY);
         if (stored) {
           const parsedNotes = JSON.parse(stored) as Note[];
-          
+
           // Debug: Verificar notas do YouTube
-          const youtubeNotes = parsedNotes.filter(note => note.source === 'YouTube');
-          console.log('📱 Loaded YouTube notes:', youtubeNotes.map(note => ({
-            id: note.id,
-            title: note.title,
-            youtubeId: note.youtubeId,
-            mediaUrl: note.mediaUrl,
-            mediaType: note.mediaType
-          })));
-          
+          const youtubeNotes = parsedNotes.filter(
+            (note) => note.source === "YouTube"
+          );
+          console.log(
+            "📱 Loaded YouTube notes:",
+            youtubeNotes.map((note) => ({
+              id: note.id,
+              title: note.title,
+              youtubeId: note.youtubeId,
+              mediaUrl: note.mediaUrl,
+              mediaType: note.mediaType,
+            }))
+          );
+
           setNotes(parsedNotes);
         }
       }
     } catch (err) {
-      console.error('Erro ao carregar notas:', err);
-      setError(err instanceof Error ? err : new Error('Erro ao carregar notas'));
+      console.error("Erro ao carregar notas:", err);
+      setError(
+        err instanceof Error ? err : new Error("Erro ao carregar notas")
+      );
     } finally {
       setLoading(false);
     }
@@ -43,24 +50,26 @@ export function useNotesStorage() {
 
   // Salvar notas sempre que mudarem
   useEffect(() => {
-    if (!loading && typeof window !== 'undefined') {
+    if (!loading && typeof window !== "undefined") {
       try {
         localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
       } catch (err) {
-        console.error('Erro ao salvar notas:', err);
-        setError(err instanceof Error ? err : new Error('Erro ao salvar notas'));
+        console.error("Erro ao salvar notas:", err);
+        setError(
+          err instanceof Error ? err : new Error("Erro ao salvar notas")
+        );
       }
     }
   }, [notes, loading]);
 
   const addNote = (note: Note) => {
-    console.log('➕ Adding note to storage:', {
+    console.log("➕ Adding note to storage:", {
       id: note.id,
       title: note.title,
       source: note.source,
       youtubeId: note.youtubeId,
       mediaUrl: note.mediaUrl,
-      mediaType: note.mediaType
+      mediaType: note.mediaType,
     });
     setNotes((prevNotes) => [note, ...prevNotes]);
   };
@@ -94,7 +103,7 @@ export function useNotesStorage() {
       setLoading(true);
       setTimeout(() => {
         try {
-          if (typeof window !== 'undefined') {
+          if (typeof window !== "undefined") {
             const stored = localStorage.getItem(NOTES_STORAGE_KEY);
             if (stored) {
               const parsedNotes = JSON.parse(stored) as Note[];
@@ -102,12 +111,14 @@ export function useNotesStorage() {
             }
           }
         } catch (err) {
-          console.error('Erro ao recarregar notas:', err);
-          setError(err instanceof Error ? err : new Error('Erro ao recarregar notas'));
+          console.error("Erro ao recarregar notas:", err);
+          setError(
+            err instanceof Error ? err : new Error("Erro ao recarregar notas")
+          );
         } finally {
           setLoading(false);
         }
       }, 100);
-    }
+    },
   };
 }

@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged for frontend
+cd web && pnpm lint-staged
+
+# Run ruff check for backend
+cd .. && uv run ruff check --fix src/
+uv run ruff format src/

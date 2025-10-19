@@ -1,26 +1,41 @@
-"use client"
-import { useState, useCallback } from "react"
-import { useCalendar } from "~/components/jarvis/calendar/hooks/use-calendar"
-import { CalendarHeader } from "~/components/jarvis/calendar/ui/calendar-header"
-import dynamic from "next/dynamic"
+"use client";
+import { useState, useCallback } from "react";
+import { useCalendar } from "~/components/jarvis/calendar/hooks/use-calendar";
+import { CalendarHeader } from "~/components/jarvis/calendar/ui/calendar-header";
+import dynamic from "next/dynamic";
 
-const DayView = dynamic(() => import("~/components/jarvis/calendar/ui/day-view"), {
-  loading: () => <div className="h-full w-full animate-pulse bg-white/[0.05]" />,
-  ssr: false,
-})
-const WeekView = dynamic(() => import("~/components/jarvis/calendar/ui/week-view"), {
-  loading: () => <div className="h-full w-full animate-pulse bg-white/[0.05]" />,
-  ssr: false,
-})
-const MonthView = dynamic(() => import("~/components/jarvis/calendar/ui/month-view"), {
-  loading: () => <div className="h-full w-full animate-pulse bg-white/[0.05]" />,
-  ssr: false,
-})
-import { AddEventDialog } from "~/components/jarvis/calendar/ui/add-event-dialog"
-import DeleteEventDialog from "~/components/jarvis/calendar/ui/delete-event-dialog"
-import { cn } from "~/lib/utils"
-import type { CalendarViewMode } from "~/components/jarvis/calendar/lib/types"
-import AnimatedPageWrapperOptimized from "~/components/jarvis/animated-page-wrapper-optimized"
+const DayView = dynamic(
+  () => import("~/components/jarvis/calendar/ui/day-view"),
+  {
+    loading: () => (
+      <div className="h-full w-full animate-pulse bg-white/[0.05]" />
+    ),
+    ssr: false,
+  }
+);
+const WeekView = dynamic(
+  () => import("~/components/jarvis/calendar/ui/week-view"),
+  {
+    loading: () => (
+      <div className="h-full w-full animate-pulse bg-white/[0.05]" />
+    ),
+    ssr: false,
+  }
+);
+const MonthView = dynamic(
+  () => import("~/components/jarvis/calendar/ui/month-view"),
+  {
+    loading: () => (
+      <div className="h-full w-full animate-pulse bg-white/[0.05]" />
+    ),
+    ssr: false,
+  }
+);
+import { AddEventDialog } from "~/components/jarvis/calendar/ui/add-event-dialog";
+import DeleteEventDialog from "~/components/jarvis/calendar/ui/delete-event-dialog";
+import { cn } from "~/lib/utils";
+import type { CalendarViewMode } from "~/components/jarvis/calendar/lib/types";
+import AnimatedPageWrapperOptimized from "~/components/jarvis/animated-page-wrapper-optimized";
 
 export default function CalendarPage({ className }: { className?: string }) {
   const {
@@ -57,51 +72,74 @@ export default function CalendarPage({ className }: { className?: string }) {
     formatHourForDisplay,
     isDateToday,
     getDaysForMonthView,
-  } = useCalendar()
-  
-  console.log('📱 CalendarPage - viewMode:', viewMode);
-  console.log('📅 CalendarPage - currentDate:', currentDate);
-  console.log('🎯 CalendarPage - eventsForSelectedDayInDayView:', eventsForSelectedDayInDayView);
+  } = useCalendar();
 
-  const [addEventInitialDate, setAddEventInitialDate] = useState<Date | undefined>(undefined)
+  console.log("📱 CalendarPage - viewMode:", viewMode);
+  console.log("📅 CalendarPage - currentDate:", currentDate);
+  console.log(
+    "🎯 CalendarPage - eventsForSelectedDayInDayView:",
+    eventsForSelectedDayInDayView
+  );
+
+  const [addEventInitialDate, setAddEventInitialDate] = useState<
+    Date | undefined
+  >(undefined);
 
   const determineInitialDateForDialog = useCallback(
-    (currentViewMode: CalendarViewMode, dateForDialog: Date, monthDateForDialog: Date): Date => {
-      let defaultDate = new Date()
+    (
+      currentViewMode: CalendarViewMode,
+      dateForDialog: Date,
+      monthDateForDialog: Date
+    ): Date => {
+      let defaultDate = new Date();
       if (currentViewMode === "day") {
-        defaultDate = new Date(dateForDialog)
+        defaultDate = new Date(dateForDialog);
       } else if (currentViewMode === "week") {
-        defaultDate = new Date(dateForDialog)
+        defaultDate = new Date(dateForDialog);
       } else if (currentViewMode === "month") {
-        const today = new Date()
+        const today = new Date();
         if (
           dateForDialog.getFullYear() === monthDateForDialog.getFullYear() &&
           dateForDialog.getMonth() === monthDateForDialog.getMonth()
         ) {
-          defaultDate = new Date(dateForDialog)
+          defaultDate = new Date(dateForDialog);
         } else if (
           today.getFullYear() === monthDateForDialog.getFullYear() &&
           today.getMonth() === monthDateForDialog.getMonth()
         ) {
-          defaultDate = today
+          defaultDate = today;
         } else {
-          defaultDate = new Date(monthDateForDialog.getFullYear(), monthDateForDialog.getMonth(), 1)
+          defaultDate = new Date(
+            monthDateForDialog.getFullYear(),
+            monthDateForDialog.getMonth(),
+            1
+          );
         }
       }
-      return defaultDate
+      return defaultDate;
     },
-    [],
-  )
+    []
+  );
 
   const handleOpenAddEventDialogWithDate = useCallback(() => {
-    const initialDate = determineInitialDateForDialog(viewMode, currentDate, monthDisplayDate)
-    setAddEventInitialDate(initialDate)
-    openDialog()
-  }, [viewMode, currentDate, monthDisplayDate, openDialog, determineInitialDateForDialog])
+    const initialDate = determineInitialDateForDialog(
+      viewMode,
+      currentDate,
+      monthDisplayDate
+    );
+    setAddEventInitialDate(initialDate);
+    openDialog();
+  }, [
+    viewMode,
+    currentDate,
+    monthDisplayDate,
+    openDialog,
+    determineInitialDateForDialog,
+  ]);
 
   return (
     <AnimatedPageWrapperOptimized className="min-h-full">
-      <div className={cn("w-full h-full flex flex-col", className)}>
+      <div className={cn("flex h-full w-full flex-col", className)}>
         <CalendarHeader
           activeFilter={activeFilter}
           setActiveFilter={setActiveFilter}
@@ -110,22 +148,28 @@ export default function CalendarPage({ className }: { className?: string }) {
           onTodayClick={handleGoToToday}
           onNewEventClick={handleOpenAddEventDialogWithDate}
           onNavigate={(direction) => {
-            if (viewMode === "day") navigateDay(direction)
-            else if (viewMode === "week") navigateWeek(direction)
-            else navigateMonth(direction)
+            if (viewMode === "day") navigateDay(direction);
+            else if (viewMode === "week") navigateWeek(direction);
+            else navigateMonth(direction);
           }}
           currentDate={currentDate}
           monthDisplayDate={monthDisplayDate}
           eventCount={
-            viewMode === "day" ? eventsForSelectedDayInDayView.length :
-            viewMode === "week" ? daysInWeekViewArray.reduce((acc, day, index) => acc + getEventsForDayOfWeek(index).length, 0) :
-            getDaysForMonthView(monthDisplayDate).reduce((total, day) => {
-              if (day) {
-                const events = getEventsForSpecificDate(day)
-                return total + events.length
-              }
-              return total
-            }, 0)
+            viewMode === "day"
+              ? eventsForSelectedDayInDayView.length
+              : viewMode === "week"
+                ? daysInWeekViewArray.reduce(
+                    (acc, day, index) =>
+                      acc + getEventsForDayOfWeek(index).length,
+                    0
+                  )
+                : getDaysForMonthView(monthDisplayDate).reduce((total, day) => {
+                    if (day) {
+                      const events = getEventsForSpecificDate(day);
+                      return total + events.length;
+                    }
+                    return total;
+                  }, 0)
           }
         />
 
@@ -141,8 +185,8 @@ export default function CalendarPage({ className }: { className?: string }) {
               onNavigate={navigateDay}
               onDeleteEvent={handleOpenDeleteDialog}
               onAddEventClick={(date) => {
-                setAddEventInitialDate(date)
-                openDialog()
+                setAddEventInitialDate(date);
+                openDialog();
               }}
             />
           )}
@@ -157,8 +201,8 @@ export default function CalendarPage({ className }: { className?: string }) {
               onNavigate={navigateWeek}
               onDeleteEvent={handleOpenDeleteDialog}
               onAddEventClick={(date) => {
-                setAddEventInitialDate(date)
-                openDialog()
+                setAddEventInitialDate(date);
+                openDialog();
               }}
             />
           )}
@@ -172,8 +216,8 @@ export default function CalendarPage({ className }: { className?: string }) {
               onNavigate={navigateMonth}
               onDeleteEvent={handleOpenDeleteDialog}
               onAddEventClick={(date) => {
-                setAddEventInitialDate(date)
-                openDialog()
+                setAddEventInitialDate(date);
+                openDialog();
               }}
             />
           )}
@@ -194,5 +238,5 @@ export default function CalendarPage({ className }: { className?: string }) {
         />
       </div>
     </AnimatedPageWrapperOptimized>
-  )
+  );
 }

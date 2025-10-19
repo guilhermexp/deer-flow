@@ -2,14 +2,14 @@
 # SPDX-License-Identifier: MIT
 
 from datetime import datetime
-from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlalchemy.orm import Session, joinedload, selectinload
-from sqlalchemy import func, case
+from sqlalchemy import case, func
+from sqlalchemy.orm import Session
 
 from src.database.base import get_db
-from src.database.models import Project, Task, User, TaskStatus, TaskPriority
+from src.database.models import Project, Task, TaskPriority, TaskStatus, User
 from src.server.auth import get_current_active_user
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
@@ -17,39 +17,39 @@ router = APIRouter(prefix="/api/projects", tags=["projects"])
 
 class ProjectCreate(BaseModel):
     name: str
-    description: Optional[str] = None
-    color: Optional[str] = "#3B82F6"
-    icon: Optional[str] = "folder"
+    description: str | None = None
+    color: str | None = "#3B82F6"
+    icon: str | None = "folder"
     status: str = "active"
 
 
 class ProjectUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    color: Optional[str] = None
-    icon: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
+    color: str | None = None
+    icon: str | None = None
 
 
 class TaskCreate(BaseModel):
     title: str
-    description: Optional[str] = None
-    status: Optional[TaskStatus] = TaskStatus.TODO
-    priority: Optional[TaskPriority] = TaskPriority.MEDIUM
-    category: Optional[str] = None
-    due_date: Optional[datetime] = None
+    description: str | None = None
+    status: TaskStatus | None = TaskStatus.TODO
+    priority: TaskPriority | None = TaskPriority.MEDIUM
+    category: str | None = None
+    due_date: datetime | None = None
 
 
 class ProjectResponse(BaseModel):
     id: int
     name: str
-    description: Optional[str] = None
+    description: str | None = None
     color: str
     icon: str
     status: str
     created_at: datetime
     updated_at: datetime
-    task_count: Optional[int] = 0
-    completed_task_count: Optional[int] = 0
+    task_count: int | None = 0
+    completed_task_count: int | None = 0
 
     class Config:
         from_attributes = True
@@ -59,13 +59,13 @@ class KanbanColumn(BaseModel):
     id: str
     title: str
     color: str
-    tasks: List["KanbanTask"]
+    tasks: list["KanbanTask"]
 
 
 class KanbanTask(BaseModel):
     id: int
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     priority: TaskPriority
     order: int
     created_at: datetime
@@ -77,7 +77,7 @@ class KanbanTask(BaseModel):
 class KanbanBoard(BaseModel):
     project_id: int
     project_name: str
-    columns: List[KanbanColumn]
+    columns: list[KanbanColumn]
 
 
 class TaskMoveRequest(BaseModel):
@@ -89,9 +89,9 @@ class TaskMoveRequest(BaseModel):
 KanbanColumn.model_rebuild()
 
 
-@router.get("/", response_model=List[ProjectResponse])
+@router.get("/", response_model=list[ProjectResponse])
 async def get_projects(
-    status: Optional[str] = None,
+    status: str | None = None,
     limit: int = Query(100, le=500),
     offset: int = 0,
     current_user: User = Depends(get_current_active_user),

@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useCallback } from "react"
-import { useAsyncMultiStorage } from "~/hooks/use-async-storage"
-import type { Task, Project, ActiveTabValue } from "../lib/types"
+import { useCallback } from "react";
+import { useAsyncMultiStorage } from "~/hooks/use-async-storage";
+import type { Task, Project, ActiveTabValue } from "../lib/types";
 
-export const PROJECTS_STORAGE_KEY = "kanban-projects-v2"
-export const TASKS_BY_PROJECT_STORAGE_KEY = "kanban-tasksByProject-v2"
-export const LAST_ACTIVE_PROJECT_KEY = "kanban-lastActiveProject-v2"
-export const LAST_ACTIVE_TAB_KEY = "kanban-lastActiveTab-v2"
+export const PROJECTS_STORAGE_KEY = "kanban-projects-v2";
+export const TASKS_BY_PROJECT_STORAGE_KEY = "kanban-tasksByProject-v2";
+export const LAST_ACTIVE_PROJECT_KEY = "kanban-lastActiveProject-v2";
+export const LAST_ACTIVE_TAB_KEY = "kanban-lastActiveTab-v2";
 
 export const initialDefaultProject: Project = {
   id: "default-project-1",
@@ -15,7 +15,7 @@ export const initialDefaultProject: Project = {
   description: "Um projeto de exemplo para começar a organizar suas tarefas.",
   createdAt: new Date().toISOString(),
   isPriority: false,
-}
+};
 
 export const initialTasksData: Task[] = [
   {
@@ -70,7 +70,7 @@ export const initialTasksData: Task[] = [
     weekDay: "terca",
     description: "Slides da apresentação concluídos.",
   },
-]
+];
 
 interface KanbanStorageData extends Record<string, unknown> {
   projects: Project[];
@@ -102,25 +102,41 @@ export function useKanbanStorageAsync() {
     if (!data.lastActiveProjectId || data.projects.length === 0) {
       return data.projects[0] || null;
     }
-    return data.projects.find(p => p.id === data.lastActiveProjectId) || data.projects[0] || null;
+    return (
+      data.projects.find((p) => p.id === data.lastActiveProjectId) ||
+      data.projects[0] ||
+      null
+    );
   }, [data.projects, data.lastActiveProjectId]);
 
   // Save methods
-  const saveProjects = useCallback((projects: Project[]) => {
-    setData('projects', projects);
-  }, [setData]);
+  const saveProjects = useCallback(
+    (projects: Project[]) => {
+      setData("projects", projects);
+    },
+    [setData]
+  );
 
-  const saveTasks = useCallback((tasksByProject: { [projectId: string]: Task[] }) => {
-    setData('tasksByProject', tasksByProject);
-  }, [setData]);
+  const saveTasks = useCallback(
+    (tasksByProject: { [projectId: string]: Task[] }) => {
+      setData("tasksByProject", tasksByProject);
+    },
+    [setData]
+  );
 
-  const saveLastActiveProject = useCallback((project: Project | null) => {
-    setData('lastActiveProjectId', project?.id || null);
-  }, [setData]);
+  const saveLastActiveProject = useCallback(
+    (project: Project | null) => {
+      setData("lastActiveProjectId", project?.id || null);
+    },
+    [setData]
+  );
 
-  const saveLastActiveTab = useCallback((tab: ActiveTabValue) => {
-    setData('lastActiveTab', tab);
-  }, [setData]);
+  const saveLastActiveTab = useCallback(
+    (tab: ActiveTabValue) => {
+      setData("lastActiveTab", tab);
+    },
+    [setData]
+  );
 
   return {
     // Data
@@ -129,7 +145,7 @@ export function useKanbanStorageAsync() {
     currentProject: getCurrentProject(),
     lastActiveTab: data.lastActiveTab,
     loading,
-    
+
     // Save methods
     saveProjects,
     saveTasks,

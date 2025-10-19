@@ -1,13 +1,18 @@
 // Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 // SPDX-License-Identifier: MIT
 
-import { apiClient, type Task, type Reminder, type DashboardStats } from './client';
+import {
+  apiClient,
+  type Task,
+  type Reminder,
+  type DashboardStats,
+} from "./client";
 
 export interface TaskCreate {
   title: string;
   description?: string;
-  status?: 'todo' | 'in_progress' | 'done';
-  priority?: 'low' | 'medium' | 'high';
+  status?: "todo" | "in_progress" | "done";
+  priority?: "low" | "medium" | "high";
   category?: string;
   due_date?: string;
 }
@@ -20,7 +25,7 @@ export interface ReminderCreate {
   title: string;
   time: string;
   date?: string;
-  priority?: 'low' | 'medium' | 'high';
+  priority?: "low" | "medium" | "high";
   category?: string;
 }
 
@@ -37,12 +42,14 @@ export const dashboardApi = {
     limit?: number;
     offset?: number;
   }): Promise<Task[]> {
-    const response = await apiClient.get<Task[]>('/dashboard/tasks', { params });
+    const response = await apiClient.get<Task[]>("/dashboard/tasks", {
+      params,
+    });
     return response.data;
   },
 
   async createTask(data: TaskCreate): Promise<Task> {
-    const response = await apiClient.post<Task>('/dashboard/tasks', data);
+    const response = await apiClient.post<Task>("/dashboard/tasks", data);
     return response.data;
   },
 
@@ -64,17 +71,25 @@ export const dashboardApi = {
     limit?: number;
     offset?: number;
   }): Promise<Reminder[]> {
-    const response = await apiClient.get<Reminder[]>('/dashboard/reminders', { params });
+    const response = await apiClient.get<Reminder[]>("/dashboard/reminders", {
+      params,
+    });
     return response.data;
   },
 
   async createReminder(data: ReminderCreate): Promise<Reminder> {
-    const response = await apiClient.post<Reminder>('/dashboard/reminders', data);
+    const response = await apiClient.post<Reminder>(
+      "/dashboard/reminders",
+      data
+    );
     return response.data;
   },
 
   async updateReminder(id: number, data: ReminderUpdate): Promise<Reminder> {
-    const response = await apiClient.put<Reminder>(`/dashboard/reminders/${id}`, data);
+    const response = await apiClient.put<Reminder>(
+      `/dashboard/reminders/${id}`,
+      data
+    );
     return response.data;
   },
 
@@ -84,7 +99,7 @@ export const dashboardApi = {
 
   // Stats
   async getStats(): Promise<DashboardStats> {
-    const response = await apiClient.get<DashboardStats>('/dashboard/stats');
+    const response = await apiClient.get<DashboardStats>("/dashboard/stats");
     return response.data;
   },
 };

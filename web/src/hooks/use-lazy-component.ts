@@ -1,8 +1,8 @@
 // Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 // SPDX-License-Identifier: MIT
 
-import { useEffect, useState, useRef } from 'react';
-import type { ComponentType } from 'react';
+import { useEffect, useState, useRef } from "react";
+import type { ComponentType } from "react";
 
 /**
  * Hook to lazy load components with better performance
@@ -24,17 +24,20 @@ export function useLazyComponent<T extends ComponentType<unknown>>(
     // Load component after delay
     if (delay > 0) {
       timeoutRef.current = setTimeout(() => {
-        void importFn().then(module => {
+        void importFn().then((module) => {
           setComponent(() => module.default);
         });
       }, delay);
     } else {
       // Load immediately if no delay
-      requestIdleCallback(() => {
-        void importFn().then(module => {
-          setComponent(() => module.default);
-        });
-      }, { timeout: 100 });
+      requestIdleCallback(
+        () => {
+          void importFn().then((module) => {
+            setComponent(() => module.default);
+          });
+        },
+        { timeout: 100 }
+      );
     }
 
     return () => {
@@ -51,10 +54,13 @@ export function useLazyComponent<T extends ComponentType<unknown>>(
  * Preload a dynamic component without rendering it
  */
 export function preloadComponent(importFn: () => Promise<unknown>) {
-  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-    requestIdleCallback(() => {
-      void importFn();
-    }, { timeout: 2000 });
+  if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+    requestIdleCallback(
+      () => {
+        void importFn();
+      },
+      { timeout: 2000 }
+    );
   } else {
     // Fallback for browsers without requestIdleCallback
     setTimeout(() => {

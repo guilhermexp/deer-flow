@@ -1,226 +1,278 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback } from "react"
-import { projectsApiService as projectsService, type FrontendProject } from "~/services/api/projects"
-import { useUser } from "@clerk/nextjs"
-import type { Task, Project, ActiveTabValue } from "../lib/types"
+import { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  createProjectsApiService,
+  type FrontendProject,
+} from "~/services/api/projects";
+import { useAuthenticatedApi } from "~/hooks/use-authenticated-api";
+import { useUser } from "@clerk/nextjs";
+import type { Task, Project, ActiveTabValue } from "../lib/types";
 
 // Use FrontendProject from API service which matches the frontend Project type
 type ApiProject = FrontendProject;
 
 export function useKanbanApi() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [tasksByProject, setTasksByProject] = useState<{ [projectId: string]: Task[] }>({})
-  const [currentProject, setCurrentProject] = useState<Project | null>(null)
-  const [activeTab, setActiveTab] = useState<ActiveTabValue>("projectList")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [tasksByProject, setTasksByProject] = useState<{
+    [projectId: string]: Task[];
+  }>({});
+  const [currentProject, setCurrentProject] = useState<Project | null>(null);
+  const [activeTab, setActiveTab] = useState<ActiveTabValue>("projectList");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const { user, isLoaded } = useUser()
-  const isAuthenticated = isLoaded && !!user
+  const { user, isLoaded } = useUser();
+  const isAuthenticated = isLoaded && !!user;
+
+  // Auth API client and service instance
+  const authApi = useAuthenticatedApi();
+  const projectsService = useMemo(() => createProjectsApiService(authApi), [authApi]);
 
   // Carregar projetos do banco de dados
   const loadProjects = useCallback(async (): Promise<Project[]> => {
     if (!isAuthenticated) {
-      return []
+      return [];
     }
 
     try {
-      setLoading(true)
-      setError(null)
-      console.log("🔄 Carregando projetos...")
-      const projects = await projectsService.getProjects()
-      console.log("✅ Projetos carregados:", projects)
-      setProjects(projects)
-      return projects
+      setLoading(true);
+      setError(null);
+      console.log("🔄 Carregando projetos...");
+      const projects = await projectsService.getProjects();
+      console.log("✅ Projetos carregados:", projects);
+      setProjects(projects);
+      return projects;
     } catch (err) {
-      console.error("❌ Erro ao carregar projetos:", err)
-      setError("Erro ao carregar projetos")
-      return []
+      console.error("❌ Erro ao carregar projetos:", err);
+      setError("Erro ao carregar projetos");
+      return [];
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated]);
 
   // Carregar tarefas de um projeto específico
-  const loadProjectTasks = useCallback(async (projectId: string): Promise<Task[]> => {
-    if (!isAuthenticated || !projectId) {
-      return []
-    }
+  const loadProjectTasks = useCallback(
+    async (projectId: string): Promise<Task[]> => {
+      if (!isAuthenticated || !projectId) {
+        return [];
+      }
 
-    try {
-      console.log("🔄 Carregando tarefas do projeto:", projectId)
-      const tasks = await projectsService.getProjectTasks(Number(projectId))
-      console.log("✅ Tarefas carregadas:", tasks)
+      try {
+        console.log("🔄 Carregando tarefas do projeto:", projectId);
+        const tasks = await projectsService.getProjectTasks(Number(projectId));
+        console.log("✅ Tarefas carregadas:", tasks);
 
-      setTasksByProject(prev => ({
-        ...prev,
-        [projectId]: tasks
-      }))
+        setTasksByProject((prev) => ({
+          ...prev,
+          [projectId]: tasks,
+        }));
 
-      return tasks
-    } catch (err) {
-      console.error("❌ Erro ao carregar tarefas do projeto:", err)
-      setError("Erro ao carregar tarefas do projeto")
-      return []
-    }
-  }, [isAuthenticated])
+        return tasks;
+      } catch (err) {
+        console.error("❌ Erro ao carregar tarefas do projeto:", err);
+        setError("Erro ao carregar tarefas do projeto");
+        return [];
+      }
+    },
+    [isAuthenticated]
+  );
 
   // Criar novo projeto
-  const createProject = useCallback(async (projectData: Partial<Project>): Promise<Project | null> => {
-    if (!isAuthenticated) {
-      throw new Error("Usuário não autenticado")
-    }
+  const createProject = useCallback(
+    async (projectData: Partial<Project>): Promise<Project | null> => {
+      if (!isAuthenticated) {
+        throw new Error("Usuário não autenticado");
+      }
 
-    try {
-      setLoading(true)
-      console.log("🔄 Criando projeto:", projectData)
-      const newProject = await projectsService.createProject(projectData)
-      console.log("✅ Projeto criado:", newProject)
-      
-      setProjects(prev => [...prev, newProject])
-      return newProject
-    } catch (err) {
-      console.error("❌ Erro ao criar projeto:", err)
-      setError("Erro ao criar projeto")
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [isAuthenticated])
+      try {
+        setLoading(true);
+        console.log("🔄 Criando projeto:", projectData);
+        const newProject = await projectsService.createProject(projectData);
+        console.log("✅ Projeto criado:", newProject);
+
+        setProjects((prev) => [...prev, newProject]);
+        return newProject;
+      } catch (err) {
+        console.error("❌ Erro ao criar projeto:", err);
+        setError("Erro ao criar projeto");
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isAuthenticated]
+  );
 
   // Atualizar projeto
-  const updateProject = useCallback(async (projectId: string, updates: Partial<Project>): Promise<Project | null> => {
-    if (!isAuthenticated) {
-      throw new Error("Usuário não autenticado")
-    }
-
-    try {
-      console.log("🔄 Atualizando projeto:", projectId, updates)
-      const updatedProject = await projectsService.updateProject(projectId, updates)
-      console.log("✅ Projeto atualizado:", updatedProject)
-      
-      setProjects(prev => 
-        prev.map(p => p.id === projectId ? updatedProject : p)
-      )
-      
-      if (currentProject?.id === projectId) {
-        setCurrentProject(updatedProject)
+  const updateProject = useCallback(
+    async (
+      projectId: string,
+      updates: Partial<Project>
+    ): Promise<Project | null> => {
+      if (!isAuthenticated) {
+        throw new Error("Usuário não autenticado");
       }
-      
-      return updatedProject
-    } catch (err) {
-      console.error("❌ Erro ao atualizar projeto:", err)
-      setError("Erro ao atualizar projeto")
-      throw err
-    }
-  }, [isAuthenticated, currentProject])
+
+      try {
+        console.log("🔄 Atualizando projeto:", projectId, updates);
+        const updatedProject = await projectsService.updateProject(
+          projectId,
+          updates
+        );
+        console.log("✅ Projeto atualizado:", updatedProject);
+
+        setProjects((prev) =>
+          prev.map((p) => (p.id === projectId ? updatedProject : p))
+        );
+
+        if (currentProject?.id === projectId) {
+          setCurrentProject(updatedProject);
+        }
+
+        return updatedProject;
+      } catch (err) {
+        console.error("❌ Erro ao atualizar projeto:", err);
+        setError("Erro ao atualizar projeto");
+        throw err;
+      }
+    },
+    [isAuthenticated, currentProject]
+  );
 
   // Deletar projeto
-  const deleteProject = useCallback(async (projectId: string): Promise<void> => {
-    if (!isAuthenticated) {
-      throw new Error("Usuário não autenticado")
-    }
-
-    try {
-      console.log("🔄 Deletando projeto:", projectId)
-      await projectsService.deleteProject(projectId)
-      console.log("✅ Projeto deletado")
-      
-      setProjects(prev => prev.filter(p => p.id !== projectId))
-      setTasksByProject(prev => {
-        const newTasks = { ...prev }
-        delete newTasks[projectId]
-        return newTasks
-      })
-      
-      if (currentProject?.id === projectId) {
-        setCurrentProject(null)
-        setActiveTab("projectList")
+  const deleteProject = useCallback(
+    async (projectId: string): Promise<void> => {
+      if (!isAuthenticated) {
+        throw new Error("Usuário não autenticado");
       }
-    } catch (err) {
-      console.error("❌ Erro ao deletar projeto:", err)
-      setError("Erro ao deletar projeto")
-      throw err
-    }
-  }, [isAuthenticated, currentProject])
+
+      try {
+        console.log("🔄 Deletando projeto:", projectId);
+        await projectsService.deleteProject(projectId);
+        console.log("✅ Projeto deletado");
+
+        setProjects((prev) => prev.filter((p) => p.id !== projectId));
+        setTasksByProject((prev) => {
+          const newTasks = { ...prev };
+          delete newTasks[projectId];
+          return newTasks;
+        });
+
+        if (currentProject?.id === projectId) {
+          setCurrentProject(null);
+          setActiveTab("projectList");
+        }
+      } catch (err) {
+        console.error("❌ Erro ao deletar projeto:", err);
+        setError("Erro ao deletar projeto");
+        throw err;
+      }
+    },
+    [isAuthenticated, currentProject]
+  );
 
   // Criar tarefa em um projeto
-  const createTask = useCallback(async (projectId: string, taskData: Partial<Task>, columnId: string = 'backlog'): Promise<Task | null> => {
-    if (!isAuthenticated) {
-      throw new Error("Usuário não autenticado")
-    }
+  const createTask = useCallback(
+    async (
+      projectId: string,
+      taskData: Partial<Task>,
+      columnId: string = "backlog"
+    ): Promise<Task | null> => {
+      if (!isAuthenticated) {
+        throw new Error("Usuário não autenticado");
+      }
 
-    try {
-      console.log("🔄 Criando tarefa:", projectId, taskData, columnId)
-      const newTask = await projectsService.createTask(Number(projectId), taskData, columnId)
-      console.log("✅ Tarefa criada:", newTask)
-      
-      setTasksByProject(prev => ({
-        ...prev,
-        [projectId]: [...(prev[projectId] || []), newTask]
-      }))
-      
-      return newTask
-    } catch (err) {
-      console.error("❌ Erro ao criar tarefa:", err)
-      setError("Erro ao criar tarefa")
-      throw err
-    }
-  }, [isAuthenticated])
+      try {
+        console.log("🔄 Criando tarefa:", projectId, taskData, columnId);
+        const newTask = await projectsService.createTask(
+          Number(projectId),
+          taskData,
+          columnId
+        );
+        console.log("✅ Tarefa criada:", newTask);
+
+        setTasksByProject((prev) => ({
+          ...prev,
+          [projectId]: [...(prev[projectId] || []), newTask],
+        }));
+
+        return newTask;
+      } catch (err) {
+        console.error("❌ Erro ao criar tarefa:", err);
+        setError("Erro ao criar tarefa");
+        throw err;
+      }
+    },
+    [isAuthenticated]
+  );
 
   // Mover tarefa entre colunas
-  const moveTask = useCallback(async (projectId: string, taskId: string, columnId: string, order: number): Promise<void> => {
-    if (!isAuthenticated) {
-      throw new Error("Usuário não autenticado")
-    }
+  const moveTask = useCallback(
+    async (
+      projectId: string,
+      taskId: string,
+      columnId: string,
+      order: number
+    ): Promise<void> => {
+      if (!isAuthenticated) {
+        throw new Error("Usuário não autenticado");
+      }
 
-    try {
-      console.log("🔄 Movendo tarefa:", taskId, "para", columnId)
-      await projectsService.moveTask(Number(projectId), Number(taskId), columnId, order)
-      console.log("✅ Tarefa movida")
+      try {
+        console.log("🔄 Movendo tarefa:", taskId, "para", columnId);
+        await projectsService.moveTask(
+          Number(projectId),
+          Number(taskId),
+          columnId,
+          order
+        );
+        console.log("✅ Tarefa movida");
 
-      // Atualizar estado local
-      setTasksByProject(prev => {
-        const projectTasks = prev[projectId] || []
-        const updatedTasks = projectTasks.map(task =>
-          task.id === taskId ? { ...task, columnId, order } : task
-        )
+        // Atualizar estado local
+        setTasksByProject((prev) => {
+          const projectTasks = prev[projectId] || [];
+          const updatedTasks = projectTasks.map((task) =>
+            task.id === taskId ? { ...task, columnId, order } : task
+          );
 
-        return {
-          ...prev,
-          [projectId]: updatedTasks
-        }
-      })
-    } catch (err) {
-      console.error("❌ Erro ao mover tarefa:", err)
-      setError("Erro ao mover tarefa")
-      throw err
-    }
-  }, [isAuthenticated])
+          return {
+            ...prev,
+            [projectId]: updatedTasks,
+          };
+        });
+      } catch (err) {
+        console.error("❌ Erro ao mover tarefa:", err);
+        setError("Erro ao mover tarefa");
+        throw err;
+      }
+    },
+    [isAuthenticated]
+  );
 
   // Inicializar dados ao montar
   useEffect(() => {
     if (isAuthenticated && user) {
-      loadProjects().then(loadedProjects => {
+      loadProjects().then((loadedProjects) => {
         if (loadedProjects.length > 0 && !currentProject) {
-          const firstProject = loadedProjects[0]
+          const firstProject = loadedProjects[0];
           if (firstProject) {
-            setCurrentProject(firstProject)
-            setActiveTab("kanbanBoard")
-            loadProjectTasks(firstProject.id)
+            setCurrentProject(firstProject);
+            setActiveTab("kanbanBoard");
+            loadProjectTasks(firstProject.id);
           }
         }
-      })
+      });
     }
-  }, [isAuthenticated, user, loadProjects, loadProjectTasks, currentProject])
+  }, [isAuthenticated, user, loadProjects, loadProjectTasks, currentProject]);
 
   // Carregar tarefas quando o projeto atual mudar
   useEffect(() => {
     if (currentProject && isAuthenticated) {
-      loadProjectTasks(currentProject.id)
+      loadProjectTasks(currentProject.id);
     }
-  }, [currentProject, isAuthenticated, loadProjectTasks])
+  }, [currentProject, isAuthenticated, loadProjectTasks]);
 
   return {
     // State
@@ -230,13 +282,13 @@ export function useKanbanApi() {
     activeTab,
     loading,
     error,
-    
+
     // Setters
     setProjects,
     setTasksByProject,
     setCurrentProject,
     setActiveTab,
-    
+
     // API methods
     loadProjects,
     loadProjectTasks,
@@ -245,8 +297,8 @@ export function useKanbanApi() {
     deleteProject,
     createTask,
     moveTask,
-    
+
     // Utils
     isAuthenticated,
-  }
-} 
+  };
+}

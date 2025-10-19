@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: MIT
 
 import os
-from typing import List, Optional
 from urllib.parse import urlparse
 
 import requests
@@ -18,7 +17,7 @@ class RAGFlowProvider(Retriever):
     api_url: str
     api_key: str
     page_size: int = 10
-    cross_languages: Optional[List[str]] = None
+    cross_languages: list[str] | None = None
 
     def __init__(self):
         api_url = os.getenv("RAGFLOW_API_URL")

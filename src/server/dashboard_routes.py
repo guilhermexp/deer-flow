@@ -2,14 +2,14 @@
 # SPDX-License-Identifier: MIT
 
 from datetime import datetime, timedelta
-from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy import and_, desc
 from sqlalchemy.orm import Session
-from sqlalchemy import desc, and_
 
 from src.database.base import get_db
-from src.database.models import Task, Reminder, User, TaskStatus, TaskPriority
+from src.database.models import Reminder, Task, TaskPriority, TaskStatus, User
 from src.server.auth import get_current_active_user
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
@@ -17,32 +17,32 @@ router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
 class TaskCreate(BaseModel):
     title: str
-    description: Optional[str] = None
-    status: Optional[TaskStatus] = TaskStatus.TODO
-    priority: Optional[TaskPriority] = TaskPriority.MEDIUM
-    category: Optional[str] = None
-    due_date: Optional[datetime] = None
+    description: str | None = None
+    status: TaskStatus | None = TaskStatus.TODO
+    priority: TaskPriority | None = TaskPriority.MEDIUM
+    category: str | None = None
+    due_date: datetime | None = None
 
 
 class TaskUpdate(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    status: Optional[TaskStatus] = None
-    priority: Optional[TaskPriority] = None
-    category: Optional[str] = None
-    due_date: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    title: str | None = None
+    description: str | None = None
+    status: TaskStatus | None = None
+    priority: TaskPriority | None = None
+    category: str | None = None
+    due_date: datetime | None = None
+    completed_at: datetime | None = None
 
 
 class TaskResponse(BaseModel):
     id: int
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     status: TaskStatus
     priority: TaskPriority
-    category: Optional[str] = None
-    due_date: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    category: str | None = None
+    due_date: datetime | None = None
+    completed_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -53,27 +53,27 @@ class TaskResponse(BaseModel):
 class ReminderCreate(BaseModel):
     title: str
     time: str  # HH:MM format
-    date: Optional[datetime] = None
-    priority: Optional[TaskPriority] = TaskPriority.MEDIUM
-    category: Optional[str] = None
+    date: datetime | None = None
+    priority: TaskPriority | None = TaskPriority.MEDIUM
+    category: str | None = None
 
 
 class ReminderUpdate(BaseModel):
-    title: Optional[str] = None
-    time: Optional[str] = None
-    date: Optional[datetime] = None
-    priority: Optional[TaskPriority] = None
-    category: Optional[str] = None
-    is_completed: Optional[bool] = None
+    title: str | None = None
+    time: str | None = None
+    date: datetime | None = None
+    priority: TaskPriority | None = None
+    category: str | None = None
+    is_completed: bool | None = None
 
 
 class ReminderResponse(BaseModel):
     id: int
     title: str
     time: str
-    date: Optional[datetime] = None
+    date: datetime | None = None
     priority: TaskPriority
-    category: Optional[str] = None
+    category: str | None = None
     is_completed: bool
     created_at: datetime
     updated_at: datetime
@@ -92,11 +92,11 @@ class DashboardStats(BaseModel):
 
 
 # Task endpoints
-@router.get("/tasks", response_model=List[TaskResponse])
+@router.get("/tasks", response_model=list[TaskResponse])
 async def get_tasks(
-    status: Optional[TaskStatus] = None,
-    priority: Optional[TaskPriority] = None,
-    category: Optional[str] = None,
+    status: TaskStatus | None = None,
+    priority: TaskPriority | None = None,
+    category: str | None = None,
     limit: int = Query(100, le=1000),
     offset: int = 0,
     current_user: User = Depends(get_current_active_user),
@@ -183,7 +183,7 @@ async def delete_task(
 
 
 # Reminder endpoints
-@router.get("/reminders/today", response_model=List[ReminderResponse])
+@router.get("/reminders/today", response_model=list[ReminderResponse])
 async def get_today_reminders(
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
@@ -207,12 +207,12 @@ async def get_today_reminders(
     return [ReminderResponse.from_orm(reminder) for reminder in reminders]
 
 
-@router.get("/reminders", response_model=List[ReminderResponse])
+@router.get("/reminders", response_model=list[ReminderResponse])
 async def get_reminders(
-    date: Optional[datetime] = None,
-    priority: Optional[TaskPriority] = None,
-    category: Optional[str] = None,
-    is_completed: Optional[bool] = None,
+    date: datetime | None = None,
+    priority: TaskPriority | None = None,
+    category: str | None = None,
+    is_completed: bool | None = None,
     limit: int = Query(100, le=1000),
     offset: int = 0,
     current_user: User = Depends(get_current_active_user),

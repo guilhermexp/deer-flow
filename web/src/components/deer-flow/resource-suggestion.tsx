@@ -40,18 +40,20 @@ export const resourceSuggestion: MentionOptions["suggestion"] = {
           editor: props.editor,
         });
 
-        const clientRect = props.clientRect || (() => {
-          const selection = props.editor.state.selection;
-          const coords = props.editor.view.coordsAtPos(selection.from);
-          return {
-            top: coords.top,
-            left: coords.left,
-            right: coords.right,
-            bottom: coords.bottom,
-            width: 0,
-            height: 0,
-          };
-        });
+        const clientRect =
+          props.clientRect ||
+          (() => {
+            const selection = props.editor.state.selection;
+            const coords = props.editor.view.coordsAtPos(selection.from);
+            return {
+              top: coords.top,
+              left: coords.left,
+              right: coords.right,
+              bottom: coords.bottom,
+              width: 0,
+              height: 0,
+            };
+          });
 
         popup = tippy("body", {
           getReferenceClientRect: clientRect as any,
@@ -70,19 +72,21 @@ export const resourceSuggestion: MentionOptions["suggestion"] = {
         }
 
         if (popup?.[0] && !popup[0].state.isDestroyed) {
-          const clientRect = props.clientRect || (() => {
-            const selection = props.editor.state.selection;
-            const coords = props.editor.view.coordsAtPos(selection.from);
-            return {
-              top: coords.top,
-              left: coords.left,
-              right: coords.right,
-              bottom: coords.bottom,
-              width: 0,
-              height: 0,
-            };
-          });
-          
+          const clientRect =
+            props.clientRect ||
+            (() => {
+              const selection = props.editor.state.selection;
+              const coords = props.editor.view.coordsAtPos(selection.from);
+              return {
+                top: coords.top,
+                left: coords.left,
+                right: coords.right,
+                bottom: coords.bottom,
+                width: 0,
+                height: 0,
+              };
+            });
+
           popup[0].setProps({
             getReferenceClientRect: clientRect as any,
           });

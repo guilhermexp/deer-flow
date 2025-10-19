@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "~/lib/utils"
-import EventCard from "./event-card" // Certifique-se que EventCard está correto
-import type { CalendarEvent } from "../lib/types"
-import { DAYS_OF_WEEK_ABBREVIATED } from "../lib/constants"
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "~/lib/utils";
+import EventCard from "./event-card"; // Certifique-se que EventCard está correto
+import type { CalendarEvent } from "../lib/types";
+import { DAYS_OF_WEEK_ABBREVIATED } from "../lib/constants";
 
 interface MonthViewProps {
-  monthDisplayDate: Date
-  getDaysInMonth: (date: Date) => (Date | null)[]
-  getEventsForSpecificDate: (date: Date) => CalendarEvent[]
-  isCurrentEventActive: (event: CalendarEvent) => boolean
-  isDateToday: (date: Date | null) => boolean
-  onNavigate: (direction: "next" | "prev") => void
-  onDeleteEvent: (event: CalendarEvent) => void
-  onAddEventClick?: (date: Date) => void
+  monthDisplayDate: Date;
+  getDaysInMonth: (date: Date) => (Date | null)[];
+  getEventsForSpecificDate: (date: Date) => CalendarEvent[];
+  isCurrentEventActive: (event: CalendarEvent) => boolean;
+  isDateToday: (date: Date | null) => boolean;
+  onNavigate: (direction: "next" | "prev") => void;
+  onDeleteEvent: (event: CalendarEvent) => void;
+  onAddEventClick?: (date: Date) => void;
 }
 
 export default function MonthView({
@@ -30,52 +30,55 @@ export default function MonthView({
   // Suppress unused variable warning - feature not implemented yet
   void onAddEventClick;
   void onNavigate;
-  
-  const cellBackgroundStyle = "bg-white/[0.05] backdrop-blur-md"
-  const emptyCellBackgroundStyle = "bg-white/[0.02] backdrop-blur-md" // Usando opacidade menor para células vazias
+
+  const cellBackgroundStyle = "bg-white/[0.05] backdrop-blur-md";
+  const emptyCellBackgroundStyle = "bg-white/[0.02] backdrop-blur-md"; // Usando opacidade menor para células vazias
 
   return (
-    <section className="space-y-6 p-1 sm:p-0 mt-2" aria-label="Month view calendar">
+    <section
+      className="mt-2 space-y-6 p-1 sm:p-0"
+      aria-label="Month view calendar"
+    >
       <div className="rounded-lg border border-white/10 p-0.5">
-        <div className="grid grid-cols-7 gap-px bg-white/10 rounded-t-md overflow-hidden">
+        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-t-md bg-white/10">
           {DAYS_OF_WEEK_ABBREVIATED.map((day) => (
-            <div key={day} className="bg-[#0a0a0a]/80 p-2 sm:p-3 text-center">
-              <span className="text-xs sm:text-sm font-medium text-gray-400">
+            <div key={day} className="bg-[#0a0a0a]/80 p-2 text-center sm:p-3">
+              <span className="text-xs font-medium text-gray-400 sm:text-sm">
                 {day}
               </span>
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-px bg-white/10 rounded-b-md overflow-hidden">
+        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-b-md bg-white/10">
           {getDaysInMonth(monthDisplayDate).map((date, index) => {
-            const dayEvents = date ? getEventsForSpecificDate(date) : []
-            const isCurrentDay = date ? isDateToday(date) : false
+            const dayEvents = date ? getEventsForSpecificDate(date) : [];
+            const isCurrentDay = date ? isDateToday(date) : false;
             return (
               <div
                 key={index}
                 className={cn(
-                  "min-h-[80px] sm:min-h-[100px] md:min-h-[120px] p-1 sm:p-1.5 md:p-2 transition-colors", // Ajustado padding e min-height
+                  "min-h-[80px] p-1 transition-colors sm:min-h-[100px] sm:p-1.5 md:min-h-[120px] md:p-2", // Ajustado padding e min-height
                   date ? cellBackgroundStyle : emptyCellBackgroundStyle,
                   date && "hover:bg-white/[0.08]",
-                  isCurrentDay && "border border-blue-500/50 relative",
+                  isCurrentDay && "relative border border-blue-500/50"
                 )}
               >
                 {isCurrentDay && (
-                  <div className="absolute top-0.5 left-0.5 sm:top-1 sm:left-1 w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full" />
+                  <div className="absolute top-0.5 left-0.5 h-1 w-1 rounded-full bg-blue-400 sm:top-1 sm:left-1 sm:h-1.5 sm:w-1.5" />
                 )}
                 {date && (
                   <>
-                    <div className="flex items-center justify-between mb-1 sm:mb-1.5">
+                    <div className="mb-1 flex items-center justify-between sm:mb-1.5">
                       <span
                         className={cn(
-                          "text-xs sm:text-sm font-medium", // Ajustado tamanho da fonte
-                          isCurrentDay ? "text-blue-400" : "text-gray-100",
+                          "text-xs font-medium sm:text-sm", // Ajustado tamanho da fonte
+                          isCurrentDay ? "text-blue-400" : "text-gray-100"
                         )}
                       >
                         {date.getDate()}
                       </span>
                       {dayEvents.length > 0 && (
-                        <span className="text-[10px] sm:text-xs text-gray-400">
+                        <span className="text-[10px] text-gray-400 sm:text-xs">
                           {dayEvents.length}
                         </span>
                       )}
@@ -88,7 +91,10 @@ export default function MonthView({
                             initial={{ scale: 0.8, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.8, opacity: 0 }}
-                            transition={{ duration: 0.2, delay: eventIndex * 0.05 }}
+                            transition={{
+                              duration: 0.2,
+                              delay: eventIndex * 0.05,
+                            }}
                             className="text-[10px] sm:text-xs"
                           >
                             <EventCard
@@ -103,7 +109,7 @@ export default function MonthView({
                           <motion.p
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="text-[9px] sm:text-[10px] text-gray-400 font-medium pl-0.5"
+                            className="pl-0.5 text-[9px] font-medium text-gray-400 sm:text-[10px]"
                           >
                             +{dayEvents.length - 2} more
                           </motion.p>
@@ -113,10 +119,10 @@ export default function MonthView({
                   </>
                 )}
               </div>
-            )
+            );
           })}
         </div>
       </div>
     </section>
-  )
+  );
 }

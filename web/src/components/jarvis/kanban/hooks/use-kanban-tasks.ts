@@ -1,8 +1,14 @@
-"use client"
+"use client";
 
-import { useState, useCallback, useMemo } from "react"
-import type { Task, Project, TaskStatus, TaskWeekDay, Assignee } from "../lib/types"
-import { deepEqual } from "~/lib/deep-equal"
+import { useState, useCallback, useMemo } from "react";
+import type {
+  Task,
+  Project,
+  TaskStatus,
+  TaskWeekDay,
+  Assignee,
+} from "../lib/types";
+import { deepEqual } from "~/lib/deep-equal";
 import {
   createTask,
   updateTaskInList,
@@ -11,77 +17,89 @@ import {
   formatTaskDate,
   createRandomAssignee,
   getDefaultTaskFormData,
-} from "~/lib/kanban-operations"
+} from "~/lib/kanban-operations";
 
 export function useKanbanTasks(
   currentProject: Project | null,
   tasksByProject: { [projectId: string]: Task[] },
-  setTasksByProject: React.Dispatch<React.SetStateAction<{ [projectId: string]: Task[] }>>
+  setTasksByProject: React.Dispatch<
+    React.SetStateAction<{ [projectId: string]: Task[] }>
+  >
 ) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [editingTask, setEditingTask] = useState<Task | null>(null)
-  const [deletingTask, setDeletingTask] = useState<Task | null>(null)
-  const [taskFormData, setTaskFormData] = useState(getDefaultTaskFormData())
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [deletingTask, setDeletingTask] = useState<Task | null>(null);
+  const [taskFormData, setTaskFormData] = useState(getDefaultTaskFormData());
 
   // Filtered tasks for current project
   const currentProjectTasks = useMemo(() => {
-    if (!currentProject) return []
-    const tasks = tasksByProject[currentProject.id] || []
-    return filterTasksByQuery(tasks, searchQuery)
-  }, [currentProject, tasksByProject, searchQuery])
+    if (!currentProject) return [];
+    const tasks = tasksByProject[currentProject.id] || [];
+    return filterTasksByQuery(tasks, searchQuery);
+  }, [currentProject, tasksByProject, searchQuery]);
 
   // Reset task form
   const resetTaskForm = useCallback(() => {
-    setTaskFormData(getDefaultTaskFormData())
-  }, [])
+    setTaskFormData(getDefaultTaskFormData());
+  }, []);
 
   // Update existing task
   const handleUpdateTask = useCallback(
     (updatedTask: Task) => {
-      if (!currentProject) return
+      if (!currentProject) return;
       setTasksByProject((prev) => {
-        const projectTasks = prev[currentProject.id] || []
+        const projectTasks = prev[currentProject.id] || [];
         // Check if task actually changed to avoid duplication
-        const existingTask = projectTasks.find((task) => task.id === updatedTask.id)
+        const existingTask = projectTasks.find(
+          (task) => task.id === updatedTask.id
+        );
         if (existingTask && deepEqual(existingTask, updatedTask)) {
-          return prev // Don't update if task hasn't changed
+          return prev; // Don't update if task hasn't changed
         }
-        const updatedTasks = updateTaskInList(projectTasks, updatedTask)
-        return { ...prev, [currentProject.id]: updatedTasks }
-      })
+        const updatedTasks = updateTaskInList(projectTasks, updatedTask);
+        return { ...prev, [currentProject.id]: updatedTasks };
+      });
     },
     [currentProject, setTasksByProject]
-  )
+  );
 
   // Add task to column
   const handleAddTaskToColumn = useCallback(
     (columnId: TaskStatus) => {
-      if (!currentProject) return
-      setEditingTask(null)
-      resetTaskForm()
-      setTaskFormData((prev) => ({ ...prev, status: columnId, weekDay: "none" }))
-      setIsTaskDialogOpen(true)
+      if (!currentProject) return;
+      setEditingTask(null);
+      resetTaskForm();
+      setTaskFormData((prev) => ({
+        ...prev,
+        status: columnId,
+        weekDay: "none",
+      }));
+      setIsTaskDialogOpen(true);
     },
     [currentProject, resetTaskForm]
-  )
+  );
 
   // Add task to day
   const handleAddTaskToDay = useCallback(
     (day: TaskWeekDay) => {
-      if (!currentProject || !day) return
-      setEditingTask(null)
-      resetTaskForm()
-      setTaskFormData((prev) => ({ ...prev, weekDay: day, status: "not-started" }))
-      setIsTaskDialogOpen(true)
+      if (!currentProject || !day) return;
+      setEditingTask(null);
+      resetTaskForm();
+      setTaskFormData((prev) => ({
+        ...prev,
+        weekDay: day,
+        status: "not-started",
+      }));
+      setIsTaskDialogOpen(true);
     },
     [currentProject, resetTaskForm]
-  )
+  );
 
   // Edit task
   const handleEditTask = useCallback((task: Task) => {
-    setEditingTask(task)
+    setEditingTask(task);
     setTaskFormData({
       title: task.title,
       description: task.description || "",
@@ -90,31 +108,34 @@ export function useKanbanTasks(
       assignees: task.assignees,
       status: task.status,
       weekDay: task.weekDay || "none",
-    })
-    setIsTaskDialogOpen(true)
-  }, [])
+    });
+    setIsTaskDialogOpen(true);
+  }, []);
 
   // Delete task
   const handleDeleteTask = useCallback((task: Task) => {
-    setDeletingTask(task)
-    setIsDeleteDialogOpen(true)
-  }, [])
+    setDeletingTask(task);
+    setIsDeleteDialogOpen(true);
+  }, []);
 
   // Confirm delete
   const confirmDeleteTask = useCallback(() => {
     if (deletingTask && currentProject) {
       setTasksByProject((prev) => ({
         ...prev,
-        [currentProject.id]: removeTaskFromList(prev[currentProject.id] || [], deletingTask.id),
-      }))
-      setDeletingTask(null)
-      setIsDeleteDialogOpen(false)
+        [currentProject.id]: removeTaskFromList(
+          prev[currentProject.id] || [],
+          deletingTask.id
+        ),
+      }));
+      setDeletingTask(null);
+      setIsDeleteDialogOpen(false);
     }
-  }, [deletingTask, currentProject, setTasksByProject])
+  }, [deletingTask, currentProject, setTasksByProject]);
 
   // Save task
   const handleSaveTask = useCallback(() => {
-    if (!taskFormData.title.trim() || !currentProject) return
+    if (!taskFormData.title.trim() || !currentProject) return;
 
     const taskToSave = createTask(
       currentProject.id,
@@ -123,50 +144,66 @@ export function useKanbanTasks(
       taskFormData.status,
       taskFormData.weekDay === "none" ? undefined : taskFormData.weekDay,
       editingTask || undefined
-    )
+    );
 
     // Apply form data to the task
-    taskToSave.progress = taskFormData.progress[0] ?? 0
-    taskToSave.assignees = taskFormData.assignees
+    taskToSave.progress = taskFormData.progress[0] ?? 0;
+    taskToSave.assignees = taskFormData.assignees;
     if (taskFormData.date) {
-      taskToSave.date = formatTaskDate(taskFormData.date)
+      taskToSave.date = formatTaskDate(taskFormData.date);
     }
 
     if (editingTask) {
-      handleUpdateTask(taskToSave)
+      handleUpdateTask(taskToSave);
     } else {
       setTasksByProject((prev) => ({
         ...prev,
         [currentProject.id]: [taskToSave, ...(prev[currentProject.id] || [])],
-      }))
+      }));
     }
-    setIsTaskDialogOpen(false)
-    resetTaskForm()
-    setEditingTask(null)
-  }, [taskFormData, currentProject, editingTask, handleUpdateTask, setTasksByProject, resetTaskForm])
+    setIsTaskDialogOpen(false);
+    resetTaskForm();
+    setEditingTask(null);
+  }, [
+    taskFormData,
+    currentProject,
+    editingTask,
+    handleUpdateTask,
+    setTasksByProject,
+    resetTaskForm,
+  ]);
 
   // Handle form changes
   const handleTaskFormChange = useCallback(
-    (field: keyof typeof taskFormData, value: string | TaskWeekDay | TaskStatus | Assignee[]) => {
-      setTaskFormData((prev) => ({ ...prev, [field]: value }))
+    (
+      field: keyof typeof taskFormData,
+      value: string | TaskWeekDay | TaskStatus | Assignee[]
+    ) => {
+      setTaskFormData((prev) => ({ ...prev, [field]: value }));
     },
     []
-  )
+  );
 
   const handleTaskSliderChange = useCallback((value: number[]) => {
-    setTaskFormData((prev) => ({ ...prev, progress: value }))
-  }, [])
+    setTaskFormData((prev) => ({ ...prev, progress: value }));
+  }, []);
 
   const addAssigneeToTask = useCallback(() => {
-    const newAssignee = createRandomAssignee()
+    const newAssignee = createRandomAssignee();
     if (!taskFormData.assignees.find((a) => a.name === newAssignee.name)) {
-      setTaskFormData((prev) => ({ ...prev, assignees: [...prev.assignees, newAssignee] }))
+      setTaskFormData((prev) => ({
+        ...prev,
+        assignees: [...prev.assignees, newAssignee],
+      }));
     }
-  }, [taskFormData.assignees])
+  }, [taskFormData.assignees]);
 
   const removeAssigneeFromTask = useCallback((index: number) => {
-    setTaskFormData((prev) => ({ ...prev, assignees: prev.assignees.filter((_, i) => i !== index) }))
-  }, [])
+    setTaskFormData((prev) => ({
+      ...prev,
+      assignees: prev.assignees.filter((_, i) => i !== index),
+    }));
+  }, []);
 
   return {
     searchQuery,
@@ -191,5 +228,5 @@ export function useKanbanTasks(
     handleTaskSliderChange,
     addAssigneeToTask,
     removeAssigneeFromTask,
-  }
+  };
 }

@@ -49,7 +49,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const [isSearching, setIsSearching] = useState(false);
   const { user } = useUser();
   const router = useRouter();
-  
+
   // Função de busca com debounce
   const performSearch = useCallback(
     debounce(async (searchQuery: string) => {
@@ -57,28 +57,32 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
         setResults([]);
         return;
       }
-      
+
       setIsSearching(true);
-      
+
       try {
         // Buscar conversas
-        const conversationsResponse = await conversationsApiService.list({ search: searchQuery });
+        const conversationsResponse = await conversationsApiService.list({
+          search: searchQuery,
+        });
         const conversations = conversationsResponse.items;
 
-        const searchResults: SearchResult[] = conversations.map(conv => ({
+        const searchResults: SearchResult[] = conversations.map((conv) => ({
           type: "conversation" as const,
           id: conv.thread_id || conv.id.toString(),
           title: conv.title || "Conversa sem título",
           content: conv.query || "",
           createdAt: conv.created_at || new Date().toISOString(),
-          highlight: conv.query?.toLowerCase().includes(searchQuery.toLowerCase()) 
-            ? conv.query 
-            : conv.title || undefined
+          highlight: conv.query
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase())
+            ? conv.query
+            : conv.title || undefined,
         }));
-        
+
         // TODO: Implementar busca em mensagens quando o backend suportar
         // const messages = await messagesService.search(searchQuery);
-        
+
         setResults(searchResults);
       } catch (error) {
         console.error("Erro na busca:", error);
@@ -88,12 +92,12 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
     }, 300),
     [user]
   );
-  
+
   // Executar busca quando query mudar
   useEffect(() => {
     performSearch(query);
   }, [query, performSearch]);
-  
+
   // Limpar ao fechar
   useEffect(() => {
     if (!open) {
@@ -101,7 +105,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
       setResults([]);
     }
   }, [open]);
-  
+
   const handleResultClick = (result: SearchResult) => {
     if (result.type === "conversation") {
       router.push(`/chat?thread=${result.id}`);
@@ -110,27 +114,31 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
     }
     onOpenChange(false);
   };
-  
+
   const highlightText = (text: string, highlight: string) => {
     if (!highlight) return text;
-    
-    const parts = text.split(new RegExp(`(${highlight})`, 'gi'));
-    return parts.map((part, i) => 
-      part.toLowerCase() === highlight.toLowerCase() 
-        ? <mark key={i} className="bg-yellow-500/30 text-yellow-200">{part}</mark>
-        : part
+
+    const parts = text.split(new RegExp(`(${highlight})`, "gi"));
+    return parts.map((part, i) =>
+      part.toLowerCase() === highlight.toLowerCase() ? (
+        <mark key={i} className="bg-yellow-500/30 text-yellow-200">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
     );
   };
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Buscar Conversas</DialogTitle>
         </DialogHeader>
-        
+
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             placeholder="Buscar por título ou conteúdo..."
             value={query}
@@ -139,13 +147,13 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             autoFocus
           />
           {isSearching && (
-            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+            <Loader2 className="text-muted-foreground absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 animate-spin" />
           )}
         </div>
-        
-        <ScrollArea className="h-[400px] mt-4">
+
+        <ScrollArea className="mt-4 h-[400px]">
           {results.length === 0 && query.length >= 2 && !isSearching ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-muted-foreground py-8 text-center">
               Nenhum resultado encontrado para "{query}"
             </div>
           ) : (
@@ -154,25 +162,25 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                 <Button
                   key={result.id}
                   variant="ghost"
-                  className="w-full justify-start text-left p-4 h-auto"
+                  className="h-auto w-full justify-start p-4 text-left"
                   onClick={() => handleResultClick(result)}
                 >
-                  <div className="flex items-start gap-3 w-full">
-                    <MessageSquare className="h-5 w-5 mt-0.5 flex-shrink-0 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
+                  <div className="flex w-full items-start gap-3">
+                    <MessageSquare className="text-muted-foreground mt-0.5 h-5 w-5 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
                       <div className="font-medium">
                         {highlightText(result.title, query)}
                       </div>
                       {result.content && (
-                        <div className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                        <div className="text-muted-foreground mt-1 line-clamp-2 text-sm">
                           {highlightText(result.content, query)}
                         </div>
                       )}
-                      <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                      <div className="text-muted-foreground mt-2 flex items-center gap-2 text-xs">
                         <Clock className="h-3 w-3" />
                         {formatDistanceToNow(new Date(result.createdAt), {
                           addSuffix: true,
-                          locale: ptBR
+                          locale: ptBR,
                         })}
                       </div>
                     </div>

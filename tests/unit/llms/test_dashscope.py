@@ -171,7 +171,7 @@ def test_convert_delta_to_message_chunk_developer_and_function_call_and_tool_cal
     # tool_calls copied as-is
     assert msg.additional_kwargs["tool_calls"][0]["id"] == "t1"
     # tool_call_chunks only for valid one
-    assert getattr(msg, "tool_call_chunks") and len(msg.tool_call_chunks) == 1
+    assert msg.tool_call_chunks and len(msg.tool_call_chunks) == 1
 
 
 def test_convert_delta_to_message_chunk_default_class_and_unknown_role():

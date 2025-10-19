@@ -4,9 +4,10 @@
 import { z } from "zod";
 
 export const MCPConfigSchema = z.object({
-  mcpServers: z.record(z.string(),
-    z.union(
-      [
+  mcpServers: z.record(
+    z.string(),
+    z
+      .union([
         z.object({
           command: z.string().describe("`command` must be a string"),
           args: z
@@ -21,7 +22,9 @@ export const MCPConfigSchema = z.object({
         z.object({
           url: z
             .string()
-            .describe("`url` must be a valid URL starting with http:// or https://")
+            .describe(
+              "`url` must be a valid URL starting with http:// or https://"
+            )
             .refine(
               (value) => {
                 try {
@@ -34,7 +37,7 @@ export const MCPConfigSchema = z.object({
               {
                 message:
                   "`url` must be a valid URL starting with http:// or https://",
-              },
+              }
             ),
           env: z
             .record(z.string(), z.string())
@@ -45,7 +48,7 @@ export const MCPConfigSchema = z.object({
             .describe("transport must be either sse or streamable_http")
             .default("sse"),
         }),
-      ]
-    ).describe("Invalid server type"),
+      ])
+      .describe("Invalid server type")
   ),
 });

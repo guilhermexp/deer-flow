@@ -1,5 +1,5 @@
-import React from 'react';
-import { cn } from '~/lib/utils';
+import React from "react";
+import { cn } from "~/lib/utils";
 
 interface LiquidGlassCardProps {
   children: React.ReactNode;
@@ -8,16 +8,13 @@ interface LiquidGlassCardProps {
 
 export const LiquidGlassCard: React.FC<LiquidGlassCardProps> = ({
   children,
-  className
+  className,
 }) => {
+  const base =
+    "relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.05] p-4 backdrop-blur-md";
   return (
-    <div
-      className={cn(
-        "relative overflow-hidden rounded-xl border border-white/10 bg-white/[0.05] p-4 backdrop-blur-md",
-        className
-      )}
-    >
-      {children}
+    <div className={className ? `${base} ${className}` : base}>
+      <div>{children}</div>
     </div>
   );
 };

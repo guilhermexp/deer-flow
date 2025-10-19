@@ -2,7 +2,14 @@
 // SPDX-License-Identifier: MIT
 
 import { useState } from "react";
-import { Check, FileText, Newspaper, Users, GraduationCap, TrendingUp } from "lucide-react";
+import {
+  Check,
+  FileText,
+  Newspaper,
+  Users,
+  GraduationCap,
+  TrendingUp,
+} from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -56,7 +63,12 @@ export function ReportStyleDialog() {
   const currentStyle = useSettingsStore((state) => state.general.reportStyle);
 
   const handleStyleChange = (
-    style: "academic" | "popular_science" | "news" | "social_media" | "strategic_investment",
+    style:
+      | "academic"
+      | "popular_science"
+      | "news"
+      | "social_media"
+      | "strategic_investment"
   ) => {
     setReportStyle(style);
     setOpen(false);
@@ -77,15 +89,16 @@ export function ReportStyleDialog() {
               Estilo de Escrita: {currentStyleConfig.label}
             </h3>
             <p>
-              Escolha o estilo de escrita para seus relatórios de pesquisa. Diferentes
-              estilos são otimizados para diferentes públicos e propósitos.
+              Escolha o estilo de escrita para seus relatórios de pesquisa.
+              Diferentes estilos são otimizados para diferentes públicos e
+              propósitos.
             </p>
           </div>
         }
       >
         <DialogTrigger asChild>
           <Button
-            className="rounded-xl bg-white/[0.05] backdrop-blur-sm border-white/10 hover:bg-white/[0.08] text-gray-300 text-xs whitespace-nowrap flex-shrink-0"
+            className="flex-shrink-0 rounded-xl border-white/10 bg-white/[0.05] text-xs whitespace-nowrap text-gray-300 backdrop-blur-sm hover:bg-white/[0.08]"
             variant="outline"
             size="icon"
           >
@@ -97,8 +110,8 @@ export function ReportStyleDialog() {
         <DialogHeader>
           <DialogTitle>Escolher Estilo de Escrita</DialogTitle>
           <DialogDescription>
-            Selecione o estilo de escrita para seus relatórios de pesquisa. Cada estilo é
-            otimizado para diferentes públicos e propósitos.
+            Selecione o estilo de escrita para seus relatórios de pesquisa. Cada
+            estilo é otimizado para diferentes públicos e propósitos.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3 py-4">
@@ -111,7 +124,7 @@ export function ReportStyleDialog() {
                 key={style.value}
                 className={cn(
                   "hover:bg-accent flex items-start gap-3 rounded-lg border p-4 text-left transition-colors",
-                  isSelected && "border-primary bg-accent",
+                  isSelected && "border-primary bg-accent"
                 )}
                 onClick={() => handleStyleChange(style.value)}
               >

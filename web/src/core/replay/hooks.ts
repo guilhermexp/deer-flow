@@ -12,7 +12,7 @@ export function useReplay() {
   const searchParams = useSearchParams();
   const replayId = useMemo(
     () => extractReplayIdFromSearchParams(searchParams.toString()),
-    [searchParams],
+    [searchParams]
   );
   return {
     isReplay: replayId != null || env.NEXT_PUBLIC_STATIC_WEBSITE_ONLY,

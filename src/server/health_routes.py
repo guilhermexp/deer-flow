@@ -2,11 +2,12 @@
 # SPDX-License-Identifier: MIT
 
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any
+from typing import Any, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
 from sqlalchemy import desc
+from sqlalchemy.orm import Session
 
 from src.database.base import get_db
 from src.database.models import HealthData, User
@@ -46,58 +47,58 @@ class Medication(BaseModel):
     name: str
     dosage: str
     taken: bool = False
-    time: Optional[str] = None
+    time: str | None = None
 
 
 class HealthDataCreate(BaseModel):
-    date: Optional[datetime] = None
-    health_score: Optional[int] = Field(None, ge=0, le=100)
-    hydration_ml: Optional[int] = Field(None, ge=0)
-    hydration_goal_ml: Optional[int] = Field(None, ge=0)
-    sleep_hours: Optional[float] = Field(None, ge=0, le=24)
-    sleep_quality: Optional[int] = Field(None, ge=0, le=100)
-    blood_pressure_systolic: Optional[int] = Field(None, ge=0)
-    blood_pressure_diastolic: Optional[int] = Field(None, ge=0)
-    pulse: Optional[int] = Field(None, ge=0)
-    workouts_completed: Optional[int] = Field(None, ge=0)
-    workouts_goal: Optional[int] = Field(None, ge=0)
-    sleep_phases: Optional[SleepPhases] = None
-    medications: Optional[List[Medication]] = None
-    notes: Optional[str] = None
+    date: datetime | None = None
+    health_score: int | None = Field(None, ge=0, le=100)
+    hydration_ml: int | None = Field(None, ge=0)
+    hydration_goal_ml: int | None = Field(None, ge=0)
+    sleep_hours: float | None = Field(None, ge=0, le=24)
+    sleep_quality: int | None = Field(None, ge=0, le=100)
+    blood_pressure_systolic: int | None = Field(None, ge=0)
+    blood_pressure_diastolic: int | None = Field(None, ge=0)
+    pulse: int | None = Field(None, ge=0)
+    workouts_completed: int | None = Field(None, ge=0)
+    workouts_goal: int | None = Field(None, ge=0)
+    sleep_phases: SleepPhases | None = None
+    medications: list[Medication] | None = None
+    notes: str | None = None
 
 
 class HealthDataUpdate(BaseModel):
-    health_score: Optional[int] = Field(None, ge=0, le=100)
-    hydration_ml: Optional[int] = Field(None, ge=0)
-    hydration_goal_ml: Optional[int] = Field(None, ge=0)
-    sleep_hours: Optional[float] = Field(None, ge=0, le=24)
-    sleep_quality: Optional[int] = Field(None, ge=0, le=100)
-    blood_pressure_systolic: Optional[int] = Field(None, ge=0)
-    blood_pressure_diastolic: Optional[int] = Field(None, ge=0)
-    pulse: Optional[int] = Field(None, ge=0)
-    workouts_completed: Optional[int] = Field(None, ge=0)
-    workouts_goal: Optional[int] = Field(None, ge=0)
-    sleep_phases: Optional[SleepPhases] = None
-    medications: Optional[List[Medication]] = None
-    notes: Optional[str] = None
+    health_score: int | None = Field(None, ge=0, le=100)
+    hydration_ml: int | None = Field(None, ge=0)
+    hydration_goal_ml: int | None = Field(None, ge=0)
+    sleep_hours: float | None = Field(None, ge=0, le=24)
+    sleep_quality: int | None = Field(None, ge=0, le=100)
+    blood_pressure_systolic: int | None = Field(None, ge=0)
+    blood_pressure_diastolic: int | None = Field(None, ge=0)
+    pulse: int | None = Field(None, ge=0)
+    workouts_completed: int | None = Field(None, ge=0)
+    workouts_goal: int | None = Field(None, ge=0)
+    sleep_phases: SleepPhases | None = None
+    medications: list[Medication] | None = None
+    notes: str | None = None
 
 
 class HealthDataResponse(BaseModel):
     id: int
     date: datetime
-    health_score: Optional[int] = None
+    health_score: int | None = None
     hydration_ml: int
     hydration_goal_ml: int
-    sleep_hours: Optional[float] = None
-    sleep_quality: Optional[int] = None
-    blood_pressure_systolic: Optional[int] = None
-    blood_pressure_diastolic: Optional[int] = None
-    pulse: Optional[int] = None
+    sleep_hours: float | None = None
+    sleep_quality: int | None = None
+    blood_pressure_systolic: int | None = None
+    blood_pressure_diastolic: int | None = None
+    pulse: int | None = None
     workouts_completed: int
     workouts_goal: int
-    sleep_phases: Optional[Dict[str, int]] = None
-    medications: Optional[List[Dict[str, Any]]] = None
-    notes: Optional[str] = None
+    sleep_phases: dict[str, int] | None = None
+    medications: list[dict[str, Any]] | None = None
+    notes: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -106,9 +107,9 @@ class HealthDataResponse(BaseModel):
 
 
 class HealthStats(BaseModel):
-    avg_health_score: Optional[float] = None
-    avg_sleep_hours: Optional[float] = None
-    avg_sleep_quality: Optional[float] = None
+    avg_health_score: float | None = None
+    avg_sleep_hours: float | None = None
+    avg_sleep_quality: float | None = None
     total_workouts: int
     avg_hydration_ml: float
     hydration_goal_achievement: float
@@ -116,10 +117,10 @@ class HealthStats(BaseModel):
     days_tracked: int
 
 
-@router.get("/data", response_model=List[HealthDataResponse])
+@router.get("/data", response_model=list[HealthDataResponse])
 async def get_health_data(
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
     limit: int = Query(30, le=365),
     offset: int = 0,
     current_user: User = Depends(get_current_active_user),

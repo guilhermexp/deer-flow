@@ -11,7 +11,11 @@ import {
 import { Sparkles, Zap, Brain, Waves } from "lucide-react";
 import { cn } from "~/lib/utils";
 
-export type Model = "google/gemini-2.5-pro" | "moonshotai/kimi-k2" | "grok-4-latest" | "deepseek/deepseek-chat-v3-0324:free";
+export type Model =
+  | "google/gemini-2.5-pro"
+  | "moonshotai/kimi-k2"
+  | "grok-4-latest"
+  | "deepseek/deepseek-chat-v3-0324:free";
 
 interface ModelSelectorProps {
   value: Model;
@@ -55,8 +59,10 @@ export function ModelSelector({
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger
         className={cn(
-          "bg-background/50 backdrop-blur-sm border-border/50",
-          size === "sm" ? "h-8 text-xs px-2 w-auto sm:w-[120px]" : "h-10 w-[180px]",
+          "bg-background/50 border-border/50 backdrop-blur-sm",
+          size === "sm"
+            ? "h-8 w-auto px-2 text-xs sm:w-[120px]"
+            : "h-10 w-[180px]",
           className
         )}
       >

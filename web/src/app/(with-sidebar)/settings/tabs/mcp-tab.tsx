@@ -17,7 +17,7 @@ import type { Tab } from "./types";
 
 export const MCPTab: Tab = ({ settings, onChange }) => {
   const [servers, setServers] = useState<MCPServerMetadata[]>(
-    settings.mcp.servers,
+    settings.mcp.servers
   );
   const [newlyAdded, setNewlyAdded] = useState(false);
   const handleAddServers = useCallback(
@@ -36,27 +36,27 @@ export const MCPTab: Tab = ({ settings, onChange }) => {
         });
       }, 100);
     },
-    [onChange, settings],
+    [onChange, settings]
   );
   const handleDeleteServer = useCallback(
     (name: string) => {
       const merged = settings.mcp.servers.filter(
-        (server) => server.name !== name,
+        (server) => server.name !== name
       );
       setServers(merged);
       onChange({ ...settings, mcp: { ...settings.mcp, servers: merged } });
     },
-    [onChange, settings],
+    [onChange, settings]
   );
   const handleToggleServer = useCallback(
     (name: string, enabled: boolean) => {
       const merged = settings.mcp.servers.map((server) =>
-        server.name === name ? { ...server, enabled } : server,
+        server.name === name ? { ...server, enabled } : server
       );
       setServers(merged);
       onChange({ ...settings, mcp: { ...settings.mcp, servers: merged } });
     },
-    [onChange, settings],
+    [onChange, settings]
   );
   const animationProps = {
     initial: { backgroundColor: "gray" },
@@ -74,9 +74,10 @@ export const MCPTab: Tab = ({ settings, onChange }) => {
           <AddMCPServerDialog onAdd={handleAddServers} />
         </div>
         <div className="text-muted-foreground markdown text-sm">
-          O Protocolo de Contexto do Modelo (MCP) impulsiona o DeerFlow integrando ferramentas externas
-          para tarefas como pesquisas de domínio privado, navegação na web, pedidos de comida
-          e muito mais. Clique aqui para
+          O Protocolo de Contexto do Modelo (MCP) impulsiona o DeerFlow
+          integrando ferramentas externas para tarefas como pesquisas de domínio
+          privado, navegação na web, pedidos de comida e muito mais. Clique aqui
+          para
           <a
             className="ml-1"
             target="_blank"
@@ -127,13 +128,13 @@ export const MCPTab: Tab = ({ settings, onChange }) => {
                 <div
                   className={cn(
                     "flex flex-col items-start px-4 py-2",
-                    !server.enabled && "text-muted-foreground",
+                    !server.enabled && "text-muted-foreground"
                   )}
                 >
                   <div
                     className={cn(
                       "mb-2 flex items-center gap-2",
-                      !server.enabled && "opacity-70",
+                      !server.enabled && "opacity-70"
                     )}
                   >
                     <div className="text-lg font-medium">{server.name}</div>
@@ -154,7 +155,7 @@ export const MCPTab: Tab = ({ settings, onChange }) => {
                   <ul
                     className={cn(
                       "flex flex-wrap items-center gap-2",
-                      !server.enabled && "opacity-70",
+                      !server.enabled && "opacity-70"
                     )}
                   >
                     <PencilRuler size={16} />
@@ -185,7 +186,7 @@ MCPTab.displayName = "MCP";
 
 function mergeServers(
   existing: MCPServerMetadata[],
-  added: MCPServerMetadata[],
+  added: MCPServerMetadata[]
 ): MCPServerMetadata[] {
   const serverMap = new Map(existing.map((server) => [server.name, server]));
 

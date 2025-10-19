@@ -5,27 +5,29 @@
  * Use this for authenticated API calls from React components.
  */
 
-import { httpClient, api as baseApi, HttpClientError } from './http-client';
+import { httpClient, api as baseApi, HttpClientError } from "./http-client";
 
 /**
  * Get Clerk session token
  * This should be called from React components where useAuth hook is available
  */
 export async function getClerkToken(): Promise<string | null> {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return null;
   }
 
   try {
     // Dynamic import to avoid SSR issues
-    const { useAuth } = await import('@clerk/nextjs');
+    const { useAuth } = await import("@clerk/nextjs");
 
     // Note: This function should be called from a component context
     // where useAuth hook is available. For direct usage, pass token explicitly.
-    console.warn('getClerkToken: This function should be used within React components with useAuth hook');
+    console.warn(
+      "getClerkToken: This function should be used within React components with useAuth hook"
+    );
     return null;
   } catch (error) {
-    console.error('Failed to get Clerk token:', error);
+    console.error("Failed to get Clerk token:", error);
     return null;
   }
 }
@@ -39,43 +41,43 @@ export function createAuthApi(getToken: () => Promise<string | null>) {
     get: async <T = any>(endpoint: string) => {
       const token = await getToken();
       return httpClient<T>(endpoint, {
-        method: 'GET',
-        token: token || undefined
+        method: "GET",
+        token: token || undefined,
       });
     },
 
     post: async <T = any>(endpoint: string, body?: any) => {
       const token = await getToken();
       return httpClient<T>(endpoint, {
-        method: 'POST',
+        method: "POST",
         body,
-        token: token || undefined
+        token: token || undefined,
       });
     },
 
     put: async <T = any>(endpoint: string, body?: any) => {
       const token = await getToken();
       return httpClient<T>(endpoint, {
-        method: 'PUT',
+        method: "PUT",
         body,
-        token: token || undefined
+        token: token || undefined,
       });
     },
 
     patch: async <T = any>(endpoint: string, body?: any) => {
       const token = await getToken();
       return httpClient<T>(endpoint, {
-        method: 'PATCH',
+        method: "PATCH",
         body,
-        token: token || undefined
+        token: token || undefined,
       });
     },
 
     delete: async <T = any>(endpoint: string) => {
       const token = await getToken();
       return httpClient<T>(endpoint, {
-        method: 'DELETE',
-        token: token || undefined
+        method: "DELETE",
+        token: token || undefined,
       });
     },
   };
@@ -99,7 +101,7 @@ export function createAuthApi(getToken: () => Promise<string | null>) {
  */
 export function useAuthApi() {
   // This will be used in React components
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     // Return base API for SSR (will fail if auth is required)
     return baseApi;
   }
@@ -111,9 +113,11 @@ export function useAuthApi() {
   try {
     // This needs to be imported and used at the component level
     // For now, return base API with a warning
-    console.warn('useAuthApi: Import and use @clerk/nextjs useAuth hook at component level');
+    console.warn(
+      "useAuthApi: Import and use @clerk/nextjs useAuth hook at component level"
+    );
   } catch (error) {
-    console.error('Failed to setup auth API:', error);
+    console.error("Failed to setup auth API:", error);
   }
 
   return baseApi;
@@ -146,43 +150,43 @@ export function createAuthenticatedApi(getToken: () => Promise<string | null>) {
     get: async <T = any>(endpoint: string) => {
       const token = await getToken();
       return httpClient<T>(endpoint, {
-        method: 'GET',
-        token: token || undefined
+        method: "GET",
+        token: token || undefined,
       });
     },
 
     post: async <T = any>(endpoint: string, body?: any) => {
       const token = await getToken();
       return httpClient<T>(endpoint, {
-        method: 'POST',
+        method: "POST",
         body,
-        token: token || undefined
+        token: token || undefined,
       });
     },
 
     put: async <T = any>(endpoint: string, body?: any) => {
       const token = await getToken();
       return httpClient<T>(endpoint, {
-        method: 'PUT',
+        method: "PUT",
         body,
-        token: token || undefined
+        token: token || undefined,
       });
     },
 
     patch: async <T = any>(endpoint: string, body?: any) => {
       const token = await getToken();
       return httpClient<T>(endpoint, {
-        method: 'PATCH',
+        method: "PATCH",
         body,
-        token: token || undefined
+        token: token || undefined,
       });
     },
 
     delete: async <T = any>(endpoint: string) => {
       const token = await getToken();
       return httpClient<T>(endpoint, {
-        method: 'DELETE',
-        token: token || undefined
+        method: "DELETE",
+        token: token || undefined,
       });
     },
   };

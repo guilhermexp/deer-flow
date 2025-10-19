@@ -2,10 +2,10 @@
  * Serviço de tarefas usando REST API
  */
 
-import type { AuthenticatedApiClient } from '~/hooks/use-authenticated-api';
+import type { AuthenticatedApiClient } from "~/hooks/use-authenticated-api";
 
-import { api } from './http-client';
-import type { TaskStatus, TaskPriority, KanbanTask } from './projects';
+import { api } from "./http-client";
+import type { TaskStatus, TaskPriority, KanbanTask } from "./projects";
 
 export interface TaskCreate {
   title: string;
@@ -33,10 +33,10 @@ export function createTasksApiService(apiClient: AuthenticatedApiClient) {
     async create(
       projectId: number,
       data: TaskCreate,
-      columnId = 'backlog'
+      columnId = "backlog"
     ): Promise<KanbanTask> {
       const queryParams = new URLSearchParams();
-      queryParams.append('column_id', columnId);
+      queryParams.append("column_id", columnId);
 
       return await apiClient.post<KanbanTask>(
         `/projects/${projectId}/tasks?${queryParams.toString()}`,
@@ -64,7 +64,7 @@ export function createTasksApiService(apiClient: AuthenticatedApiClient) {
      */
     async checkTasksTableExists(): Promise<boolean> {
       return true;
-    }
+    },
   };
 }
 
@@ -77,10 +77,10 @@ export const tasksApiService = {
   async create(
     projectId: number,
     data: TaskCreate,
-    columnId = 'backlog'
+    columnId = "backlog"
   ): Promise<KanbanTask> {
     const queryParams = new URLSearchParams();
-    queryParams.append('column_id', columnId);
+    queryParams.append("column_id", columnId);
 
     return await api.post<KanbanTask>(
       `/projects/${projectId}/tasks?${queryParams.toString()}`,
@@ -108,5 +108,5 @@ export const tasksApiService = {
    */
   async checkTasksTableExists(): Promise<boolean> {
     return true;
-  }
+  },
 };

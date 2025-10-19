@@ -1,0 +1,21 @@
+# Ignore build outputs
+.next/
+build/
+dist/
+coverage/
+.turbo/
+
+# Ignore node_modules
+node_modules/
+
+# Ignore generated files
+*.lock
+package-lock.json
+pnpm-lock.yaml
+
+# Ignore test snapshots
+**/__snapshots__/
+
+# Ignore specific file types
+*.min.js
+*.min.css

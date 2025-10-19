@@ -58,17 +58,23 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({
   };
 
   const handleCancel = () => {
-    setCurrentSelections(visibleCards); 
+    setCurrentSelections(visibleCards);
     onOpenChange(false);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className={cn("sm:max-w-[425px] bg-[#0a0a0a] border-white/10", className)}>
+      <DialogContent
+        className={cn(
+          "border-white/10 bg-[#0a0a0a] sm:max-w-[425px]",
+          className
+        )}
+      >
         <DialogHeader>
           <DialogTitle className="text-white">{title}</DialogTitle>
           <DialogDescription className="text-gray-400">
-            Personalize sua dashboard escolhendo quais cartões deseja exibir ou ocultar.
+            Personalize sua dashboard escolhendo quais cartões deseja exibir ou
+            ocultar.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -84,11 +90,20 @@ const DashboardSettingsModal: React.FC<DashboardSettingsModalProps> = ({
         </div>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline" onClick={handleCancel} className="border-white/10 text-gray-300 hover:bg-white/[0.08]">
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              className="border-white/10 text-gray-300 hover:bg-white/[0.08]"
+            >
               Cancel
             </Button>
           </DialogClose>
-          <Button onClick={handleSave} className="bg-blue-500/20 text-blue-400 border border-blue-500/50 hover:bg-blue-500/30">Save Changes</Button>
+          <Button
+            onClick={handleSave}
+            className="border border-blue-500/50 bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+          >
+            Save Changes
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

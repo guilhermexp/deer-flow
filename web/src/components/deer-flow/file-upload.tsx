@@ -1,7 +1,14 @@
 // Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
 // SPDX-License-Identifier: MIT
 
-import { Upload, File, X, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  Upload,
+  File,
+  X,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
 import { useCallback, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Progress } from "~/components/ui/progress";
@@ -16,16 +23,22 @@ interface FileUploadProps {
   disabled?: boolean;
 }
 
-export function FileUpload({ className, onFilesSelect, disabled }: FileUploadProps) {
+export function FileUpload({
+  className,
+  onFilesSelect,
+  disabled,
+}: FileUploadProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>(
+    {}
+  );
 
   const uploadFile = async (file: File): Promise<Resource | null> => {
     try {
       const result = await uploadToRAG(file);
-      
+
       if (result.success && result.resource) {
         return result.resource;
       } else {
@@ -40,33 +53,33 @@ export function FileUpload({ className, onFilesSelect, disabled }: FileUploadPro
   const handleFileSelect = useCallback(
     async (files: FileList | null) => {
       if (!files || isUploading) return;
-      
+
       const fileArray = Array.from(files);
       const newFiles = [...selectedFiles, ...fileArray];
       setSelectedFiles(newFiles);
       setIsUploading(true);
-      
+
       // Upload files and get resources
       const resources: Resource[] = [];
-      
+
       for (const file of fileArray) {
-        setUploadProgress(prev => ({ ...prev, [file.name]: 0 }));
-        
+        setUploadProgress((prev) => ({ ...prev, [file.name]: 0 }));
+
         const resource = await uploadFile(file);
-        
+
         if (resource) {
           resources.push(resource);
-          setUploadProgress(prev => ({ ...prev, [file.name]: 100 }));
+          setUploadProgress((prev) => ({ ...prev, [file.name]: 100 }));
         } else {
           // Create a local reference if upload fails
           resources.push({
             uri: `file://${file.name}`,
             title: file.name,
           });
-          setUploadProgress(prev => ({ ...prev, [file.name]: -1 })); // -1 indicates error
+          setUploadProgress((prev) => ({ ...prev, [file.name]: -1 })); // -1 indicates error
         }
       }
-      
+
       setIsUploading(false);
       onFilesSelect(fileArray, resources);
     },
@@ -108,7 +121,7 @@ export function FileUpload({ className, onFilesSelect, disabled }: FileUploadPro
           isDragOver
             ? "border-blue-500 bg-blue-500/10"
             : "border-white/20 hover:border-white/30",
-          disabled && "opacity-50 cursor-not-allowed"
+          disabled && "cursor-not-allowed opacity-50"
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -125,7 +138,7 @@ export function FileUpload({ className, onFilesSelect, disabled }: FileUploadPro
         <label
           htmlFor="file-upload"
           className={cn(
-            "flex flex-col items-center justify-center gap-2 p-4 cursor-pointer",
+            "flex cursor-pointer flex-col items-center justify-center gap-2 p-4",
             disabled && "cursor-not-allowed"
           )}
         >
@@ -135,15 +148,16 @@ export function FileUpload({ className, onFilesSelect, disabled }: FileUploadPro
           </p>
         </label>
       </div>
-      
+
       {selectedFiles.length > 0 && (
         <div className="flex flex-col gap-2">
           {selectedFiles.map((file, index) => {
             const progress = uploadProgress[file.name];
             const isError = progress === -1;
             const isComplete = progress === 100;
-            const isUploading = progress !== undefined && progress >= 0 && progress < 100;
-            
+            const isUploading =
+              progress !== undefined && progress >= 0 && progress < 100;
+
             return (
               <div
                 key={index}
@@ -151,7 +165,7 @@ export function FileUpload({ className, onFilesSelect, disabled }: FileUploadPro
               >
                 <div className="flex items-center gap-2">
                   {isUploading ? (
-                    <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-400" />
                   ) : isComplete ? (
                     <CheckCircle className="h-4 w-4 text-green-400" />
                   ) : isError ? (
@@ -159,7 +173,9 @@ export function FileUpload({ className, onFilesSelect, disabled }: FileUploadPro
                   ) : (
                     <File className="h-4 w-4 text-gray-400" />
                   )}
-                  <span className="text-sm text-gray-300 flex-1">{file.name}</span>
+                  <span className="flex-1 text-sm text-gray-300">
+                    {file.name}
+                  </span>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -170,9 +186,7 @@ export function FileUpload({ className, onFilesSelect, disabled }: FileUploadPro
                     <X className="h-3 w-3" />
                   </Button>
                 </div>
-                {isUploading && (
-                  <Progress value={progress} className="h-1" />
-                )}
+                {isUploading && <Progress value={progress} className="h-1" />}
                 {isError && (
                   <p className="text-xs text-red-400">Upload failed</p>
                 )}
